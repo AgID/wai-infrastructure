@@ -1,0 +1,17 @@
+---
+# Galera role
+- name: Fail if galera members are less than 3
+  fail:
+    msg: "Wrong configuration for galera cluster member"
+  when: "groups[group_names[0]] | length < 3"
+
+- include_role:
+    name: mariadb
+
+- name: Create Galera configuration file
+  template:
+    src: 'galera.yml.j2'
+    dest: '/etc/mysql/conf.d/galera.cnf'
+    owner: 'root'
+    group: 'root'
+    mode: '0600'
