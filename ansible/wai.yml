@@ -1,0 +1,34 @@
+---
+# Main WAI playbook
+- hosts: all
+  roles:
+    - infrastructure  
+- hosts: elastic
+  roles:
+    - elastic.elasticsearch
+- hosts: kibana
+  roles:
+    - kibana
+- hosts: galera-prod
+  roles:
+    - galera
+    - metricbeat
+- hosts: galera-ppg
+  roles:
+    - galera
+    - metricbeat
+- hosts: mariadb-dev
+  roles:
+    - mariadb
+    - metricbeat
+- hosts: gluster
+  roles:
+    - glusterfs
+    - metricbeat
+- hosts: k8s-cluster
+  roles:
+    - metricbeat
+- name: Kubernetes cluster
+  import_playbook: kubespray-2.8.3/cluster.yml
+#  TODO: Enable apt daily check at the end of the playbook
+  
