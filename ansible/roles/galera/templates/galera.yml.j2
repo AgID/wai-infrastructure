@@ -1,0 +1,54 @@
+[mysqld]
+
+binlog_format=ROW
+default-storage-engine=innodb
+innodb_autoinc_lock_mode=2
+
+# Galera Provider Configuration
+wsrep_on=ON
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+
+# Galera Cluster Configuration
+wsrep_cluster_name="wai-galera_cluster"
+wsrep_cluster_address="gcomm://{{ groups[group_names[0]] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | join(',') }}"
+
+# Galera Synchronization Configuration
+wsrep_sst_method=rsync
+
+# Galera Node Configuration
+wsrep_node_address="{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}"
+wsrep_node_name="{{ansible_hostname}}"
+
+# Skip dns reverse lookup
+skip-name-resolve
+
+# Accept 1st lost by hardware failure
+innodb_flush_log_at_trx_commit=0
+
+# Flush at 1s timeout
+innodb_flush_log_at_timeout=1
+
+# Shot conflicts
+wsrep_log_conflicts=ON
+wsrep_provider_options="cert.log_conflicts=YES"
+
+# 80% of free memory
+innodb_buffer_pool_size={{ (ansible_memtotal_mb * 0.8) | int }}m
+innodb_log_file_size={{ (ansible_memtotal_mb * 0.1) | int }}m
+innodb_buffer_pool_instances=12
+query_cache_limit=256M
+performance_schema=ON
+sort_buffer_size=10M
+tmp_table_size=1G
+max_heap_table_size=1G
+innodb_thread_concurrency=0
+innodb_read_io_threads=64
+innodb_write_io_threads=64
+# Autocomiit to avoid deadlock
+wsrep_retry_autocommit=4
+
+# Log long query
+long_query_time=10
+log_queries_not_using_indexes=ON
+slow_query_log_file=/var/log/mysql/mariadb-slow.log
+slow_query_log=1

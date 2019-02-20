@@ -1,0 +1,48 @@
+---
+- name: Add http proxy to environment
+  lineinfile:
+    path: /etc/environment
+    state: present
+    regexp: '^http_proxy'
+    line: 'http_proxy="{{ http_proxy}}"'
+  when:
+    - http_proxy is defined
+
+- name: Add https proxy to environment
+  lineinfile:
+    path: /etc/environment
+    state: present
+    regexp: '^https_proxy'
+    line: 'https_proxy="{{ https_proxy}}"'
+  when:
+    - https_proxy is defined
+
+- name: Check http:proxy in /etc/apt/apt.conf
+  raw: grep -qsi 'Acquire::http::proxy' /etc/apt/apt.conf
+  failed_when: false
+  changed_when: false
+  register: need_http_proxy
+  when:
+    - http_proxy is defined
+
+- name: Add http_proxy to /etc/apt/apt.conf if http_proxy is defined
+  raw: echo 'Acquire::http::proxy "{{ http_proxy }}";' >> /etc/apt/apt.conf
+  become: true
+  environment: {}
+  when:
+    - http_proxy is defined
+    - need_http_proxy.rc != 0
+
+- name: Check https::proxy in /etc/apt/apt.conf
+  raw: grep -qsi 'Acquire::https::proxy' /etc/apt/apt.conf
+  failed_when: false
+  changed_when: false
+  register: need_https_proxy
+  when:
+    - https_proxy is defined
+
+- name: Add https_proxy to /etc/apt/apt.conf if https_proxy is defined
+  raw: echo 'Acquire::https::proxy "{{ https_proxy }}";' >> /etc/apt/apt.conf
+  when:
+    - https_proxy is defined
+    - need_https_proxy.rc != 0

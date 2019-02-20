@@ -1,0 +1,25 @@
+---
+# Infrastructure operations
+- name: Exchange ssh keys
+  authorized_key:
+    user: "{{ ansible_user }}"
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  when: wai_development
+
+- name: Sudo without password
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^{{ ansible_user }}'
+    line: '{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+  when: wai_development
+
+- include: proxy.yml
+  when:
+    - (http_proxy is defined or https_proxy is defined)
+    
+- include: apt-lock.yml
+  when: ansible_distribution == 'Ubuntu'
+

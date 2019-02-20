@@ -1,0 +1,11 @@
+---
+# Installing GlusterFS
+- name: Adding PPA repoistory
+  apt_repository: 
+    repo: ppa:gluster/glusterfs-4.1
+    state: present
+- name: Installing GlusterFS
+  apt: 
+    update_cache: true
+    name: glusterfs-server
+    state: present

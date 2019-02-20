@@ -1,0 +1,22 @@
+# Elasticsearch vars
+es_data_dirs:
+  - "/opt/elastic/data"
+es_log_dir: "/opt/elastic/log"
+es_instance_name: "wai" 
+es_api_port: 9200
+es_heap_size: "{{ (ansible_memtotal_mb * 0.5) | int }}m"
+es_enable_xpack: true
+es_xpack_features: ['monitoring']
+es_config:
+  node.name: "{{ansible_hostname}}"
+  network.host: "0.0.0.0"
+  cluster.name: "wai-cluster"
+  discovery.zen.ping.unicast.hosts: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
+  http.port: 9200
+  transport.tcp.port: 9300
+  node.data: true
+  node.master: true
+  node.ingest: true
+  bootstrap.memory_lock: true
+  discovery.zen.minimum_master_nodes: 2
+  xpack.monitoring.collection.enabled: true
