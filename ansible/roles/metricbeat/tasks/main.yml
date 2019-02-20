@@ -1,0 +1,39 @@
+---
+# Kibana role
+- name: Adding Elastic PGP key
+  apt_key: 
+    url: "{{es_apt_key}}"
+    state: present
+
+- name: Updating repository
+  apt_repository:
+    repo: "{{es_apt_url}}"
+    state: present
+
+- name: Installing Metricbeat
+  apt:
+    update_cache: yes
+    name: metricbeat={{es_version}}
+
+- name: Add metricbeat mysql module
+  set_fact: metric_configure_mysql_module=true
+  when: "'mariadb' in role_names or 'galera' in role_names"
+
+- name: Add mysql .:. galera module
+  set_fact: metric_configure_mysql_module_galera=true
+  when: 
+    - "metric_configure_mysql_module"
+    - "'galera' in role_names"
+  
+- name: Configure metricbeat
+  template:
+    src: metricbeat.yml.j2
+    dest: /etc/metricbeat/metricbeat.yml
+  notify:
+    - restart metricbeat
+
+- name: Ensure Metricbeat is up and running
+  service:
+    name: metricbeat
+    state: started
+    enabled: yes

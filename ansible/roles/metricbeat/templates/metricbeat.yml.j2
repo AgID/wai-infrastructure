@@ -1,0 +1,41 @@
+metricbeat.config.modules:
+  reload.enabled: false
+setup.template.settings:
+  index.number_of_shards: 1
+  index.codec: best_compression
+setup.kibana:
+  host: "{{hostvars[groups['kibana'][0]]['ansible_default_ipv4']['address']}}:5601"
+output.elasticsearch:
+  hosts: {{metricbeat_output_elastic}}
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+metricbeat.modules:
+  - module: system
+    metricsets:
+      - cpu
+      - load
+      - core
+      - diskio
+      - filesystem
+      - fsstat
+      - memory
+      - network
+      - process
+      - socket
+    enabled: true
+    period: 10s
+    processes: ['.*']  
+  {% if metric_configure_mysql_module is defined and metric_configure_mysql_module %}
+
+  - module: mysql
+    metricset:
+      - status
+    {% if metric_configure_mysql_module_galera is defined and metric_configure_mysql_module_galera %}    
+
+      - galera_status
+    {% endif %}
+
+    period: 10s
+    hosts: ["tcp({{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:3306)/"]
+  {% endif %}
