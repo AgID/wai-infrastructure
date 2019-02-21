@@ -1,0 +1,7 @@
+{
+  "ansible": {
+    "use_hostnames": true,
+    "expand_hostvars": false,
+    "fail_on_errors": true
+  }
+}

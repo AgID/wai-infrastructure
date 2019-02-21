@@ -1,4 +1,34 @@
+# Local generated files
 .DS_Store
 .vscode
-.vscode/*
+
+# Ignore downloaded playbook
 ansible/kubespray-*
+
+# Ignore pyenv
+.python-version
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Terraform variables
+env-*.json
+env-*.tfvars
+
+# Log files
+*.log
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore openstack credentials
+clouds.yml
+*openrc*
