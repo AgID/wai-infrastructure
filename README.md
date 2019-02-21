@@ -16,6 +16,61 @@ Di seguito l'infrastruttura applicativa e la dislocazione delle componenti.
 
 Per la descrizione della infrastruttura fare riferimento alla documentazione consultabile a questo [link]() ed al capacity plan presente a questo [link]().
 
+## Provisioning
+
+Per il provisioning dell'infrastruttura presso il servizio SPC Cloud - Lotto 1,
+è disponibile lo script `infrastructure/wai-provisioner.py` che automatizza la
+procedura di creazione di tutte le risorse previste (reti, gruppi di protezione,
+istanze, volumi, etc.).
+
+### Requisiti
+
+Installare le dipendenze con:
+
+```bash
+$ pip install -r requirements.txt
+```
+
+Prima di utilizzare lo script è necessario creare i file che descrivono gli
+ambienti utilizzado i template disponibili
+(`infrastructure/env-*.tfvars.template`) e copiandoli/rinominandoli senza
+l'estensione `.template`.
+
+Le credenziali per l'accesso al cloud provider devono essere caricate come
+variabili d'ambiente. Il modo più semplice è utilizzare il [file _OpenStack
+RC_](https://docs.openstack.org/newton/user-guide/common/cli-set-environment-variables-using-openstack-rc.html#download-and-source-the-openstack-rc-file).
+
+### Utilizzo
+
+Per la creazione/aggiornamento delle risorse nell'infrastruttura:
+
+```bash
+$ infrastructure/wai-provisioner.py <environment> apply
+```
+
+Per la distruzione delle risorse nell'infrastruttura (senza possibilità di
+recupero):
+
+```bash
+$ infrastructure/wai-provisioner.py <environment> destroy
+```
+
+Il parametro `<environment>` può assumere uno dei tre valori: `production`,
+`staging` o `public-playground`.
+
+### Inventory dinamico
+
+Lo script `infrastructure/inventory/openstack_inventory.py` può essere
+utilizzato da _ansible_ per la generazione di un inventory dinamico a partire
+dalle risorse create.
+
+Con l'opzione `--hostfile` lo script genera uno snippet utilizzabile nel file
+`/etc/hosts` per la risoluzione dei nomi delle istanze all'interno
+dell'infrastruttura.
+
+Anche questo script necessita che le credenziali per l'accesso al cloud provider
+siano caricate come variabili d'ambiente.
+
 ## Ansible
 
 Per l'installazione e configurazione del software di base e delle componenti infrastrutturali è stato realizzato il playbook  Ansible *wai.yml*; il playbook è realizzato per la versione del sistema operativo installato ovvero Ubuntu 18.x.
