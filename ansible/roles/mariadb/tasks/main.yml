@@ -6,6 +6,11 @@
     name: python3-pymysql
     state: present
 
+- name: Clean mariadb root password if present
+  file:
+    state: absent
+    path: "/root/.my.cnf"
+
 - name: Install mariadb
   apt: 
     update_cache: false

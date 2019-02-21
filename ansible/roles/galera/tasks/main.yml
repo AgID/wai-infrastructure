@@ -5,6 +5,11 @@
     msg: "Wrong configuration for galera cluster member"
   when: "groups[group_names[0]] | length < 3"
 
+- name: Clean galera configuration file
+  file:
+    state: absent
+    path: "/etc/mysql/conf.d/galera.cnf"
+
 - include_role:
     name: mariadb
 
@@ -14,4 +19,27 @@
     dest: '/etc/mysql/conf.d/galera.cnf'
     owner: 'root'
     group: 'root'
-    mode: '0600'
+    mode: '0644'
+
+- name: Identify first Galera node
+  set_fact: 
+    galera_first_node: true
+  with_items: ["galera-prod", "galera-ppg"]
+  when: "inventory_hostname == groups[item][0]"
+
+- name: Stop Mariadb
+  service:
+    name: mariadb
+    state: stopped
+    enabled: yes
+
+- name: Action on first galera node
+  raw: "galera_new_cluster"
+  when: "galera_first_node is defined"
+
+- name: Restart mariadb on other nodes
+  service:
+    name: mariadb
+    state: restarted
+    enabled: yes
+  when: "galera_first_node is not defined"

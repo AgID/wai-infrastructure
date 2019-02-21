@@ -26,16 +26,28 @@ metricbeat.modules:
     enabled: true
     period: 10s
     processes: ['.*']  
-  {% if metric_configure_mysql_module is defined and metric_configure_mysql_module %}
+
+  {% if metric_configure_mysql_module | default(false) %}
 
   - module: mysql
     metricset:
       - status
-    {% if metric_configure_mysql_module_galera is defined and metric_configure_mysql_module_galera %}    
+    {% if metric_configure_mysql_module_galera | default(false) %}    
 
       - galera_status
     {% endif %}
 
     period: 10s
     hosts: ["tcp({{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:3306)/"]
+    username: root
+    password: {{ mariadb_root_password }}
+
+  {% endif %}
+
+  {% if metric_configure_etcd | default(false) %}
+
+  - module: etcd
+    metricsets: ["leader", "self", "store"]
+    period: 10s
+    hosts: ["localhost:2379"]
   {% endif %}
