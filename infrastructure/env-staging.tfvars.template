@@ -1,0 +1,76 @@
+# Environment name
+environment = "staging"
+environment_short = "stag"
+
+# Galera slug name
+galera_slug = "galera"
+
+# Galera network CIDR
+galera_network_cidr = "<CIDR>"
+
+# Galera instance flavor
+galera_flavor = {
+    vcpus = "<VCPU>"
+    ram = "<RAM_MB>"
+    disk = "<DISK_GB>"
+}
+
+# Galera instance parameters
+galera_instance = {
+    image_id = "<IMAGE_ID>"
+    num_instances = <NUM_OF_INSTANCES>
+    external_volume_size = <EXTERNAL_VOLUME_SIZE>
+}
+
+# Galera instance groups added to metadata for ansible dynamic inventory
+# Each item in the list will be added to the corresponding instance number
+# i.e. the first item in the list will be added to the first instance and so on
+# if there are more instances than items in the list it will restart from the first one
+galera_instance_groups = ["galera-stag"]
+
+# Galera security rules
+# See http://galeracluster.com/documentation-webpages/firewallsettings.html
+galera_sec_rules = [
+    {
+        protocol = "icmp"
+        from = 0
+        to = 0
+        cidr = "0.0.0.0/0"
+    },
+    {
+        protocol = "tcp"
+        from = 22
+        to = 22
+        cidr = "0.0.0.0/0"
+    },
+    {
+        protocol = "tcp"
+        from = 3306
+        to = 3306
+        cidr = "0.0.0.0/0"
+    },
+    {
+        protocol = "tcp"
+        from = 4567
+        to = 4567
+        cidr = "<CIDR>"
+    },
+    {
+        protocol = "udp"
+        from = 4567
+        to = 4567
+        cidr = "<CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 4568
+        to = 4568
+        cidr = "<CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 4444
+        to = 4444
+        cidr = "<CIDR>"
+    }
+]
