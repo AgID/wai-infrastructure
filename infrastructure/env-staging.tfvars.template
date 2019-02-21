@@ -1,0 +1,51 @@
+# Environment name
+environment = "staging"
+environment_short = "stag"
+
+# MariaDB slug name
+mariadb_slug = "mariadb"
+
+# MariaDB network CIDR
+mariadb_network_cidr = "<CIDR>"
+
+# MariaDB instance flavor
+mariadb_flavor = {
+    vcpus = "<VCPU>"
+    ram = "<RAM_MB>"
+    disk = "<DISK_GB>"
+}
+
+# MariaDB instance parameters
+mariadb_instance = {
+    image_id = "<IMAGE_ID>"
+    num_instances = <NUM_OF_INSTANCES>
+    external_volume_size = <EXTERNAL_VOLUME_SIZE>
+}
+
+# MariaDB instance groups added to metadata for ansible dynamic inventory
+# Each item in the list will be added to the corresponding instance number
+# i.e. the first item in the list will be added to the first instance and so on
+# if there are more instances than items in the list it will restart from the first one
+mariadb_instance_groups = ["mariadb-stag"]
+
+# MariaDB security rules
+mariadb_sec_rules = [
+    {
+        protocol = "icmp"
+        from = 0
+        to = 0
+        cidr = "0.0.0.0/0"
+    },
+    {
+        protocol = "tcp"
+        from = 22
+        to = 22
+        cidr = "0.0.0.0/0"
+    },
+    {
+        protocol = "tcp"
+        from = 3306
+        to = 3306
+        cidr = "0.0.0.0/0"
+    }
+]
