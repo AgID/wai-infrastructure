@@ -89,8 +89,8 @@ module "galera_production" {
   cluster_flavor = "${var.galera_flavor}"
 }
 
-# Galera staging nodes
-module "galera_staging" {
+# MariaDB staging node
+module "mariadb_staging" {
   source = "./modules/generic-cluster"
   enabled = "${terraform.workspace == "staging" && var.environment == "staging"}"
   environment_short = "${var.environment_short}"
@@ -99,12 +99,12 @@ module "galera_staging" {
   public_dns_ips = "${var.public_dns_ips}"
   ssh_keypair_name = "${local.keypair_pubkey_name}"
   ssh_user = "${var.ssh_user}"
-  cluster_slug = "${var.galera_slug}"
-  cluster_network_cidr = "${var.galera_network_cidr}"
-  cluster_instance = "${var.galera_instance}"
-  cluster_instance_groups = "${var.galera_instance_groups}"
-  cluster_sec_rules = "${var.galera_sec_rules}"
-  cluster_flavor = "${var.galera_flavor}"
+  cluster_slug = "${var.mariadb_slug}"
+  cluster_network_cidr = "${var.mariadb_network_cidr}"
+  cluster_instance = "${var.mariadb_instance}"
+  cluster_instance_groups = "${var.mariadb_instance_groups}"
+  cluster_sec_rules = "${var.mariadb_sec_rules}"
+  cluster_flavor = "${var.mariadb_flavor}"
 }
 
 # Galera public playground nodes
