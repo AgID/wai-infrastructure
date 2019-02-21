@@ -25,10 +25,10 @@
   roles:
     - glusterfs
     - metricbeat
-- hosts: k8s-cluster
+- name: Kubernetes cluster
+  import_playbook: kubespray/cluster.yml
+- hosts: k8s-master
   roles:
     - metricbeat
-- name: Kubernetes cluster
-  import_playbook: kubespray-2.8.3/cluster.yml
 #  TODO: Enable apt daily check at the end of the playbook
   

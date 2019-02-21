@@ -1,5 +1,5 @@
 ---
-# Kibana role
+# Metricbeat role
 - name: Adding Elastic PGP key
   apt_key: 
     url: "{{es_apt_key}}"
@@ -22,9 +22,14 @@
 - name: Add mysql .:. galera module
   set_fact: metric_configure_mysql_module_galera=true
   when: 
-    - "metric_configure_mysql_module"
+    - "metric_configure_mysql_module | default(false)"
     - "'galera' in role_names"
   
+- name: Add etcd module
+  set_fact: metric_configure_etcd=true
+  when: 
+    - "'etcd' in group_names"
+
 - name: Configure metricbeat
   template:
     src: metricbeat.yml.j2
