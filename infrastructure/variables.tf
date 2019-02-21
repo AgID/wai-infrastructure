@@ -165,6 +165,51 @@ variable "galera_sec_rules" {
   default = []
 }
 
+# MariaDB slug name
+variable "mariadb_slug" {
+  type = "string"
+  description = "MariaDB slug name"
+  default = ""
+}
+
+# MariaDB network CIDR
+variable "mariadb_network_cidr" {
+  type = "string"
+  description = "MariaDB network CIDR"
+  default = ""
+}
+
+# MariaDB instance flavor
+variable "mariadb_flavor" {
+  type = "map"
+  description = "MariaDB instance flavor"
+  default = {}
+}
+
+# MariaDB instance parameters
+variable "mariadb_instance" {
+  type = "map"
+  description = "MariaDB instance parameters"
+  default = {}
+}
+
+# MariaDB instance groups added to metadata for ansible dynamic inventory
+# Each item in the list will be added to the corresponding instance number
+# i.e. the first item in the list will be added to the first instance and so on
+# if there are more instances than items in the list it will restart from the first one
+variable "mariadb_instance_groups" {
+  type = "list"
+  description = "Groups in mariaDB instances metadata"
+  default = []
+}
+
+# MariaDB security rules
+variable "mariadb_sec_rules" {
+  type = "list"
+  description = "MariaDB security rules"
+  default = []
+}
+
 # Elastic slug name
 variable "elastic_slug" {
   type = "string"
