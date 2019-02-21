@@ -39,6 +39,9 @@ metricbeat.modules:
 
     period: 10s
     hosts: ["tcp({{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:3306)/"]
+    username: root
+    password: {{ mariadb_root_password }}
+
   {% endif %}
 
   {% if metric_configure_etcd | default(false) %}
