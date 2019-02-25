@@ -23,3 +23,10 @@
 - include: apt-lock.yml
   when: ansible_distribution == 'Ubuntu'
 
+- name: Test storage_dev
+  fail:
+    msg: 'Define the storage_dev variable for {{ ansible_host }}'
+  when: storage_dev is not defined
+
+- include: data-volume.yml
+

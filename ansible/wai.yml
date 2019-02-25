@@ -30,5 +30,12 @@
 - hosts: k8s-master
   roles:
     - metricbeat
-#  TODO: Enable apt daily check at the end of the playbook
-  
+- hosts: all
+  tasks:
+  - name: Enable APT automatic update
+    raw: systemctl enable --now {{item}}
+    with_items:
+      - 'apt-daily.timer'
+      - 'apt-daily-upgrade.timer'
+  - name: Reload systemctl daemon-reload
+    raw: systemctl daemon-reload
