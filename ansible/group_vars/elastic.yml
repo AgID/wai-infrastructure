@@ -1,7 +1,7 @@
 # Elasticsearch vars
 es_data_dirs:
-  - "/opt/elastic/data"
-es_log_dir: "/opt/elastic/log"
+  - "/opt/data/elastic/data"
+es_log_dir: "/opt/data/elastic/log"
 es_instance_name: "wai" 
 es_api_port: 9200
 es_heap_size: "{{ (ansible_memtotal_mb * 0.5) | int }}m"
