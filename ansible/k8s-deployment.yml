@@ -1,0 +1,77 @@
+---
+# Deploy K8S WAI Resources
+- hosts: kube-master
+  tasks:
+    - name: K8S .:. Create destination directory
+      file:
+        path: "{{ wai_k8s_deployment_dir }}"
+        state: directory
+      when: inventory_hostname == groups['kube-master'][0]
+
+    - name: K8S .:. Copy artifacts to K8S master
+      copy:
+        src: k8s/
+        dest: "{{ wai_k8s_deployment_dir }}"
+        mode: 0644
+      when: inventory_hostname == groups['kube-master'][0]
+
+    - name: K8S .:. Deploy namespaces
+      kube:
+        name: "namespaces"
+        kubectl: "/usr/local/bin/kubectl"
+        filename: "{{ wai_k8s_deployment_dir }}/namespaces.yml"
+        state: "latest"
+      when: inventory_hostname == groups['kube-master'][0]
+
+    - name: K8S .:. Deploy resource quota
+      kube:
+        name: "quota-{{ item }}"
+        namespace: "wai-{{ item }}"
+        kubectl: "/usr/local/bin/kubectl"
+        filename: "{{ wai_k8s_deployment_dir }}/resource-quota-{{ item }}.yml"
+        state: "latest"
+      with_items: "{{ wai_k8s_env }}"
+      when: inventory_hostname == groups['kube-master'][0]
+
+    - name: K8S .:. Prepare GlusterFS endpoints
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/glusterfs-{{ item }}.yml"
+        src: k8s/glusterfs.yml.j2
+      with_items: "{{ wai_k8s_env }}"
+      when: inventory_hostname == groups['kube-master'][0]
+
+    - name: K8S .:. Deploy GlusterFS
+      kube:
+        name: "glusterfs-{{ item }}"
+        namespace: "wai-{{ item }}"
+        kubectl: "/usr/local/bin/kubectl"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/glusterfs-{{ item }}.yml"
+      with_items: "{{ wai_k8s_env }}"
+      when: inventory_hostname == groups['kube-master'][0]
+
+    - name: K8S .:. Configure Elasticsearch hosts for metricbeat
+      set_fact: 
+        elastic_url: 'http://{{item}}:9200'
+      with_items: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
+      register: kibana_elastic_hosts_list
+      when: inventory_hostname == groups['kube-master'][0]
+
+    - name: K8S .:. Build Elasticsearch host array
+      set_fact: 
+        kibana_elastic_hosts: '{{kibana_elastic_hosts_list.results | map(attribute="ansible_facts.elastic_url") | list | to_yaml}}'
+      when: inventory_hostname == groups['kube-master'][0]
+
+    - name: K8S .:. Prepare Metricbeat DaemonSet and services
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/metricbeat.yml"
+        src: k8s/metricbeat.yml.j2
+      when: inventory_hostname == groups['kube-master'][0]
+
+    - name: K8S .:. Deploy Metricbeat DaemonSet and services
+      kube:
+        name: "metricbeat"
+        kubectl: "/usr/local/bin/kubectl"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/metricbeat.yml"
+      when: inventory_hostname == groups['kube-master'][0]
