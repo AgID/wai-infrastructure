@@ -5,7 +5,9 @@ wai_k8s_namespaces:
   - wai-ppg
   - wai-dev
 wai_matomo_base_image: giafar/wai-matomo:3.7.0-fpm
-
+wai_kube_state_metrics_version: release-1.5
+wai_kube_state_metrics: 'https://codeload.github.com/kubernetes/kube-state-metrics/zip/{{ wai_kube_state_metrics_version }}'
+wai_kubectl: /usr/local/bin/kubectl
 # Elastic version used for Elastiksearch, Kibana and Beats.
 # These vars override default settings of role elastic.elasticsearch and are used in wai roles kibana and metricbeat
 es_version: 6.6.0
