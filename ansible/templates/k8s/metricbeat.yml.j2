@@ -23,7 +23,7 @@ data:
     #      hints.enabled: true
 
     output.elasticsearch:
-      hosts: ['${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}']
+      hosts: {{ kibana_elastic_hosts }}
 ---
 apiVersion: v1
 kind: ConfigMap
