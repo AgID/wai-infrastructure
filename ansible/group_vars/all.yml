@@ -1,9 +1,9 @@
 # WAI
 wai_k8s_deployment_dir: /opt/data/scripts/wai
-wai_k8s_env:
-  - prod
-  - ppg
-  - dev
+wai_k8s_namespaces:
+  - wai-prod
+  - wai-ppg
+  - wai-dev
 wai_matomo_base_image: giafar/wai-matomo:3.7.0-fpm
 
 # Elastic version used for Elastiksearch, Kibana and Beats.

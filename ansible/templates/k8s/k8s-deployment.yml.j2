@@ -1,0 +1,83 @@
+---
+# K8S Namespaces
+{% for ns in wai_k8s_namespaces %}
+apiVersion: v1
+kind: Namespace
+metadata:
+   name: {{ ns }}
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: resource-quota-{{ ns }}
+  namespace: {{ ns }}
+spec:
+  hard:
+    requests.cpu: "10" 
+    requests.memory: 10Gi 
+    limits.cpu: "20" 
+    limits.memory: 20Gi 
+---
+{% endfor %}
+# K8S shared roles
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: cluster-role-view-access
+  namespace: kube-system
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources:
+    - componentstatuses
+    - configmaps
+    - daemonsets
+    - deployments
+    - events
+    - endpoints
+    - horizontalpodautoscalers
+    - ingress
+    - jobs
+    - limitranges
+    - namespaces
+    - nodes
+    - pods
+    - persistentvolumes
+    - persistentvolumeclaims
+    - replicasets
+    - replicationcontrollers
+    - secrets
+    - serviceaccounts
+    - services
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["batch"]
+  resources:
+  - jobs
+  - cronjobs
+  verbs: ["GET", "LIST"]
+---
+# K8S Service Account
+{% for ns in wai_k8s_namespaces %}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name:  {{ ns }}-view-account
+  namespace: {{ ns }}
+---
+{% endfor %}
+# K8S Roles binding and security
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: cluster-role-view-access
+  namespace: kube-system
+subjects:
+{% for ns in wai_k8s_namespaces %}
+- kind: ServiceAccount
+  name: {{ ns }}-view-account
+  namespace: {{ ns }}
+{% endfor %}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cluster-role-view-access
