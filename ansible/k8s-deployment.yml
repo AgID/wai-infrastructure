@@ -1,19 +1,17 @@
 ---
 # Deploy K8S WAI Resources
-- hosts: kube-master
+- hosts: kube-master[0]
   tasks:
     - name: K8S .:. Create destination directory
       file:
         path: "{{ wai_k8s_deployment_dir }}"
         state: directory
-      when: inventory_hostname == groups['kube-master'][0]
 
     - name: K8S .:. Copy artifacts to K8S master
       copy:
         src: k8s/
         dest: "{{ wai_k8s_deployment_dir }}"
         mode: 0644
-      when: inventory_hostname == groups['kube-master'][0]
 
     - name: K8S .:. Deploy namespaces
       kube:
@@ -21,7 +19,6 @@
         kubectl: "/usr/local/bin/kubectl"
         filename: "{{ wai_k8s_deployment_dir }}/namespaces.yml"
         state: "latest"
-      when: inventory_hostname == groups['kube-master'][0]
 
     - name: K8S .:. Deploy resource quota
       kube:
@@ -31,14 +28,12 @@
         filename: "{{ wai_k8s_deployment_dir }}/resource-quota-{{ item }}.yml"
         state: "latest"
       with_items: "{{ wai_k8s_env }}"
-      when: inventory_hostname == groups['kube-master'][0]
 
     - name: K8S .:. Prepare GlusterFS endpoints
       template:
         dest: "{{ wai_k8s_deployment_dir }}/glusterfs-{{ item }}.yml"
         src: k8s/glusterfs.yml.j2
       with_items: "{{ wai_k8s_env }}"
-      when: inventory_hostname == groups['kube-master'][0]
 
     - name: K8S .:. Deploy GlusterFS
       kube:
@@ -48,25 +43,21 @@
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/glusterfs-{{ item }}.yml"
       with_items: "{{ wai_k8s_env }}"
-      when: inventory_hostname == groups['kube-master'][0]
 
     - name: K8S .:. Configure Elasticsearch hosts for metricbeat
       set_fact: 
         elastic_url: 'http://{{item}}:9200'
       with_items: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
       register: kibana_elastic_hosts_list
-      when: inventory_hostname == groups['kube-master'][0]
 
     - name: K8S .:. Build Elasticsearch host array
       set_fact: 
         kibana_elastic_hosts: '{{kibana_elastic_hosts_list.results | map(attribute="ansible_facts.elastic_url") | list | to_yaml}}'
-      when: inventory_hostname == groups['kube-master'][0]
 
     - name: K8S .:. Prepare Metricbeat DaemonSet and services
       template:
         dest: "{{ wai_k8s_deployment_dir }}/metricbeat.yml"
         src: k8s/metricbeat.yml.j2
-      when: inventory_hostname == groups['kube-master'][0]
 
     - name: K8S .:. Deploy Metricbeat DaemonSet and services
       kube:
@@ -74,4 +65,41 @@
         kubectl: "/usr/local/bin/kubectl"
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/metricbeat.yml"
-      when: inventory_hostname == groups['kube-master'][0]
+
+    - name: K8S .:. Prepare Matomo Ingestion template vars
+      set_fact:
+          matomo_app_filename: "/piwik.php"
+          matomo_name: "matomo-ingestion"
+
+    - name: K8S .:. Prepare Matomo Ingestion deployment file
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/matomo-ingestion.yml"
+        src: k8s/matomo-jail.yml.j2
+
+    - name: K8S .:. Deploy Matomo Ingestion
+      kube:
+        name: "{{ matomo_name }}-{{ item }}"
+        namespace: "wai-{{ item }}"
+        kubectl: "/usr/local/bin/kubectl"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/matomo-ingestion.yml"
+      with_items: "{{ wai_k8s_env }}"
+
+    - name: K8S .:. Prepare Matomo API template vars
+      set_fact:
+          matomo_app_filename: "/index.php"
+          matomo_name: "matomo-api"
+
+    - name: K8S .:. Prepare Matomo API deployment file
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/matomo-nginx-api.yml"
+        src: k8s/matomo-jail.yml.j2
+
+    - name: K8S .:. Deploy Matomo API
+      kube:
+        name: "{{ matomo_name }}-{{ item }}"
+        namespace: "wai-{{ item }}"
+        kubectl: "/usr/local/bin/kubectl"
+        filename: "{{ wai_k8s_deployment_dir }}/matomo-nginx-api.yml"
+        state: "latest"
+      with_items: "{{ wai_k8s_env }}"

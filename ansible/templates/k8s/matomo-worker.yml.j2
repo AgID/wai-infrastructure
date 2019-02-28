@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ matomo_name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ matomo_name }}
+  serviceName: {{ matomo_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ matomo_name }}
+    spec:
+      containers:
+      - image: {{ wai_matomo_base_image }}
+        name: {{ matomo_name }}
+        resources:
+          limits:
+            cpu: "0.25"
+            memory: "128Mi"
+        command: ["/bin/sh", "-c"]
+        args: ["chmod +x /var/www/html/console ; . /var/www/scripts/qt-worker.sh"]
+        volumeMounts:
+        - name: {{ matomo_name }}-conf
+          mountPath: /var/www/scripts
+      volumes:
+        - name: {{ matomo_name }}-conf
+          configMap:
+            name: {{ matomo_name }}-conf
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ matomo_name }}-conf
+data:
+  qt-worker.sh: |-
+    #!/bin/sh
+    QUEUEID=${HOSTNAME##*-}
+    cd /var/www/html
+    chmod +x console
+    while true;
+    do
+      ./console queuedtracking:process --queue-id $QUEUEID > /dev/null 2>&1
+      sleep 0.5
+    done
