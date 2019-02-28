@@ -29,7 +29,7 @@
   import_playbook: kubespray/cluster.yml
 - name: Deploy WAI K8S resources
   import_playbook: k8s-deployment.yml
-- hosts: k8s-master
+- hosts: kube-master
   roles:
     - metricbeat
 - hosts: all
