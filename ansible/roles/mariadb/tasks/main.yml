@@ -31,7 +31,7 @@
       regexp: "^bind-address.*"
       replace: "bind-address={{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}"
 
-- name: Copy mysql data directory to storage devicec
+- name: Copy mysql data directory to storage device
   raw: 'cp -R -p /var/lib/mysql /opt/data/mysql && rm -fR /var/lib/mysql'
 
 - name: Change mysql data directory
