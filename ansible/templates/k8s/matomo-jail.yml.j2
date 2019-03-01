@@ -109,3 +109,23 @@ spec:
     port: 80
   selector:
     app: {{ matomo_name }}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ matomo_name }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
+spec:
+  rules:
+    # TO FIX
+    - host: wai-prod.ingestion.devlab.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ matomo_name }}-service
+              servicePort: 80    
