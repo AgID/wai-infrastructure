@@ -43,7 +43,7 @@ spec:
       volumes:
         - name: {{ matomo_name }}-nginx-conf
           configMap: 
-            name: {{ matomo_name }}-nginx-conf
+            name: {{ matomo_name }}-nginx-configmap
         - name: {{ matomo_name }}-html
           emptyDir: {}
 ---
