@@ -53,7 +53,7 @@ rules:
   resources:
   - jobs
   - cronjobs
-  verbs: ["GET", "LIST"]
+  verbs: ["get", "list"]
 ---
 # K8S Service Account
 {% for ns in wai_k8s_namespaces %}
