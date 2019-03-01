@@ -16,7 +16,7 @@
     - name: K8S .:. Deploy base objects template
       kube:
         name: "k8s-deployment"
-        kubectl: "/usr/local/bin/kubectl"
+        kubectl: "{{ wai_kubectl }}"
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/k8s-deployment.yml"
 
@@ -31,7 +31,7 @@
       kube:
         name: "glusterfs-{{ item }}"
         namespace: "{{ item }}"
-        kubectl: "/usr/local/bin/kubectl"
+        kubectl: "{{ wai_kubectl }}"
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/glusterfs-{{ item }}.yml"
       with_items: "{{ wai_k8s_namespaces }}"
