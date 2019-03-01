@@ -24,7 +24,7 @@
 - name: Identify first Galera node
   set_fact: 
     galera_first_node: true
-  with_items: ["galera-prod", "galera-ppg"]
+  with_items: ["galera-prod", "galera-play"]
   when: "inventory_hostname == groups[item][0]"
 
 - name: Stop Mariadb

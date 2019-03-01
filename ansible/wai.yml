@@ -13,11 +13,11 @@
   roles:
     - galera
     - metricbeat
-- hosts: galera-ppg
+- hosts: galera-play
   roles:
     - galera
     - metricbeat
-- hosts: mariadb-dev
+- hosts: mariadb-stag
   roles:
     - mariadb
     - metricbeat
