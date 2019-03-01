@@ -38,7 +38,7 @@ metadata:
 data:
   qt-worker.sh: |-
     #!/bin/sh
-    QUEUEID=${HOSTNAME##*-}
+    QUEUE_ID=${HOSTNAME##*-}
     cd /var/www/html
     chmod +x console
     while true;
