@@ -43,14 +43,14 @@ spec:
       volumes:
         - name: {{ matomo_name }}-nginx-conf
           configMap: 
-            name: {{ matomo_name }}-nginx-conf
+            name: {{ matomo_name }}-nginx-configmap
         - name: {{ matomo_name }}-html
           emptyDir: {}
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ matomo_name }}-nginx-conf
+  name: {{ matomo_name }}-nginx-configmap
 data:
   nginx.conf: |-
     user nginx;
