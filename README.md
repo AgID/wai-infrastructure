@@ -119,7 +119,7 @@ Disabilitare il controllo della chiave per i server dell'infrastruttura eseguend
 $ cat > ~/.ansible.cfg <<EOF
 [defaults]
 host_key_checking = False
-roles_path = $(pwd)/ansible/kubespray-2.8.3
+roles_path = $(pwd)/playbooks/kubespray-2.8.3
 EOF
 ```
 
@@ -129,7 +129,7 @@ Impostare all'interno del file ansible/group_vars/all.yml le variabili *ansible_
 
 Configurato l'utente siamo pronti per eseguire il playbook tramite il comando
 ```bash
-$ cd ansible
+$ cd playbooks
 $ ansible-playbook -i hosts.ini wai.yml -b -K
 ```
 
