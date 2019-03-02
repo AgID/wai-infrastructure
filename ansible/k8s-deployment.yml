@@ -62,6 +62,7 @@
         filename: "{{ item.path }}"
       with_items: 
         - "{{ ksm_deployment_files.files }}"
+
 # Metricbeat
     - name: K8S .:. Configure Elasticsearch hosts for metricbeat
       set_fact: 
@@ -102,6 +103,7 @@
       set_fact:
         matomo_app_filename: "/piwik.php"
         matomo_name: "matomo-ingestion"
+        matomo_pod_size_index: "matomo-ingestion"
         matomo_nginx_jailed: true
         matomo_create_ingress: true 
         matomo_enable_session: false
@@ -124,10 +126,10 @@
       set_fact:
         matomo_app_filename: "/index.php"
         matomo_name: "matomo-api"
+        matomo_pod_size_index: "matomo-api"
         matomo_nginx_jailed: true
         matomo_create_ingress: false 
         matomo_enable_session: false
-        matomo_ingress_fqdn_index: "ingestion"
 
     - name: K8S .:. Prepare Matomo API deployment file
       template:
@@ -139,4 +141,17 @@
         name: "{{ matomo_name }}"
         kubectl: "{{ wai_kubectl }}"
         filename: "{{ wai_k8s_deployment_dir }}/matomo-nginx-api.yml"
+        state: "latest"
+
+# Matomo Worker
+    - name: K8S .:. Prepare Matomo Worker deployment file
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/matomo-worker.yml"
+        src: k8s/matomo-worker.yml.j2
+
+    - name: K8S .:. Deploy Matomo Worker
+      kube:
+        name: "matomo-worker"
+        kubectl: "{{ wai_kubectl }}"
+        filename: "{{ wai_k8s_deployment_dir }}/matomo-worker.yml"
         state: "latest"

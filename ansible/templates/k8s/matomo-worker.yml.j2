@@ -1,40 +1,43 @@
+{% for ns in wai_k8s_namespaces %}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ matomo_name }}
+  name: matomo-worker
+  namespace: {{ ns }}
 spec:
-  replicas: 1
+  replicas: {{ wai_matomo_pod_size[ns]['matomo-worker'] }}
   selector:
     matchLabels:
-      app: {{ matomo_name }}
-  serviceName: {{ matomo_name }}
+      app: matomo-worker
+  serviceName: matomo-worker
   template:
     metadata:
       labels:
-        app: {{ matomo_name }}
+        app: matomo-worker
     spec:
       containers:
       - image: {{ wai_matomo_base_image }}
-        name: {{ matomo_name }}
+        name: matomo-worker
         resources:
           limits:
-            cpu: "0.25"
-            memory: "128Mi"
+            cpu: "0.50"
+            memory: "256Mi"
         command: ["/bin/sh", "-c"]
         args: ["chmod +x /var/www/html/console ; . /var/www/scripts/qt-worker.sh"]
         volumeMounts:
-        - name: {{ matomo_name }}-conf
+        - name: matomo-worker-conf
           mountPath: /var/www/scripts
       volumes:
-        - name: {{ matomo_name }}-conf
+        - name: matomo-worker-conf
           configMap:
-            name: {{ matomo_name }}-conf
+            name: matomo-worker-conf
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ matomo_name }}-conf
+  name: matomo-worker-conf
+  namespace: {{ ns }}
 data:
   qt-worker.sh: |-
     #!/bin/sh
@@ -42,6 +45,7 @@ data:
     cd /var/www/html
     while true;
     do
-      ./console queuedtracking:process --queue-id $QUEUEID > /dev/null 2>&1
+      ./console queuedtracking:process --queue-id $QUEUE_ID > /dev/null 2>&1
       sleep 0.5
     done
+{% endfor %}
