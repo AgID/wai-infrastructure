@@ -4,11 +4,34 @@ wai_k8s_namespaces:
   - wai-prod
   - wai-play
   - wai-stag
+# Base fqdn domain
+wai_base_domain: wai.devlab.local
+# Hostnames
+wai_hostname:
+  wai-prod:
+    ingestion: ingestion
+    matomo: matomo
+    portal: www
+    api: api
+  wai-play:
+    ingestion: ingestion-play
+    matomo: matomo-play
+    portal: www-play
+    api: api-play
+  wai-stag:
+    ingestion: ingestion-stag
+    matomo: matomo-stag
+    portal: www-stag
+    api: api-stag
+# Base Matomo Image    
 wai_matomo_base_image: giafar/wai-matomo:3.7.0-fpm
 wai_kube_state_metrics_version: v1.5.0
+wai_kube_state_metrics_output_dir: kube-state-metrics-1.5.0
 wai_kube_state_metrics: 'https://codeload.github.com/kubernetes/kube-state-metrics/zip/{{ wai_kube_state_metrics_version }}'
 wai_kubectl: /usr/local/bin/kubectl
+# Base K8S Node port for http
 wai_base_http_port: 30080
+# Base K8S Node port for https
 wai_base_https_port: 30443
 # Elastic version used for Elasticsearch, Kibana and Beats.
 # These vars override default settings of role elastic.elasticsearch and are used in wai roles kibana and metricbeat
