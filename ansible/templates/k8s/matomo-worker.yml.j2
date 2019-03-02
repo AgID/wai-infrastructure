@@ -40,7 +40,6 @@ data:
     #!/bin/sh
     QUEUE_ID=${HOSTNAME##*-}
     cd /var/www/html
-    chmod +x console
     while true;
     do
       ./console queuedtracking:process --queue-id $QUEUEID > /dev/null 2>&1
