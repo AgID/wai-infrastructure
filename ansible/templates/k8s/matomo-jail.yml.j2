@@ -6,7 +6,7 @@ metadata:
   name: {{ matomo_name }}
   namespace: {{ ns }}
 spec:
-  replicas: 1
+  replicas: {{ wai_matomo_pod_size[ns][matomo_pod_size_index] }}
   selector:
     app: {{ matomo_name }}
   template:
@@ -32,7 +32,7 @@ spec:
         resources:
           limits:
             cpu: "0.25"
-            memory: "128Mi"
+            memory: "256Mi"
         args: ["nginx", "-g", "daemon off;", "-c", "/etc/config/nginx.conf"]
         ports:
         - containerPort: 80

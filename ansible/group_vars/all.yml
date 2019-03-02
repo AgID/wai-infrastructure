@@ -6,6 +6,20 @@ wai_k8s_namespaces:
   - wai-stag
 # Base fqdn domain
 wai_base_domain: wai.devlab.local
+# Matomo POD size configuration
+wai_matomo_pod_size:
+  wai-prod: 
+    matomo-worker: 3
+    matomo-ingestion: 3
+    matomo-api: 3
+  wai-play:
+    matomo-worker: 2
+    matomo-ingestion: 2
+    matomo-api: 2
+  wai-stag:
+    matomo-worker: 1
+    matomo-ingestion: 1
+    matomo-api: 1
 # Hostnames
 wai_hostname:
   wai-prod:
