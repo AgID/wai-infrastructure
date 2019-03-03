@@ -3,7 +3,7 @@
 .vscode
 
 # Ignore downloaded playbook
-ansible/kubespray-*
+playbooks/kubespray-*
 
 # Ignore pyenv
 .python-version

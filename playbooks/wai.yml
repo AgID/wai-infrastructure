@@ -13,11 +13,11 @@
   roles:
     - galera
     - metricbeat
-- hosts: galera-ppg
+- hosts: galera-play
   roles:
     - galera
     - metricbeat
-- hosts: mariadb-dev
+- hosts: mariadb-stag
   roles:
     - mariadb
     - metricbeat
@@ -27,8 +27,17 @@
     - metricbeat
 - name: Kubernetes cluster
   import_playbook: kubespray/cluster.yml
-- hosts: k8s-master
+- name: Deploy WAI K8S resources
+  import_playbook: k8s-deployment.yml
+- hosts: kube-master
   roles:
     - metricbeat
-#  TODO: Enable apt daily check at the end of the playbook
-  
+- hosts: all
+  tasks:
+  - name: Enable APT automatic update
+    raw: systemctl enable --now {{item}}
+    with_items:
+      - 'apt-daily.timer'
+      - 'apt-daily-upgrade.timer'
+  - name: Reload systemctl daemon-reload
+    raw: systemctl daemon-reload

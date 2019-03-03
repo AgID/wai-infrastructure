@@ -1,0 +1,2 @@
+# Override etcd_data_dir in kubespray etcd.yml
+etcd_data_dir: /opt/data/etcd
