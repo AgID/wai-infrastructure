@@ -6,7 +6,7 @@ metadata:
   name: matomo-worker
   namespace: {{ ns }}
 spec:
-  replicas: {{ wai_matomo_pod_size[ns]['matomo-worker'] }}
+  replicas: {{ wai_matomo_pod_size[ns][matomo_pod_size_index] }}
   selector:
     matchLabels:
       app: matomo-worker
