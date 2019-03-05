@@ -1,0 +1,83 @@
+---
+# Configure Matomo database
+- hosts:
+    - galera-prod[0]
+    - galera-play[0]
+    - mariadb-stag[0]
+  tasks:
+
+    - name: Database .:. Install required software
+      apt:
+        name: ["python3-pymysql"]
+        state: present
+
+    - name: Database .:. Test if prod password
+      set_fact:
+        wai_environment: wai-prod
+      when: inventory_hostname in groups['galera-prod']
+
+    - name: Database .:. Test if play password
+      set_fact:
+        wai_environment: wai-play
+      when: inventory_hostname in groups['galera-play']
+
+    - name: Database .:. Test if stag password
+      set_fact:
+        wai_environment: wai-stag
+      when: inventory_hostname in groups['mariadb-stag']
+
+    - name: Database .:. Fail if host not founded
+      fail:
+        msg: "Password environment not founded"
+      when: "wai_environment is not defined"
+
+    - name: Database .:. Prepare matomo template sql script
+      template:
+        src: "mariadb/matomo_3_8_1-data.sql.j2"
+        dest: "/root/matomo_3_8_1-data.sql"
+
+    - name: Database .:. Test if matomo database is present
+      shell: mysql -e 'SHOW DATABASES;' | grep matomo
+      register: matomo_db_status
+      failed_when: matomo_db_status.rc == 2
+
+    - name: Database .:. Import Matomo database
+      mysql_db:
+        name: matomo
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        state: import
+        target: "/root/matomo_3_8_1-data.sql"
+      when: matomo_db_status.rc != 0
+
+    - name: Database .:. Create WAI database
+      mysql_db:
+        name: wai
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        state: present
+
+    - name: Database .:.  Create Matomo super user
+      mysql_user:
+        name: matomo_admin
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        password: "{{ wai_database_password[wai_environment]['matomo-admin'] }}"
+        priv: "matomo.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES"
+        host: "%"
+        state: present
+
+    - name: Database .:.  Create Matomo readonly user
+      mysql_user:
+        name: matomo_user
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        password: "{{ wai_database_password[wai_environment]['matomo-user'] }}"
+        priv: "matomo.*:SELECT"
+        host: "%"
+        state: present
+
+    - name: Database .:.  Create WAI super user
+      mysql_user:
+        name: wai_admin
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        password: "{{ wai_database_password[wai_environment]['wai-admin'] }}"
+        priv: "wai.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES"
+        host: "%"
+        state: present
