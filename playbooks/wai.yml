@@ -1,41 +1,69 @@
 ---
 # Main WAI playbook
 
+# Include vault password
 - include_vars:
   file: password.yml
 
+# Infrastructure requirements 
 - hosts: all
   roles:
     - infrastructure  
+
+# Install elastic search
 - hosts: elastic
   roles:
     - elastic.elasticsearch
+
+# Install kibana
 - hosts: kibana
   roles:
     - kibana
+
+# Install galera prod cluster     
 - hosts: galera-prod
   roles:
     - galera
     - metricbeat
+
+# Install galera prod slave cluster
+- hosts: galera-prod-slave
+  roles:
+    - galera
+    - metricbeat
+
+# Install galera public play ground cluster    
 - hosts: galera-play
   roles:
     - galera
     - metricbeat
+
+# Install mariadb stage server    
 - hosts: mariadb-stag
   roles:
     - mariadb
     - metricbeat
+
+# Install GlusterFS server    
 - hosts: gluster
   roles:
     - glusterfs
     - metricbeat
+
+# Install K8S cluster    
 - name: Kubernetes cluster
   import_playbook: kubespray/cluster.yml
+
+# Configure K8S resources  
 - name: Deploy WAI K8S resources
   import_playbook: k8s-deployment.yml
+
+# Install metricbeat on kube-master nodes  
 - hosts: kube-master
   roles:
     - metricbeat
+
+# Enable apt automatic update    
 - hosts: all
   tasks:
   - name: Enable APT automatic update
