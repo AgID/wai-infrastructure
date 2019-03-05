@@ -1,14 +1,15 @@
 {% for ns in wai_k8s_namespaces %}
 ---
-apiVersion: v1
-kind: ReplicationController
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: {{ matomo_name }}
   namespace: {{ ns }}
 spec:
   replicas: {{ wai_matomo_pod_size[ns][matomo_pod_size_index] }}
   selector:
-    app: {{ matomo_name }}
+    matchLabels:
+      app: {{ matomo_name }}
   template:
     metadata:
       labels:
@@ -153,7 +154,6 @@ metadata:
 
 spec:
   rules:
-    # TO FIX
     - host: {{ wai_hostname[ns][matomo_ingress_fqdn_index] }}.{{ wai_base_domain }}
       http:
         paths:
