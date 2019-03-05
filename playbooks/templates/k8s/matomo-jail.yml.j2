@@ -27,7 +27,19 @@ spec:
           name: fpm-port
         volumeMounts:
         - name: {{ matomo_name }}-html
-          mountPath: /var/www/html
+          mountPath: /var/www/html/
+        - name: {{ matomo_name }}-config
+          mountPath: /tmp/config
+        env:
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: matomo-secret-{{ matomo_database_user }}
+              key: password
+        - name: DATABASE_USER
+          value: {{ matomo_database_user }}
+        - name: DATABASE_HOST
+          value: {{ matomo_database_host }}
       - image: nginx:1.15.8
         name: nginx
         resources:
@@ -44,6 +56,9 @@ spec:
         - name: {{ matomo_name }}-html
           mountPath: /var/www/html
       volumes:
+        - name: {{ matomo_name }}-config
+          configMap: 
+            name: matomo-php-config
         - name: {{ matomo_name }}-nginx-conf
           configMap: 
             name: {{ matomo_name }}-nginx-configmap

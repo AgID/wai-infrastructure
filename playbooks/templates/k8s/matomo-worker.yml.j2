@@ -24,14 +24,29 @@ spec:
             cpu: "0.50"
             memory: "256Mi"
         command: ["/bin/sh", "-c"]
-        args: ["chmod +x /var/www/html/console ; . /var/www/scripts/qt-worker.sh"]
+        args: ["/entrypoint.sh; . /var/www/scripts/qt-worker.sh"]
         volumeMounts:
         - name: matomo-worker-conf
           mountPath: /var/www/scripts
+        - name: matomo-php-config
+          mountPath: /tmp/config
+        env:
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: matomo-secret-{{ matomo_database_user }}
+              key: password
+        - name: DATABASE_USER
+          value: {{ matomo_database_user }}
+        - name: DATABASE_HOST
+          value: {{ matomo_database_host }}
       volumes:
         - name: matomo-worker-conf
           configMap:
             name: matomo-worker-conf
+        - name: matomo-php-config
+          configMap: 
+            name: matomo-php-config
 ---
 kind: ConfigMap
 apiVersion: v1
