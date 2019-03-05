@@ -14,8 +14,8 @@ metadata:
   name: resource-quota-{{ ns }}
   namespace: {{ ns }}
 spec:
-  hard: 
-  {% for key, value in wai_k8s_resource_quota[ns].iteritems() %}
+  hard:   
+  {% for key, value in wai_k8s_resource_quota[ns].items() %}
   {{ key }}: {{ value }}
   {% endfor %}
 {% endfor %}
