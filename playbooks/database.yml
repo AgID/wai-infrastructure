@@ -5,6 +5,8 @@
     - galera-play[0]
     - mariadb-stag[0]
   tasks:
+    - include_vars:
+      file: password.yml
 
     - name: Database .:. Install required software
       apt:
@@ -26,10 +28,10 @@
         wai_environment: wai-stag
       when: inventory_hostname in groups['mariadb-stag']
 
-    - name: Database .:. Fail if host not founded
+    - name: Database .:. Fail if password is not found
       fail:
-        msg: "Password environment not founded"
-      when: "wai_environment is not defined"
+        msg: "Password for the current environment not found"
+      when: "wai_environment is not defined or wai_database_password[wai_environment] is not defined"
 
     - name: Database .:. Prepare matomo template sql script
       template:
@@ -81,3 +83,21 @@
         priv: "wai.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES"
         host: "%"
         state: present
+
+    - name: Database .:. Set root password
+      mysql_user:
+        login_user: 'root'
+        name: root
+        password: "{{ wai_database_password[wai_environment]['root'] }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      when: mariadb_mycnf_result.stat.exists == false
+    
+    - name: Database .:. Create root configuration file
+      template:
+        vars:
+          database_root_password: "{{ wai_database_password[wai_environment]['root'] }}"
+        src: 'root-my.cnf.j2'
+        dest: '/root/.my.cnf'
+        owner: 'root'
+        group: 'root'
+        mode: '0600'

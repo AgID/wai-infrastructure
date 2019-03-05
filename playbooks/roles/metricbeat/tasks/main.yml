@@ -1,43 +1,64 @@
 ---
 # Metricbeat role
-- name: Adding Elastic PGP key
+- include_vars:
+    file: password.yml
+
+- name: Metricbeat .:. Adding Elastic PGP key
   apt_key: 
     url: "{{es_apt_key}}"
     state: present
 
-- name: Updating repository
+- name: Metricbeat .:. Updating repository
   apt_repository:
     repo: "{{es_apt_url}}"
     state: present
 
-- name: Installing Metricbeat
+- name: Metricbeat .:. Installing Metricbeat
   apt:
     update_cache: yes
     name: metricbeat={{es_version}}
 
-- name: Add metricbeat mysql module
-  set_fact: metric_configure_mysql_module=true
+- name: Metricbeat .:. Get database root password for prod environment
+  set_fact:
+    database_password: "{{ wai_database_password['wai-prod']['root'] }}"
+  when: "inventory_hostname in groups['galera-prod'] or inventory_hostname in groups['galera-prod-slave']"
+
+- name: Metricbeat .:. Get database root password for play environment
+  set_fact:
+    database_password: "{{ wai_database_password['wai-play']['root'] }}"
+  when: "inventory_hostname in groups['galera-play']"
+
+- name: Metricbeat .:. Get database root password for stage environment
+  set_fact:
+    database_password: "{{ wai_database_password['wai-stag']['root'] }}"
+  when: "inventory_hostname in groups['mariadb-stag']"
+
+- name: Metricbeat .:. Add metricbeat mysql module
+  set_fact: 
+    metric_configure_mysql_module: true
   when: "'mariadb' in role_names or 'galera' in role_names"
 
-- name: Add mysql .:. galera module
-  set_fact: metric_configure_mysql_module_galera=true
+- name: Metricbeat .:. Add mysql .:. galera module
+  set_fact: 
+    metric_configure_mysql_module_galera: true
   when: 
     - "metric_configure_mysql_module | default(false)"
     - "'galera' in role_names"
   
-- name: Add etcd module
-  set_fact: metric_configure_etcd=true
+- name: Metricbeat .:. Add etcd module
+  set_fact: 
+    metric_configure_etcd: true
   when: 
     - "'etcd' in group_names"
 
-- name: Configure metricbeat
+- name: Metricbeat .:. Configure metricbeat
   template:
     src: metricbeat.yml.j2
     dest: /etc/metricbeat/metricbeat.yml
   notify:
     - restart metricbeat
 
-- name: Ensure Metricbeat is up and running
+- name: Metricbeat .:. Ensure Metricbeat is up and running
   service:
     name: metricbeat
     state: started

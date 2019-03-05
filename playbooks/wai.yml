@@ -1,10 +1,6 @@
 ---
 # Main WAI playbook
 
-# Include vault password
-- include_vars:
-  file: password.yml
-
 # Infrastructure requirements 
 - hosts: all
   roles:
