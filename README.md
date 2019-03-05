@@ -118,10 +118,12 @@ Il playpook per il deploy dell'infrastruttura e la configurazione del software d
 
 Decriptare il file `password.yml`, utilizzando la password *changeme* con il comando
 ```bash
-$ ansible-vault decrypt password-template.yml 
+$ ansible-vault decrypt playbooks/password.yml
 ```
 
-Impostare le password all'interno del file ecrittografare nuovamente il file con il comando `ansible-vault encrypt password.yml` 
+Impostare le password all'interno del file e crittografare nuovamente il file con il comando
+```bash
+$ ansible-vault encrypt playbooks/password.yml
 
 ### Inizializzazione
 
@@ -131,7 +133,8 @@ Disabilitare il controllo della chiave per i server dell'infrastruttura eseguend
 $ cat > ~/.ansible.cfg <<EOF
 [defaults]
 host_key_checking = False
-roles_path = $(pwd)/playbooks/kubespray-2.8.3
+roles_path = $(pwd)/playbooks/kubespray
+library = /home/admin/playbooks/kubespray/library
 EOF
 ```
 

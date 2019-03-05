@@ -32,8 +32,9 @@ sudo true
 download_ansible
 download_jinja
 
-# Download kubespray 2.8.3
-wget https://codeload.github.com/kubernetes-sigs/kubespray/zip/v2.8.3 -O playbooks/kubespray-2.8-3.zip && cd playbooks && unzip kubespray-2.8-3.zip && cd ..
+# Download kubespray 2.8.3. Change the tag if you want to use a different version
+git clone --branch v2.8.3 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
+
 
 
 
