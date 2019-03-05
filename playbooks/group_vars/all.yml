@@ -22,7 +22,7 @@ wai_k8s_resource_quota:
   wai-play: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "55", limits.memory: "60Gi" }
   wai-stag: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "55", limits.memory: "60Gi" }
 # Base Matomo Image    
-wai_matomo_base_image: giafar/wai-matomo:3.8.1-fpm
+wai_matomo_base_image: giafar/wai-matomo-base:0.0.1-fpm
 wai_kube_state_metrics_version: v1.5.0
 wai_kube_state_metrics_output_dir: kube-state-metrics-1.5.0
 wai_kube_state_metrics: 'https://codeload.github.com/kubernetes/kube-state-metrics/zip/{{ wai_kube_state_metrics_version }}'
