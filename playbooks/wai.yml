@@ -1,5 +1,9 @@
 ---
 # Main WAI playbook
+
+- include_vars:
+  file: password.yml
+
 - hosts: all
   roles:
     - infrastructure  
