@@ -1,10 +1,12 @@
 # K8S Namespaces
 {% for ns in wai_k8s_namespaces %}
+
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
    name: {{ ns }}
+
 ---
 apiVersion: v1
 kind: ResourceQuota
@@ -12,13 +14,12 @@ metadata:
   name: resource-quota-{{ ns }}
   namespace: {{ ns }}
 spec:
-  hard:
-    requests.cpu: "10" 
-    requests.memory: 10Gi 
-    limits.cpu: "20" 
-    limits.memory: 20Gi 
+  hard: 
+  {% for key, value in wai_k8s_resource_quota[ns].iteritems() %}
+  {{ key }}: {{ value }}
+  {% endfor %}
 {% endfor %}
-# K8S Cluster Role with view access
+
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -33,6 +34,7 @@ rules:
   - jobs
   - cronjobs
   verbs: ["*"]
+
 ---
 # K8S Cluster Role with view access
 kind: ClusterRole
@@ -69,6 +71,7 @@ rules:
   - cronjobs
   verbs: ["get", "list"]
 {% for ns in wai_k8s_namespaces %}
+
 ---
 # K8S Service Account {{ ns }}-view-account
 apiVersion: v1
@@ -76,6 +79,7 @@ kind: ServiceAccount
 metadata:
   name:  {{ ns }}-view-account
   namespace: {{ ns }}
+
 ---
 # K8S Service Account {{ ns }}-full-account
 apiVersion: v1
@@ -83,6 +87,7 @@ kind: ServiceAccount
 metadata:
   name:  {{ ns }}-full-account
   namespace: {{ ns }}
+
 ---
 # K8S RoleBinding {{ ns }}-role-binding-view-access
 apiVersion: rbac.authorization.k8s.io/v1
@@ -98,6 +103,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: wai-cluster-role-view-access
+
 ---
 # K8S RoleBinding {{ ns }}-role-binding-view-access
 apiVersion: rbac.authorization.k8s.io/v1
