@@ -7,6 +7,11 @@ metadata:
   namespace: {{ ns }}
 spec:
   replicas: {{ wai_matomo_pod_size[ns][matomo_pod_size_index] }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
   selector:
     matchLabels:
       app: {{ matomo_name }}
@@ -25,6 +30,18 @@ spec:
         ports:
         - containerPort: 9000
           name: fpm-port
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /var/www/html/config/config.ini.php
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: fpm-port
+          initialDelaySeconds: 5
+          periodSeconds: 5
         volumeMounts:
         - name: {{ matomo_name }}-html
           mountPath: /var/www/html/
@@ -50,6 +67,17 @@ spec:
         ports:
         - containerPort: 80
           name: nginx
+        livenessProbe:
+          httpGet:
+{% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}            
+            path: {{ matomo_app_filename }} 
+{% else %}            
+            path: /
+{% endif %}
+            port: nginx
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
         volumeMounts:
         - name: {{ matomo_name }}-nginx-conf
           mountPath: /etc/config/

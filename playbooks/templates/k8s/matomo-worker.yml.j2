@@ -7,6 +7,8 @@ metadata:
   namespace: {{ ns }}
 spec:
   replicas: {{ wai_matomo_pod_size[ns][matomo_pod_size_index] }}
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: matomo-worker
@@ -25,6 +27,13 @@ spec:
             memory: "256Mi"
         command: ["/bin/sh", "-c"]
         args: ["/entrypoint.sh; . /var/www/scripts/qt-worker.sh"]
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /var/www/html/config/config.ini.php
+          initialDelaySeconds: 5
+          periodSeconds: 5
         volumeMounts:
         - name: matomo-worker-conf
           mountPath: /var/www/scripts
