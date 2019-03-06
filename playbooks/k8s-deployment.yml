@@ -26,7 +26,7 @@
     # GlusterFS
     - name: K8S .:. Prepare GlusterFS endpoints
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/glusterfs-{{ item }}.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}-glusterfs.yml"
         src: k8s/glusterfs.yml.j2
       with_items: "{{ wai_k8s_namespaces }}"
 
@@ -36,7 +36,7 @@
         namespace: "{{ item }}"
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
-        filename: "{{ wai_k8s_deployment_dir }}/glusterfs-{{ item }}.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}-glusterfs.yml"
       with_items: "{{ wai_k8s_namespaces }}"
 
     # Kube State Metrics
@@ -142,15 +142,17 @@
 
     - name: K8S .:. Prepare Matomo Ingestion deployment file
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/matomo-ingestion.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-ingestion.yml"
         src: k8s/matomo-jail.yml.j2
+      with_items: "{{ wai_k8s_namespaces }}" 
 
     - name: K8S .:. Deploy Matomo Ingestion
       kube:
         name: "{{ matomo_name }}"
         kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/matomo-ingestion.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-ingestion.yml"
         state: "latest"
+      with_items: "{{ wai_k8s_namespaces }}"
 
     # Matomo API
     - name: K8S .:. Prepare Matomo API template vars
@@ -166,15 +168,17 @@
 
     - name: K8S .:. Prepare Matomo API deployment file
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/matomo-nginx-api.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-api.yml"
         src: k8s/matomo-jail.yml.j2
+      with_items: "{{ wai_k8s_namespaces }}" 
 
     - name: K8S .:. Deploy Matomo API
       kube:
         name: "{{ matomo_name }}"
         kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/matomo-nginx-api.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-api.yml"
         state: "latest"
+      with_items: "{{ wai_k8s_namespaces }}"
 
     # Matomo Worker
     - name: K8S .:. Prepare Matomo Worker template
@@ -185,12 +189,14 @@
 
     - name: K8S .:. Prepare Matomo Worker deployment file
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/matomo-worker.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-worker.yml"
         src: k8s/matomo-worker.yml.j2
+      with_items: "{{ wai_k8s_namespaces }}" 
 
     - name: K8S .:. Deploy Matomo Worker
       kube:
         name: "matomo-worker"
         kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/matomo-worker.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-worker.yml"
         state: "latest"
+      with_items: "{{ wai_k8s_namespaces }}" 

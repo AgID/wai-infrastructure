@@ -1,12 +1,11 @@
-{% for ns in wai_k8s_namespaces %}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: matomo-worker
-  namespace: {{ ns }}
+  namespace: {{ item }}
 spec:
-  replicas: {{ wai_matomo_pod_size[ns][matomo_pod_size_index] }}
+  replicas: {{ wai_matomo_pod_size[item][matomo_pod_size_index] }}
   updateStrategy:
     type: RollingUpdate
   selector:
@@ -61,7 +60,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: matomo-worker-conf
-  namespace: {{ ns }}
+  namespace: {{ item }}
 data:
   qt-worker.sh: |-
     #!/bin/sh
@@ -72,4 +71,4 @@ data:
       ./console queuedtracking:process --queue-id $QUEUE_ID > /dev/null 2>&1
       sleep 0.5
     done
-{% endfor %}
+
