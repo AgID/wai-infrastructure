@@ -42,3 +42,5 @@ metricbeat_output_elastic: '{{ groups["elastic"] | map("extract", hostvars, ["an
 # Override path used to store Docker data in kubespray all\docker.yml
 docker_daemon_graph: "/opt/data/docker"
 
+# Redis
+redis_image_version: 5.0.3
