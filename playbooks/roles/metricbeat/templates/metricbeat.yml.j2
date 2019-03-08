@@ -4,9 +4,9 @@ setup.template.settings:
   index.number_of_shards: 1
   index.codec: best_compression
 setup.kibana:
-  host: "{{hostvars[groups['kibana'][0]]['ansible_default_ipv4']['address']}}:5601"
+  host: "{{ hostvars[groups['kibana'][0]]['ansible_default_ipv4']['address'] }}:5601"
 output.elasticsearch:
-  hosts: {{metricbeat_output_elastic}}
+  hosts: {{ metricbeat_output_elastic }}
 processors:
   - add_host_metadata: ~
   - add_cloud_metadata: ~
@@ -38,7 +38,7 @@ metricbeat.modules:
     {% endif %}
 
     period: 10s
-    hosts: ["tcp({{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:3306)/"]
+    hosts: ["tcp({{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:3306)/"]
     username: root
     {% if database_password is defined %}password: {{ database_password }}{% endif %}
 

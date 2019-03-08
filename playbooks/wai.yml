@@ -63,7 +63,7 @@
 - hosts: all
   tasks:
   - name: Enable APT automatic update
-    raw: systemctl enable --now {{item}}
+    raw: systemctl enable --now {{ item }}
     with_items:
       - 'apt-daily.timer'
       - 'apt-daily-upgrade.timer'

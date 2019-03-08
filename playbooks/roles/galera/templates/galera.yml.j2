@@ -16,8 +16,8 @@ wsrep_cluster_address="gcomm://{{ groups[group_names[0]] | map("extract", hostva
 wsrep_sst_method=rsync
 
 # Galera Node Configuration
-wsrep_node_address="{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}"
-wsrep_node_name="{{ansible_hostname}}"
+wsrep_node_address="{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+wsrep_node_name="{{ ansible_hostname }}"
 
 # Skip dns reverse lookup
 skip-name-resolve

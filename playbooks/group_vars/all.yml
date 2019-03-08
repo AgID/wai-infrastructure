@@ -44,3 +44,7 @@ docker_daemon_graph: "/opt/data/docker"
 
 # Redis
 redis_image_version: 5.0.3
+
+# GlusterFS
+gluster_apt_repo:  ppa:gluster/glusterfs-4.1
+gluster_package_version: 4.*

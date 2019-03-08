@@ -4,7 +4,7 @@
     path: /etc/environment
     state: present
     regexp: '^http_proxy'
-    line: 'http_proxy="{{ http_proxy}}"'
+    line: 'http_proxy="{{ http_proxy }}"'
   when:
     - http_proxy is defined
 
@@ -13,7 +13,7 @@
     path: /etc/environment
     state: present
     regexp: '^https_proxy'
-    line: 'https_proxy="{{ https_proxy}}"'
+    line: 'https_proxy="{{ https_proxy }}"'
   when:
     - https_proxy is defined
 

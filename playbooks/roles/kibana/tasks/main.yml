@@ -1,27 +1,27 @@
 - name: Adding Elastic PGP key
   apt_key: 
-    url: "{{es_apt_key}}"
+    url: "{{ es_apt_key }}"
     state: present
 
 - name: Updating repository
   apt_repository:
-    repo: "{{es_apt_url}}"
+    repo: "{{ es_apt_url }}"
     state: present
 
 - name: Installing Kibana
   apt:
     update_cache: yes
-    name: kibana={{es_version}}
+    name: kibana={{ es_version }}
 
 - name: Configure Elasticsearch hosts
   set_fact: 
-    elastic_url: 'http://{{item}}:9200'
+    elastic_url: 'http://{{ item }}:9200'
   with_items: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
   register: kibana_elastic_hosts_list
 
 - name: Build hosts array
   set_fact: 
-    kibana_elastic_hosts: '{{kibana_elastic_hosts_list.results | map(attribute="ansible_facts.elastic_url") | list | to_yaml}}'
+    kibana_elastic_hosts: '{{ kibana_elastic_hosts_list.results | map(attribute="ansible_facts.elastic_url") | list | to_yaml }}'
 
 - name: Configure Kibana
   template:

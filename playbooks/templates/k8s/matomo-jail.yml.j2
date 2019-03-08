@@ -68,11 +68,11 @@ spec:
           name: nginx
         livenessProbe:
           httpGet:
-{% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}            
+            {% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
             path: {{ matomo_app_filename }} 
-{% else %}            
+            {% else %}
             path: /
-{% endif %}
+            {% endif %}
             port: nginx
           initialDelaySeconds: 5
           periodSeconds: 5

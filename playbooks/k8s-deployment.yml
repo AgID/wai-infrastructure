@@ -69,13 +69,13 @@
     # Metricbeat
     - name: K8S .:. Configure Elasticsearch hosts for metricbeat
       set_fact:
-        elastic_url: "http://{{item}}:9200"
+        elastic_url: "http://{{ item }}:9200"
       with_items: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
       register: kibana_elastic_hosts_list
 
     - name: K8S .:. Build Elasticsearch host array
       set_fact:
-        kibana_elastic_hosts: '{{kibana_elastic_hosts_list.results | map(attribute="ansible_facts.elastic_url") | list | to_yaml}}'
+        kibana_elastic_hosts: '{{ kibana_elastic_hosts_list.results | map(attribute="ansible_facts.elastic_url") | list | to_yaml }}'
 
     - name: K8S .:. Prepare Metricbeat DaemonSet and services
       template:

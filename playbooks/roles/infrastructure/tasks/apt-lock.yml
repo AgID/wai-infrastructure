@@ -1,6 +1,6 @@
 ---
 - name: Disable APT automatic update
-  raw: systemctl disable --now {{item}}
+  raw: systemctl disable --now {{ item }}
   with_items:
     - 'apt-daily.timer'
     - 'apt-daily-upgrade.timer'

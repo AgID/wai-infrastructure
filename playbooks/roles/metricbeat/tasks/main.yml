@@ -5,18 +5,18 @@
 
 - name: Metricbeat .:. Adding Elastic PGP key
   apt_key: 
-    url: "{{es_apt_key}}"
+    url: "{{ es_apt_key }}"
     state: present
 
 - name: Metricbeat .:. Updating repository
   apt_repository:
-    repo: "{{es_apt_url}}"
+    repo: "{{ es_apt_url }}"
     state: present
 
 - name: Metricbeat .:. Installing Metricbeat
   apt:
     update_cache: yes
-    name: metricbeat={{es_version}}
+    name: metricbeat={{ es_version }}
 
 - name: Metricbeat .:. Get database root password for prod environment
   set_fact:
@@ -38,7 +38,7 @@
     metric_configure_mysql_module: true
   when: "'mariadb' in role_names or 'galera' in role_names"
 
-- name: Metricbeat .:. Add mysql .:. galera module
+- name: Metricbeat .:. Add mysql module with galera
   set_fact: 
     metric_configure_mysql_module_galera: true
   when: 

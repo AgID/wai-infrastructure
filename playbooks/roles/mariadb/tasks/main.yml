@@ -33,7 +33,7 @@
   replace:
       path: /etc/mysql/mariadb.conf.d/50-server.cnf
       regexp: "^bind-address.*"
-      replace: "bind-address={{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}"
+      replace: "bind-address={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
   when: mariadb_mycnf_result.stat.exists == false
 
 - name: MariaDB .:. Copy mysql data directory to storage device
@@ -51,7 +51,7 @@
     - mariadb_mycnf_result.stat.exists == false
     - mariadb_data_moved.stat.exists == false
 
-- name: MariaDB .:. Restart always mariadb 
+- name: MariaDB .:. Restart if needed
   service:
     name: mariadb
     state: restarted
