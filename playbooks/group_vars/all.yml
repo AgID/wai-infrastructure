@@ -1,3 +1,7 @@
+# WAI alert destination
+wai_alert_email_destination:
+  - example@example.org
+  - test@test.it
 # WAI
 wai_k8s_deployment_dir: /opt/data/scripts/wai
 wai_k8s_namespaces:
@@ -38,7 +42,6 @@ es_apt_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
 es_apt_url: "deb https://artifacts.elastic.co/packages/6.x/apt stable main"
 # Metricbeat output
 metricbeat_output_elastic: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list | to_json }}'
-
 # Override path used to store Docker data in kubespray all\docker.yml
 docker_daemon_graph: "/opt/data/docker"
 
