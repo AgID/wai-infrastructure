@@ -16,12 +16,6 @@
     path: "/opt/data/mysql/ibdata1"
   register: mariadb_data_moved
 
-- name: MariaDB .:. Clean mariadb root password if present
-  file:
-    state: absent
-    path: "/root/.my.cnf"
-  when: mariadb_mycnf_result.stat.exists == false
-
 - name: MariaDB .:. Install MariaDB
   apt: 
     update_cache: false
