@@ -2,13 +2,13 @@
 # Installing GlusterFS
 - name: GlusterFS .:. Adding PPA repository
   apt_repository:
-    repo: ppa:gluster/glusterfs-4.1
+    repo: '{{ gluster_apt_repo }}'
     state: present
 
 - name: GlusterFS .:. Installing GlusterFS
   apt:
     update_cache: true
-    name: glusterfs-server=4.*
+    name: glusterfs-server={{ gluster_package_version }}
     state: present
 
 - name: GlusterFS .:. Create peer
