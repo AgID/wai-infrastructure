@@ -22,9 +22,9 @@ wai_matomo_pod_size:
   wai-stag: { wai-portal: 2, wai-reporting: 2, wai-api: 2, matomo-portal: 2, matomo-worker: 2, matomo-ingestion: 2, matomo-api: 2 }
 # Resource Quota
 wai_k8s_resource_quota:
-  wai-prod: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "55", limits.memory: "60Gi" }
-  wai-play: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "55", limits.memory: "60Gi" }
-  wai-stag: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "55", limits.memory: "60Gi" }
+  wai-prod: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "60", limits.memory: "64Gi" }
+  wai-play: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "50", limits.memory: "64Gi" }
+  wai-stag: { requests.cpu: "24", requests.memory: "30Gi", limits.cpu: "34", limits.memory: "40Gi" }
 # Base Matomo Image    
 wai_matomo_base_image: giafar/wai-matomo-base:0.0.1-fpm
 wai_kube_state_metrics_version: v1.5.0
