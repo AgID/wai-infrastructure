@@ -36,11 +36,6 @@ spec:
             - /var/www/html/config/config.ini.php
           initialDelaySeconds: 5
           periodSeconds: 5
-        livenessProbe:
-          tcpSocket:
-            port: fpm-port
-          initialDelaySeconds: 5
-          periodSeconds: 5
         volumeMounts:
         - name: {{ matomo_name }}-html
           mountPath: /var/www/html/
