@@ -29,10 +29,18 @@ spec:
         readinessProbe:
           exec:
             command:
-            - cat
-            - /var/www/html/config/config.ini.php
+            - /usr/local/bin/php
+            - /var/www/html/piwik.php
           initialDelaySeconds: 5
           periodSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/php
+            - /var/www/html/piwik.php
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
         volumeMounts:
         - name: matomo-worker-conf
           mountPath: /var/www/scripts
