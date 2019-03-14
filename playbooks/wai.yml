@@ -46,6 +46,15 @@
     - glusterfs
     - metricbeat
 
+# Install GlusterFS client
+- hosts: kube-node
+  roles:
+    - glusterfs.client
+
+# Deploy Matomo database
+- name: Deploy Matomo database
+  import_playbook: database.yml
+
 # Install K8S cluster    
 - name: Kubernetes cluster
   import_playbook: kubespray/cluster.yml
