@@ -6,7 +6,7 @@
     - mariadb-stag[0]
   tasks:
     - include_vars:
-      file: password.yml
+        file: password.yml
 
     - name: Database .:. Install required software
       apt:
@@ -90,18 +90,19 @@
 
     - name: Database .:. Set root password
       mysql_user:
-        login_user: 'root'
+        login_user: "root"
         name: root
         password: "{{ wai_database_password[wai_environment]['root'] }}"
         login_unix_socket: /var/run/mysqld/mysqld.sock
-      when: mariadb_mycnf_result.stat.exists == false
-    
+
+    - name: Database .:. Set database password
+      set_fact:
+        database_root_password: "{{ wai_database_password[wai_environment]['root'] }}"
+
     - name: Database .:. Create root configuration file
       template:
-        vars:
-          database_root_password: "{{ wai_database_password[wai_environment]['root'] }}"
-        src: 'root-my.cnf.j2'
-        dest: '/root/.my.cnf'
-        owner: 'root'
-        group: 'root'
-        mode: '0600'
+        src: "mariadb/root-my.cnf.j2"
+        dest: "/root/.my.cnf"
+        owner: "root"
+        group: "root"
+        mode: "0600"
