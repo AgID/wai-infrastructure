@@ -4,9 +4,9 @@ setup.template.settings:
   index.number_of_shards: 1
   index.codec: best_compression
 setup.kibana:
-  host: "{{hostvars[groups['kibana'][0]]['ansible_default_ipv4']['address']}}:5601"
+  host: "{{ hostvars[groups['kibana'][0]]['ansible_default_ipv4']['address'] }}:5601"
 output.elasticsearch:
-  hosts: {{metricbeat_output_elastic}}
+  hosts: {{ metricbeat_output_elastic }}
 processors:
   - add_host_metadata: ~
   - add_cloud_metadata: ~
@@ -38,9 +38,9 @@ metricbeat.modules:
     {% endif %}
 
     period: 10s
-    hosts: ["tcp({{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}:3306)/"]
+    hosts: ["unix(/var/run/mysqld/mysqld.sock)/"]
     username: root
-    password: {{ mariadb_root_password }}
+    {% if database_password is defined %}password: {{ database_password }}{% endif %}
 
   {% endif %}
 
@@ -49,5 +49,11 @@ metricbeat.modules:
   - module: etcd
     metricsets: ["leader", "self", "store"]
     period: 10s
-    hosts: ["localhost:2379"]
+    hosts: ["https://localhost:2379"]
+    ssl.verification_mode: "none"
+    ssl.certificate_authorities:
+      - /etc/ssl/etcd/ssl/ca.pem
+    ssl.key: /etc/ssl/etcd/ssl/member-{{ ansible_hostname }}-key.pem
+    ssl.certificate: /etc/ssl/etcd/ssl/member-{{ ansible_hostname }}.pem
+
   {% endif %}

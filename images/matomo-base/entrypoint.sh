@@ -17,6 +17,9 @@ if [ -e /usr/src/QueuedTracking.zip ]; then
   unzip -qq /usr/src/QueuedTracking.zip -d plugins/ && rm -f /usr/src/QueuedTracking.zip
 fi
 
+sed -e "s/@DATABASE_HOST@/${DATABASE_HOST}/g; s/@DATABASE_USER@/${DATABASE_USER}/g; s/@DATABASE_PASSWORD@/${DATABASE_PASSWORD}/g" \
+  /tmp/config/config.ini.php-configmap > /var/www/html/config/config.ini.php
+
 chown -R www-data . 
 
 exec "$@"

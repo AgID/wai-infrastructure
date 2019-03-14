@@ -1,3 +1,7 @@
+# WAI alert destination
+wai_alert_email_destination:
+  - example@example.org
+  - test@test.it
 # WAI
 wai_k8s_deployment_dir: /opt/data/scripts/wai
 wai_k8s_namespaces:
@@ -5,40 +9,24 @@ wai_k8s_namespaces:
   - wai-play
   - wai-stag
 # Base fqdn domain
-wai_base_domain: wai.devlab.local
+wai_base_domain: 
+  wai-prod: webanalytics.italia.it
+  wai-play: play.webanalytics.italia.it
+  wai-stag: staging.webanalytics.italia.it
+# Hostnames
+wai_hostname: { ingestion: ingestion, matomo: matomo, portal: www, api: api}
 # Matomo POD size configuration
 wai_matomo_pod_size:
-  wai-prod: 
-    matomo-worker: 3
-    matomo-ingestion: 3
-    matomo-api: 3
-  wai-play:
-    matomo-worker: 2
-    matomo-ingestion: 2
-    matomo-api: 2
-  wai-stag:
-    matomo-worker: 1
-    matomo-ingestion: 1
-    matomo-api: 1
-# Hostnames
-wai_hostname:
-  wai-prod:
-    ingestion: ingestion
-    matomo: matomo
-    portal: www
-    api: api
-  wai-play:
-    ingestion: ingestion-play
-    matomo: matomo-play
-    portal: www-play
-    api: api-play
-  wai-stag:
-    ingestion: ingestion-stag
-    matomo: matomo-stag
-    portal: www-stag
-    api: api-stag
+  wai-prod: { wai-portal: 4, wai-reporting: 4, wai-api: 4, matomo-portal: 4, matomo-worker: 8, matomo-ingestion: 8, matomo-api: 4 }
+  wai-play: { wai-portal: 4, wai-reporting: 4, wai-api: 4, matomo-portal: 4, matomo-worker: 8, matomo-ingestion: 8, matomo-api: 4 }
+  wai-stag: { wai-portal: 2, wai-reporting: 2, wai-api: 2, matomo-portal: 2, matomo-worker: 2, matomo-ingestion: 2, matomo-api: 2 }
+# Resource Quota
+wai_k8s_resource_quota:
+  wai-prod: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "60", limits.memory: "64Gi" }
+  wai-play: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "50", limits.memory: "64Gi" }
+  wai-stag: { requests.cpu: "24", requests.memory: "30Gi", limits.cpu: "34", limits.memory: "40Gi" }
 # Base Matomo Image    
-wai_matomo_base_image: giafar/wai-matomo:3.8.1-fpm
+wai_matomo_base_image: giafar/wai-matomo-base:0.0.1-fpm
 wai_kube_state_metrics_version: v1.5.0
 wai_kube_state_metrics_output_dir: kube-state-metrics-1.5.0
 wai_kube_state_metrics: 'https://codeload.github.com/kubernetes/kube-state-metrics/zip/{{ wai_kube_state_metrics_version }}'
@@ -54,7 +42,12 @@ es_apt_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
 es_apt_url: "deb https://artifacts.elastic.co/packages/6.x/apt stable main"
 # Metricbeat output
 metricbeat_output_elastic: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list | to_json }}'
-
 # Override path used to store Docker data in kubespray all\docker.yml
 docker_daemon_graph: "/opt/data/docker"
 
+# Redis
+redis_image_version: 5.0.3
+
+# GlusterFS
+gluster_apt_repo:  ppa:gluster/glusterfs-4.1
+gluster_package_version: 4.*

@@ -1,12 +1,13 @@
-{% for ns in wai_k8s_namespaces %}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: matomo-worker
-  namespace: {{ ns }}
+  namespace: {{ item }}
 spec:
-  replicas: {{ wai_matomo_pod_size[ns]['matomo-worker'] }}
+  replicas: {{ wai_matomo_pod_size[item][matomo_pod_size_index] }}
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: matomo-worker
@@ -24,20 +25,50 @@ spec:
             cpu: "0.50"
             memory: "256Mi"
         command: ["/bin/sh", "-c"]
-        args: ["chmod +x /var/www/html/console ; . /var/www/scripts/qt-worker.sh"]
+        args: ["/entrypoint.sh; . /var/www/scripts/qt-worker.sh"]
+        readinessProbe:
+          exec:
+            command:
+            - /usr/local/bin/php
+            - /var/www/html/piwik.php
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/php
+            - /var/www/html/piwik.php
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
         volumeMounts:
         - name: matomo-worker-conf
           mountPath: /var/www/scripts
+        - name: matomo-php-config
+          mountPath: /tmp/config
+        env:
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: matomo-secret-{{ matomo_database_user }}
+              key: password
+        - name: DATABASE_USER
+          value: {{ matomo_database_user }}
+        - name: DATABASE_HOST
+          value: {{ matomo_database_host }}
       volumes:
         - name: matomo-worker-conf
           configMap:
             name: matomo-worker-conf
+        - name: matomo-php-config
+          configMap: 
+            name: matomo-php-config
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: matomo-worker-conf
-  namespace: {{ ns }}
+  namespace: {{ item }}
 data:
   qt-worker.sh: |-
     #!/bin/sh
@@ -48,4 +79,4 @@ data:
       ./console queuedtracking:process --queue-id $QUEUE_ID > /dev/null 2>&1
       sleep 0.5
     done
-{% endfor %}
+

@@ -1,43 +1,107 @@
 ---
 # Main WAI playbook
+
+# Infrastructure requirements
 - hosts: all
   roles:
-    - infrastructure  
+    - infrastructure
+
+# Install elastic search
 - hosts: elastic
   roles:
     - elastic.elasticsearch
+
+# Install kibana
 - hosts: kibana
   roles:
     - kibana
+
+# Install galera prod cluster
 - hosts: galera-prod
   roles:
     - galera
     - metricbeat
+
+# Install galera prod slave cluster
+- hosts: galera-prod-slave
+  roles:
+    - galera
+    - metricbeat
+
+# Install galera public play ground cluster
 - hosts: galera-play
   roles:
     - galera
     - metricbeat
+
+# Install mariadb stage server
 - hosts: mariadb-stag
   roles:
     - mariadb
     - metricbeat
+
+# Install GlusterFS server
 - hosts: gluster
   roles:
     - glusterfs
     - metricbeat
+
+# Install GlusterFS client
+- hosts: kube-node
+  roles:
+    - glusterfs.client
+
+# Deploy Matomo database
+- name: Deploy Matomo database
+  import_playbook: database.yml
+
+# Install K8S cluster
 - name: Kubernetes cluster
   import_playbook: kubespray/cluster.yml
+
+# Configure K8S resources
 - name: Deploy WAI K8S resources
   import_playbook: k8s-deployment.yml
+
+  # Install metricbeat on kube-master nodes
 - hosts: kube-master
   roles:
     - metricbeat
+
+# Enable apt automatic update
 - hosts: all
   tasks:
   - name: Enable APT automatic update
-    raw: systemctl enable --now {{item}}
+    raw: systemctl enable --now {{ item }}
     with_items:
       - 'apt-daily.timer'
       - 'apt-daily-upgrade.timer'
   - name: Reload systemctl daemon-reload
     raw: systemctl daemon-reload
+
+# Because of https://github.com/kubernetes/kubernetes/issues/68607 remove proxy settings if configured
+# Kubectl uses proxy settings for livenessProbe and readinessProbe so remove env proxy settings and restart kubelet
+- hosts:  k8s-cluster
+  tasks:
+    - name: Remove http proxy to environment
+      lineinfile:
+          path: /etc/environment
+          state: absent
+          regexp: "^http_proxy"
+      when:
+          - http_proxy is defined
+
+    - name: Remove https proxy to environment
+      lineinfile:
+          path: /etc/environment
+          state: absent
+          regexp: "^https_proxy"
+      when:
+          - https_proxy is defined
+
+    - name: Restart kubectl
+      service:
+          name: kubelet
+          state: restarted
+      when:
+          - https_proxy is defined or http_proxy is defined

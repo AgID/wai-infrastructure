@@ -1,11 +1,38 @@
 ---
 # Installing GlusterFS
-- name: Adding PPA repoistory
-  apt_repository: 
-    repo: ppa:gluster/glusterfs-4.1
+- name: GlusterFS .:. Adding PPA repository
+  apt_repository:
+    repo: '{{ gluster_apt_repo }}'
     state: present
-- name: Installing GlusterFS
-  apt: 
+
+- name: GlusterFS .:. Installing GlusterFS
+  apt:
     update_cache: true
-    name: glusterfs-server
+    name: glusterfs-server={{ gluster_package_version }}
     state: present
+
+- name: GlusterFS .:. Create peer
+  gluster_peer:
+    state: present
+    nodes: '{{ groups["gluster"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
+  when:
+    - inventory_hostname == groups['gluster'][0]
+
+- name: GlusterFS .:. Ensure base directory
+  file:
+    path: /opt/data
+    state: directory
+
+- name: GlusterFS .:. Create  5  volumes for each K8S environment
+  gluster_volume:
+    state: present
+    name: "{{ item[0] }}-vol-{{ item[1] }}"
+    bricks: /opt/data/{{ item[0] }}-vol-{{ item[1] }}
+    rebalance: yes
+    cluster: '{{ groups["gluster"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
+    force: true
+  when:
+    - inventory_hostname == groups['gluster'][0]
+  with_nested:  
+    - "{{ wai_k8s_namespaces }}"
+    - "{{ range(0, 5) | list}}"

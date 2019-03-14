@@ -111,6 +111,20 @@ TODO: Indicazioni per l'inventoty
 
 TODO: Indicare i parametri da modificare
 
+#### Password
+Il playpook per il deploy dell'infrastruttura e la configurazione del software di base utilizza, per l'archiviazione delle password `ansible-vault`. Il file `password.yml` contiene le password  che saranno utilizzate per:
+
+1. Utenti del database
+
+Decriptare il file `password.yml`, utilizzando la password *changeme* con il comando
+```bash
+$ ansible-vault decrypt playbooks/password.yml
+```
+
+Impostare le password all'interno del file e crittografare nuovamente il file con il comando
+```bash
+$ ansible-vault encrypt playbooks/password.yml
+
 ### Inizializzazione
 
 Disabilitare il controllo della chiave per i server dell'infrastruttura eseguendo il seguente comando
@@ -119,7 +133,8 @@ Disabilitare il controllo della chiave per i server dell'infrastruttura eseguend
 $ cat > ~/.ansible.cfg <<EOF
 [defaults]
 host_key_checking = False
-roles_path = $(pwd)/playbooks/kubespray-2.8.3
+roles_path = $(pwd)/playbooks/kubespray
+library = /home/admin/playbooks/kubespray/library
 EOF
 ```
 
@@ -130,7 +145,7 @@ Impostare all'interno del file ansible/group_vars/all.yml le variabili *ansible_
 Configurato l'utente siamo pronti per eseguire il playbook tramite il comando
 ```bash
 $ cd playbooks
-$ ansible-playbook -i hosts.ini wai.yml -b -K
+$ ansible-playbook -i hosts.ini wai.yml -b --ask-vault-pass
 ```
 
 

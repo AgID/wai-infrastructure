@@ -1,55 +1,54 @@
 ---
 # MariaDB installation
-- name: Install python3-pymysql
+- name: MariaDB .:. Install python3-pymysql
   apt: 
     update_cache: true
     name: python3-pymysql
     state: present
 
-- name: Clean mariadb root password if present
-  file:
-    state: absent
+- name: MariaDB .:. Test if root .mysql file exists
+  stat:
     path: "/root/.my.cnf"
+  register: mariadb_mycnf_result
 
-- name: Install mariadb
+- name: MariaDB .:. Test if data has been moved
+  stat:
+    path: "/opt/data/mysql/ibdata1"
+  register: mariadb_data_moved
+
+- name: MariaDB .:. Install MariaDB
   apt: 
     update_cache: false
     name: mariadb-server
     state: present
+  when: mariadb_mycnf_result.stat.exists == false
 
-# Ubuntu configure MariaDB to start using socket
-- name: Set root password
-  mysql_user:
-    login_user: 'root'
-    name: root
-    password: '{{mariadb_root_password}}'
-    login_unix_socket: /var/run/mysqld/mysqld.sock
-
-- name: Configure bind address
+- name: MariaDB .:. Configure bind address
   replace:
       path: /etc/mysql/mariadb.conf.d/50-server.cnf
       regexp: "^bind-address.*"
-      replace: "bind-address={{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}"
+      replace: "bind-address={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+  when: mariadb_mycnf_result.stat.exists == false
 
-- name: Copy mysql data directory to storage device
+- name: MariaDB .:. Copy mysql data directory to storage device
   raw: 'cp -R -p /var/lib/mysql /opt/data/mysql && rm -fR /var/lib/mysql'
+  when: 
+    - mariadb_mycnf_result.stat.exists == false
+    - mariadb_data_moved.stat.exists == false
 
-- name: Change mysql data directory
+- name: MariaDB .:. Change mysql data directory
   replace:
       path: /etc/mysql/mariadb.conf.d/50-server.cnf
       regexp: "^datadir.*"
       replace: "datadir = /opt/data/mysql"
+  when: 
+    - mariadb_mycnf_result.stat.exists == false
+    - mariadb_data_moved.stat.exists == false
 
-- name: Restart always mariadb 
+- name: MariaDB .:. Restart if needed
   service:
     name: mariadb
     state: restarted
     enabled: yes
-
-- name: Create root configuration file
-  template:
-    src: 'root-my.cnf.j2'
-    dest: '/root/.my.cnf'
-    owner: 'root'
-    group: 'root'
-    mode: '0600'
+  when: 
+    - mariadb_mycnf_result.stat.exists == false

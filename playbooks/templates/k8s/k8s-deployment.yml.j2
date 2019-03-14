@@ -1,116 +1,83 @@
+# {{ ansible_managed }}
 # K8S Namespaces
-{% for ns in wai_k8s_namespaces %}
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-   name: {{ ns }}
+   name: {{ item }}
+   labels:
+     environment: {{ item }}
 ---
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: resource-quota-{{ ns }}
-  namespace: {{ ns }}
+  name: resource-quota-{{ item }}
+  namespace: {{ item }}
 spec:
-  hard:
-    requests.cpu: "10" 
-    requests.memory: 10Gi 
-    limits.cpu: "20" 
-    limits.memory: 20Gi 
-{% endfor %}
-# K8S Cluster Role with view access
+  hard:   
+  {% for key, value in wai_k8s_resource_quota[item].items() %}
+  {{ key }}: {{ value }}
+  {% endfor %}
+
 ---
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
 metadata:
-  name: wai-cluster-role-full-access
-rules:
-- apiGroups: ["", "extensions", "apps"]
-  resources: ["*"]
-  verbs: ["*"]
-- apiGroups: ["batch"]
-  resources:
-  - jobs
-  - cronjobs
-  verbs: ["*"]
+  name: allow-only-intra-namespace
+  namespace: {{ item }}
+spec:
+  podSelector: {}
+  ingress:
+  - from:
+     - namespaceSelector:
+          environment: {{ item }}
+        matchLabels:
+  policyTypes:
+  - Ingress
 ---
-# K8S Cluster Role with view access
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: wai-cluster-role-view-access
-rules:
-- apiGroups: ["", "extensions", "apps"]
-  resources:
-    - componentstatuses
-    - configmaps
-    - daemonsets
-    - deployments
-    - events
-    - endpoints
-    - horizontalpodautoscalers
-    - ingress
-    - jobs
-    - limitranges
-    - namespaces
-    - nodes
-    - pods
-    - persistentvolumes
-    - persistentvolumeclaims
-    - replicasets
-    - replicationcontrollers
-    - secrets
-    - serviceaccounts
-    - services
-  verbs: ["get", "watch", "list"]
-- apiGroups: ["batch"]
-  resources:
-  - jobs
-  - cronjobs
-  verbs: ["get", "list"]
-{% for ns in wai_k8s_namespaces %}
----
-# K8S Service Account {{ ns }}-view-account
+# K8S Service Account {{ item }}-view-account
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name:  {{ ns }}-view-account
-  namespace: {{ ns }}
+  name:  {{ item }}-view-account
+  namespace: {{ item }}
+
 ---
-# K8S Service Account {{ ns }}-full-account
+# K8S Service Account {{ item }}-full-account
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name:  {{ ns }}-full-account
-  namespace: {{ ns }}
+  name:  {{ item }}-full-account
+  namespace: {{ item }}
+
 ---
-# K8S RoleBinding {{ ns }}-role-binding-view-access
+# K8S RoleBinding {{ item }}-role-binding-view-access
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ ns }}-role-binding-view-access
-  namespace: {{ ns }}
+  name: {{ item }}-role-binding-view-access
+  namespace: {{ item }}
 subjects:
 - kind: ServiceAccount
-  name: {{ ns }}-view-account
-  namespace: {{ ns }}
+  name: {{ item }}-view-account
+  namespace: {{ item }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: wai-cluster-role-view-access
+
 ---
-# K8S RoleBinding {{ ns }}-role-binding-view-access
+# K8S RoleBinding {{ item }}-role-binding-view-access
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ ns }}-role-binding-full-access
-  namespace: {{ ns }}
+  name: {{ item }}-role-binding-full-access
+  namespace: {{ item }}
 subjects:
 - kind: ServiceAccount
-  name: {{ ns }}-full-account
-  namespace: {{ ns }}
+  name: {{ item }}-full-account
+  namespace: {{ item }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: wai-cluster-role-full-access
-{% endfor %}

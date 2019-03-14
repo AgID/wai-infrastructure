@@ -8,7 +8,7 @@ es_heap_size: "{{ (ansible_memtotal_mb * 0.5) | int }}m"
 es_enable_xpack: true
 es_xpack_features: ['monitoring']
 es_config:
-  node.name: "{{ansible_hostname}}"
+  node.name: "{{ ansible_hostname }}"
   network.host: "0.0.0.0"
   cluster.name: "wai-cluster"
   discovery.zen.ping.unicast.hosts: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'

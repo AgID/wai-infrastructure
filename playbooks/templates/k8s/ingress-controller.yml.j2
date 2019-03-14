@@ -338,7 +338,7 @@ spec:
       port: 443
       targetPort: 443
       {% set http_port = wai_base_https_port + loop.index0 -%}
-      nodePort: {{ http_port}}
+      nodePort: {{ http_port }}
       protocol: TCP
   selector:
     app.kubernetes.io/name: ingress-nginx
