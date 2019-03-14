@@ -33,6 +33,10 @@
         msg: "Password for the current environment not found"
       when: "wai_environment is not defined or wai_database_password[wai_environment] is not defined"
 
+    - name: Database .:. Calculate matomo super user password
+      set_fact:
+        matomo_database_superuser_password: "{{ matomo_vars.super_user.password | password_hash('md5', matomo_vars.salt) }}"
+
     - name: Database .:. Prepare matomo template sql script
       template:
         src: "mariadb/matomo_3_8_1-data.sql.j2"

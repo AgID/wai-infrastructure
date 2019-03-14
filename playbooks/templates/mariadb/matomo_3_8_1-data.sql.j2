@@ -704,7 +704,7 @@ CREATE TABLE `matomo_user` (
 
 LOCK TABLES `matomo_user` WRITE;
 INSERT INTO `matomo_user` VALUES 
-  ('admin','$2y$10$wHcsLZCpkflZ1EuPKibAPugwHDH5.adcGALXsHVkJBkovCrP.AREu','admin','gfares@indracompany.com','','654515393d282d3bd48824c3c8bf9a40',1,'2019-03-03 12:48:30','2019-03-03 12:48:30'),
+  ('{{ matomo_vars.super_user.login }}','{{ matomo_database_superuser_password }}','{{ matomo_vars.super_user.login }}','{{ matomo_vars.super_user.email }}','','{{ matomo_vars.super_user.token }}',1,'2019-03-03 12:48:30','2019-03-03 12:48:30'),
   ('anonymous','','anonymous','anonymous@example.org','','anonymous',0,'2019-03-03 12:46:31','2019-03-03 12:46:31');
 UNLOCK TABLES;
 
