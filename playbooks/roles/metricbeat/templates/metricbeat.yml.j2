@@ -38,7 +38,7 @@ metricbeat.modules:
     {% endif %}
 
     period: 10s
-    hosts: ["tcp({{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:3306)/"]
+    hosts: ["unix(/var/run/mysqld/mysqld.sock)/"]
     username: root
     {% if database_password is defined %}password: {{ database_password }}{% endif %}
 
@@ -49,5 +49,11 @@ metricbeat.modules:
   - module: etcd
     metricsets: ["leader", "self", "store"]
     period: 10s
-    hosts: ["localhost:2379"]
+    hosts: ["https://localhost:2379"]
+    ssl.verification_mode: "none"
+    ssl.certificate_authorities:
+      - /etc/ssl/etcd/ssl/ca.pem
+    ssl.key: /etc/ssl/etcd/ssl/member-{{ ansible_hostname }}-key.pem
+    ssl.certificate: /etc/ssl/etcd/ssl/member-{{ ansible_hostname }}.pem
+
   {% endif %}
