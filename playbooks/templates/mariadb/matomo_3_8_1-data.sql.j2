@@ -465,8 +465,8 @@ LOCK TABLES `matomo_plugin_setting` WRITE;
 INSERT INTO `matomo_plugin_setting` VALUES 
   ('QueuedTracking','backend','redis',0,'',1),
   ('QueuedTracking','useSentinelBackend','1',0,'',2),
-  ('QueuedTracking','sentinelMasterName','mymaster',0,'',3),
-  ('QueuedTracking','redisHost','matomo-redis',0,'',4),
+  ('QueuedTracking','sentinelMasterName','ingestion-redis-master',0,'',3),
+  ('QueuedTracking','redisHost','ingestion-redis-sentinel-service',0,'',4),
   ('QueuedTracking','redisPort','26379',0,'',5),
   ('QueuedTracking','redisDatabase','0',0,'',6),
   ('QueuedTracking','redisPassword','',0,'',7),

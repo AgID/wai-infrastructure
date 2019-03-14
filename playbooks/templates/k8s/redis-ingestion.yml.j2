@@ -1,3 +1,4 @@
+# {{ ansible_managed }}
 # This deployment is based on a Redis StatefulSet and a Redis Sentinel DaemonSet
 # When the StatefulSet starts the 0-index POD assumes to be the redis master if no redis sentinel is started
 # If the 0-index POD finds a master then it will be a slave node otherwise starts as master one. The StatefulSet has an initContainers that waits for the sentinel instance just if it is not the 0-index container.
@@ -7,7 +8,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: ingestion-redis
+  name: ingestion-redis-node
   namespace: {{ item }}
 spec:
   replicas: 3
@@ -15,12 +16,12 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: ingestion-redis
+      app: ingestion-redis-node
   serviceName: ingestion-redis
   template:
     metadata:
       labels:
-        app: ingestion-redis
+        app: ingestion-redis-node
     spec:
       initContainers:
         - name: wait-for-sentinel
@@ -40,7 +41,7 @@ spec:
           resources:
             limits:
               cpu: "1"
-              memory: "4Gi"
+              memory: "1Gi"
           command: ["/bin/sh", "-c"]
           args: [". /read-only/start-redis.sh"]
           ports:
@@ -71,18 +72,18 @@ spec:
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: ingestion-redis-sentinel
+  name: redis-sentinel-daemonset
   namespace: {{ item }}
 spec:
   updateStrategy:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: redis-sentinel
+      app: redis-sentinel-daemonset
   template:
     metadata:
       labels:
-        app: redis-sentinel
+        app: redis-sentinel-daemonset
     spec:
       initContainers:
         - name: wait-for-redis-master
@@ -138,12 +139,12 @@ metadata:
 spec:
   clusterIP: None
   selector:
-    app: ingestion-redis
+    app: ingestion-redis-node
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: ingestion-redis-sentinel
+  name: ingestion-redis-sentinel-service
   namespace: {{ item }}
 spec:
   ports:
@@ -151,7 +152,7 @@ spec:
       protocol: TCP
       port: 26379
   selector:
-    app: redis-sentinel
+    app: redis-sentinel-daemonset
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -178,7 +179,7 @@ data:
     #!/bin/sh
     # If I'm not the 0-index node of the StatefulSet wait for Sentinel
     if [ "${HOSTNAME##*-}" != "0" ]; then
-        while ["$(echo "SENTINEL get-master-addr-by-name ingestion-redis-master" | redis-cli -h ingestion-redis-sentinel -p 26379 | head -n 1)" = "" ];  
+        while ["$(echo "SENTINEL get-master-addr-by-name ingestion-redis-master" | redis-cli -h ingestion-redis-sentinel-service -p 26379 | head -n 1)" = "" ];  
         do 
           echo "Waiting for sentinel"
           sleep 5
@@ -195,7 +196,7 @@ data:
     #!/bin/sh
     HOST_ID=${HOSTNAME##*-}
     echo "Starting redis node with id $HOST_ID"
-    MASTER_IP=$(echo "SENTINEL get-master-addr-by-name ingestion-redis-master" | redis-cli -h ingestion-redis-sentinel -p 26379 | head -n 1)
+    MASTER_IP=$(echo "SENTINEL get-master-addr-by-name ingestion-redis-master" | redis-cli -h ingestion-redis-sentinel-service -p 26379 | head -n 1)
     # If a master is already registered on redis-sentinel I'm a slave
     if [ "$MASTER_IP" != "" ]; then
       echo "slaveof $MASTER_IP 6379" > /etc/redis.conf
@@ -229,7 +230,7 @@ data:
         echo "Redis master found"
         REDIS_MASTER="redis-headless"
       else
-        REDIS_MASTER=$(echo "SENTINEL get-master-addr-by-name ingestion-redis-master" | redis-cli -h ingestion-redis-sentinel -p 26379 | head -n 1) 
+        REDIS_MASTER=$(echo "SENTINEL get-master-addr-by-name ingestion-redis-master" | redis-cli -h ingestion-redis-sentinel-service -p 26379 | head -n 1) 
       fi
       sleep 10
     done
