@@ -196,7 +196,7 @@ metadata:
 
 spec:
   rules:
-    - host: {{ wai_hostname[item][matomo_ingress_fqdn_index] }}.{{ wai_base_domain }}
+    - host: {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
       http:
         paths:
           - path: /
