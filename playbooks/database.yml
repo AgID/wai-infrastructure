@@ -63,7 +63,7 @@
 
     - name: Database .:.  Create Matomo super user
       mysql_user:
-        name: matomo_admin
+        name: matomo-admin
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
         password: "{{ wai_database_password[wai_environment]['matomo-admin'] }}"
         priv: "matomo.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES"
@@ -72,7 +72,7 @@
 
     - name: Database .:.  Create Matomo readonly user
       mysql_user:
-        name: matomo_user
+        name: matomo-user
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
         password: "{{ wai_database_password[wai_environment]['matomo-user'] }}"
         priv: "matomo.*:SELECT"
@@ -81,7 +81,7 @@
 
     - name: Database .:.  Create WAI super user
       mysql_user:
-        name: wai_admin
+        name: wai-admin
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
         password: "{{ wai_database_password[wai_environment]['wai-admin'] }}"
         priv: "wai.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES"
