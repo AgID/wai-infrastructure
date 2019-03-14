@@ -1,10 +1,10 @@
-{% for ns in wai_k8s_namespaces %}
+# {{ ansible_managed }}
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata: 
   name: matomo-php-config
-  namespace: {{ ns }}
+  namespace: {{ item }}
 data:
   config.ini.php-configmap: |-
 
@@ -16,7 +16,7 @@ data:
     tables_prefix = "matomo_"
 
     [General]
-    salt = "5bfc2aecd95375c82e9ea0a3332e3b54"
+    salt = "{{ matomo_vars.salt }}"
     trusted_hosts[] = "localhost"
     trusted_hosts[] = "127.0.0.1"
 

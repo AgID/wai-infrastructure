@@ -6,37 +6,51 @@
         file: password.yml
 
     # Base objects
-    - name: K8S .:. Create destination directory
+    - name: K8S .:. Create destination directories
       file:
-        path: "{{ wai_k8s_deployment_dir }}"
+        path: "{{ wai_k8s_deployment_dir }}/{{ item }}"
         state: directory
+      with_items: "{{ wai_k8s_namespaces }}"
+
+    - name: K8S .:. Prepare cluster roles
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/k8s-cluster-roles.yml"
+        src: k8s/k8s-cluster-roles.yml.j2
+
+    - name: K8S .:. Deploy cluster roles
+      kube:
+        name: "k8s-cluster-roles"
+        kubectl: "{{ wai_kubectl }}"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/k8s-cluster-roles.yml"
 
     - name: K8S .:. Prepare base objects template
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/k8s-deployment.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-deployment.yml"
         src: k8s/k8s-deployment.yml.j2
+      with_items: "{{ wai_k8s_namespaces }}"
 
     - name: K8S .:. Deploy base objects template
       kube:
         name: "k8s-deployment"
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
-        filename: "{{ wai_k8s_deployment_dir }}/k8s-deployment.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-deployment.yml"
+      with_items: "{{ wai_k8s_namespaces }}"
 
     # GlusterFS
     - name: K8S .:. Prepare GlusterFS endpoints
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}-glusterfs.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/glusterfs.yml"
         src: k8s/glusterfs.yml.j2
       with_items: "{{ wai_k8s_namespaces }}"
 
     - name: K8S .:. Deploy GlusterFS
       kube:
         name: "glusterfs-{{ item }}"
-        namespace: "{{ item }}"
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
-        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}-glusterfs.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/glusterfs.yml"
       with_items: "{{ wai_k8s_namespaces }}"
 
     # Kube State Metrics
@@ -104,29 +118,33 @@
     # Deploy K8S matomo default configmap
     - name: K8S .:. Prepare Matomo configmap deployment file
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/matomo-config-map.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-config-map.yml"
         src: k8s/matomo-config-map.yml.j2
+      with_items: "{{ wai_k8s_namespaces }}"
 
     - name: K8S .:. Deploy Matomo config map
       kube:
         name: "matomo-php-config-map"
         kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/matomo-config-map.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-config-map.yml"
         state: "latest"
+      with_items: "{{ wai_k8s_namespaces }}"
 
     # Deploy K8S matomo secrets
     - name: K8S .:. Prepare matomo secrets
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/matomo-secrets.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-secrets.yml"
         src: k8s/matomo-secrets.yml.j2
-      
+      with_items: "{{ wai_k8s_namespaces }}"
+
     - name: K8S .:. Deploy Matomo secrets
       kube:
         name: "matomo-secrets"
         kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/matomo-secrets.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-secrets.yml"
         state: "latest"
-
+      with_items: "{{ wai_k8s_namespaces }}"
+    
     # Matomo Ingestion
     - name: K8S .:. Prepare Matomo Ingestion template vars
       set_fact:
@@ -142,7 +160,7 @@
 
     - name: K8S .:. Prepare Matomo Ingestion deployment file
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-ingestion.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-ingestion.yml"
         src: k8s/matomo-jail.yml.j2
       with_items: "{{ wai_k8s_namespaces }}" 
 
@@ -150,7 +168,7 @@
       kube:
         name: "{{ matomo_name }}"
         kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-ingestion.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-ingestion.yml"
         state: "latest"
       with_items: "{{ wai_k8s_namespaces }}"
 
@@ -168,7 +186,7 @@
 
     - name: K8S .:. Prepare Matomo API deployment file
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-api.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-api.yml"
         src: k8s/matomo-jail.yml.j2
       with_items: "{{ wai_k8s_namespaces }}" 
 
@@ -176,7 +194,7 @@
       kube:
         name: "{{ matomo_name }}"
         kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-api.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-api.yml"
         state: "latest"
       with_items: "{{ wai_k8s_namespaces }}"
 
@@ -189,7 +207,7 @@
 
     - name: K8S .:. Prepare Matomo Worker deployment file
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-worker.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-worker.yml"
         src: k8s/matomo-worker.yml.j2
       with_items: "{{ wai_k8s_namespaces }}" 
 
@@ -197,14 +215,14 @@
       kube:
         name: "matomo-worker"
         kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}-matomo-worker.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-worker.yml"
         state: "latest"
       with_items: "{{ wai_k8s_namespaces }}" 
 
     # Deploy Redis Sentinel
     - name: K8S .:. Prepare Redis & Sentinel template
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}-ingestion-redis.yml"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/ingestion-redis.yml"
         src: k8s/redis-ingestion.yml.j2
       with_items: "{{ wai_k8s_namespaces }}" 
 
@@ -212,6 +230,6 @@
       kube:
         name: "redis-ingestion"
         kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}-ingestion-redis.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/ingestion-redis.yml"
         state: "latest"
       with_items: "{{ wai_k8s_namespaces }}" 
