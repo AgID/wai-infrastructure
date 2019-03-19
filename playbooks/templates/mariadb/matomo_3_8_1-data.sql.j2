@@ -312,7 +312,7 @@ INSERT INTO `matomo_option` VALUES
   ('SitesManager_DefaultTimezone','Europe/Rome',0),
   ('UpdateCheck_LastTimeChecked','1551617297',1),
   ('UpdateCheck_LatestVersion','3.8.1',0),
-  ('useridsalt','emgoUiEOSRUExTC4Ll2V1zLiztxAFkezECr_BUTT',1),
+  ('useridsalt','{{ ansible_date_time.iso8601_micro | hash('sha1') }}',1),
   ('UsersManager.lastSeen.admin','1551617341',1),
   ('version_Actions','3.8.1',1),
   ('version_Annotations','3.8.1',1),
