@@ -16,7 +16,7 @@ data:
     tables_prefix = "matomo_"
 
     [General]
-    salt = "{{ matomo_vars.salt }}"
+    salt = "{{ ansible_date_time.iso8601_micro | md5 }}"
     trusted_hosts[] = "localhost"
     trusted_hosts[] = "127.0.0.1"
 
