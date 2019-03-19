@@ -35,7 +35,7 @@
 
     - name: Database .:. Calculate matomo super user password
       set_fact:
-        matomo_database_superuser_password: "{{ matomo_vars.super_user.password | password_hash('md5', matomo_vars.salt) }}"
+        matomo_database_superuser_password: "{{ matomo_vars.super_user.password | md5 | password_hash('bcrypt') }}"
 
     - name: Database .:. Prepare matomo template sql script
       template:
