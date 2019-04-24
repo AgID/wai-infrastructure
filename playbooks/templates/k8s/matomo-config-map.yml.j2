@@ -19,6 +19,7 @@ data:
     salt = "{{ ansible_date_time.iso8601_micro | md5 }}"
     trusted_hosts[] = "localhost"
     trusted_hosts[] = "127.0.0.1"
+    enable_update_users_email = 0
 
     [Plugins]
     Plugins[] = "CorePluginsAdmin"
