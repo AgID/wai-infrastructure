@@ -5,7 +5,7 @@ output "k8s-worker-num-instances" {
 
 output "k8s-master-instances" {
   description = "K8S master node instances"
-  value       = openstack_compute_instance_v2.k8s_master_node.*.name
+  value       = openstack_compute_instance_v2.k8s_master_instance.*.name
 }
 
 output "k8s-worker-public-ips" {

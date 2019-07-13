@@ -32,3 +32,7 @@ override.tf.json
 # Ignore openstack credentials
 clouds.yml
 *openrc*
+backend-config
+
+# Ignore ansible retry files
+*.retry

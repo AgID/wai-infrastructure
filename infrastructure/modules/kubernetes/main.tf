@@ -73,21 +73,20 @@ resource "openstack_networking_secgroup_rule_v2" "k8s_worker_secgroup_rule" {
   security_group_id = openstack_networking_secgroup_v2.k8s_worker_secgroup[0].id
 }
 
-# Kubernetes master node flavor
-resource "openstack_compute_flavor_v2" "k8s_master_flavor" {
-  count = var.enabled ? 1 : 0
-  name  = local.k8s_master_flavor_name
-  vcpus = var.k8s_master_flavor["vcpus"]
-  ram   = var.k8s_master_flavor["ram"]
-  disk  = var.k8s_master_flavor["disk"]
+# Kubernetes master node boot volume
+resource "openstack_blockstorage_volume_v3" "k8s_master_boot_volume" {
+  count       = var.enabled ? lookup(var.k8s_master_instance, "num_instances", 0) : 0
+  name        = format("%s-boot-volume-%02d", local.k8s_master_node_name, count.index + 1)
+  image_id    = var.k8s_master_instance["image_id"]
+  size        = var.k8s_master_instance["boot_volume_size"]
+  volume_type = var.k8s_master_instance["boot_volume_type"]
 }
 
 # Kubernetes master node instance
-resource "openstack_compute_instance_v2" "k8s_master_node" {
+resource "openstack_compute_instance_v2" "k8s_master_instance" {
   count     = var.enabled ? lookup(var.k8s_master_instance, "num_instances", 0) : 0
   name      = format("%s-%02d", local.k8s_master_node_name, count.index + 1)
-  image_id  = var.k8s_master_instance["image_id"]
-  flavor_id = openstack_compute_flavor_v2.k8s_master_flavor[0].id
+  flavor_id = var.k8s_master_instance["flavor_id"]
   key_pair  = data.openstack_compute_keypair_v2.ssh_keypair[0].name
   network {
     port = element(
@@ -95,9 +94,15 @@ resource "openstack_compute_instance_v2" "k8s_master_node" {
       count.index,
     )
   }
+  block_device {
+    boot_index      = 0
+    uuid            = element(openstack_blockstorage_volume_v3.k8s_master_boot_volume.*.id, count.index)
+    source_type      = "volume"
+    destination_type = "volume"
+  }
   metadata = {
     ansible_user = var.ssh_user
-    groups       = element(var.k8s_master_instance_groups, count.index)
+    groups       = join(", ", ["wai", element(var.k8s_master_instance_groups, count.index)])
   }
 }
 
@@ -115,52 +120,59 @@ resource "openstack_networking_port_v2" "k8s_master_port" {
   security_group_ids = [openstack_networking_secgroup_v2.k8s_master_secgroup[0].id]
   fixed_ip {
     subnet_id  = openstack_networking_subnet_v2.k8s_subnet[0].id
-    ip_address = cidrhost(var.k8s_network_cidr, count.index + 100)
+    ip_address = cidrhost(var.k8s_network_cidr, count.index + 101)
   }
 }
 
 # Kubernetes master node floating IP association
 resource "openstack_compute_floatingip_associate_v2" "k8s_master_floatingip_association" {
-  count       = var.enabled ? length(var.k8s_master_floatingips) : 0
+  count       = var.enabled ? min(length(var.k8s_master_floatingips), lookup(var.k8s_master_instance, "num_instances", 0)) : 0
   floating_ip = var.k8s_master_floatingips[count.index]
   instance_id = element(
-    openstack_compute_instance_v2.k8s_master_node.*.id,
+    openstack_compute_instance_v2.k8s_master_instance.*.id,
     count.index,
   )
 }
 
-# Kubernetes master node volume
-resource "openstack_blockstorage_volume_v3" "k8s_master_volume" {
+# Kubernetes master node data volume
+resource "openstack_blockstorage_volume_v3" "k8s_master_data_volume" {
+  count       = var.enabled ? lookup(var.k8s_master_instance, "num_instances", 0) : 0
+  name        = format("%s-data-volume-%02d", local.k8s_master_node_name, count.index + 1)
+  size        = var.k8s_master_instance["data_volume_size"]
+  volume_type = var.k8s_master_instance["data_volume_type"]
+  metadata    = {
+    data_storage = true
+    attached_mode = "rw"
+  }
 }
 
-# Kubernetes master node volume attach
-resource "openstack_compute_volume_attach_v2" "k8s_master_volume_attach" {
+# Kubernetes master node data volume attach
+resource "openstack_compute_volume_attach_v2" "k8s_master_data_volume_attach" {
   count = var.enabled ? lookup(var.k8s_master_instance, "num_instances", 0) : 0
   volume_id = element(
-    openstack_blockstorage_volume_v3.k8s_master_volume.*.id,
+    openstack_blockstorage_volume_v3.k8s_master_data_volume.*.id,
     count.index,
   )
   instance_id = element(
-    openstack_compute_instance_v2.k8s_master_node.*.id,
+    openstack_compute_instance_v2.k8s_master_instance.*.id,
     count.index,
   )
 }
 
-# Kubernetes worker node flavor
-resource "openstack_compute_flavor_v2" "k8s_worker_flavor" {
-  count = var.enabled ? 1 : 0
-  name  = local.k8s_worker_flavor_name
-  vcpus = var.k8s_worker_flavor["vcpus"]
-  ram   = var.k8s_worker_flavor["ram"]
-  disk  = var.k8s_worker_flavor["disk"]
+# Kubernetes worker node boot volume
+resource "openstack_blockstorage_volume_v3" "k8s_worker_boot_volume" {
+  count       = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
+  name        = format("%s-boot-volume-%02d", local.k8s_worker_node_name, count.index + 1)
+  image_id    = var.k8s_worker_instance["image_id"]
+  size        = var.k8s_worker_instance["boot_volume_size"]
+  volume_type = var.k8s_worker_instance["boot_volume_type"]
 }
 
 # Kubernetes worker node instance
-resource "openstack_compute_instance_v2" "k8s_worker_node" {
+resource "openstack_compute_instance_v2" "k8s_worker_instance" {
   count     = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
   name      = format("%s-%02d", local.k8s_worker_node_name, count.index + 1)
-  image_id  = var.k8s_worker_instance["image_id"]
-  flavor_id = openstack_compute_flavor_v2.k8s_worker_flavor[0].id
+  flavor_id = var.k8s_worker_instance["flavor_id"]
   key_pair  = data.openstack_compute_keypair_v2.ssh_keypair[0].name
   network {
     port = element(
@@ -168,9 +180,15 @@ resource "openstack_compute_instance_v2" "k8s_worker_node" {
       count.index,
     )
   }
+  block_device {
+    boot_index       = 0
+    uuid             = element(openstack_blockstorage_volume_v3.k8s_worker_boot_volume.*.id, count.index)
+    source_type      = "volume"
+    destination_type = "volume"
+  }
   metadata = {
     ansible_user = var.ssh_user
-    groups       = element(var.k8s_worker_instance_groups, count.index)
+    groups       = join(", ", ["wai", element(var.k8s_worker_instance_groups, count.index)])
   }
 }
 
@@ -188,36 +206,41 @@ resource "openstack_networking_port_v2" "k8s_worker_port" {
   security_group_ids = [openstack_networking_secgroup_v2.k8s_worker_secgroup[0].id]
   fixed_ip {
     subnet_id  = openstack_networking_subnet_v2.k8s_subnet[0].id
-    ip_address = cidrhost(var.k8s_network_cidr, count.index + 150)
+    ip_address = cidrhost(var.k8s_network_cidr, count.index + 151)
   }
 }
 
 # Kubernetes worker node floating IP association
 resource "openstack_compute_floatingip_associate_v2" "k8s_worker_floatingip_association" {
-  count       = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
+  count       = var.enabled ? min(length(var.k8s_worker_floatingips), lookup(var.k8s_worker_instance, "num_instances", 0)) : 0
   floating_ip = var.k8s_worker_floatingips[count.index]
   instance_id = element(
-    openstack_compute_instance_v2.k8s_worker_node.*.id,
+    openstack_compute_instance_v2.k8s_worker_instance.*.id,
     count.index,
   )
 }
 
-# Kubernetes worker node volume
-resource "openstack_blockstorage_volume_v3" "k8s_worker_volume" {
-  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
-  name  = format("%s-%02d", local.k8s_worker_volume_name, count.index + 1)
-  size  = var.k8s_worker_instance["external_volume_size"]
+# Kubernetes worker node data volume
+resource "openstack_blockstorage_volume_v3" "k8s_worker_data_volume" {
+  count       = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
+  name        = format("%s-data-volume-%02d", local.k8s_worker_node_name, count.index + 1)
+  size        = var.k8s_worker_instance["data_volume_size"]
+  volume_type = var.k8s_worker_instance["data_volume_type"]
+  metadata    = {
+    data_storage = true
+    attached_mode = "rw"
+  }
 }
 
 # Kubernetes worker node volume attach
-resource "openstack_compute_volume_attach_v2" "k8s_worker_volume_attach" {
+resource "openstack_compute_volume_attach_v2" "k8s_worker_data_volume_attach" {
   count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
   volume_id = element(
-    openstack_blockstorage_volume_v3.k8s_worker_volume.*.id,
+    openstack_blockstorage_volume_v3.k8s_worker_data_volume.*.id,
     count.index,
   )
   instance_id = element(
-    openstack_compute_instance_v2.k8s_worker_node.*.id,
+    openstack_compute_instance_v2.k8s_worker_instance.*.id,
     count.index,
   )
 }

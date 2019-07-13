@@ -5,5 +5,5 @@ output "cluster-num-instances" {
 
 output "cluster-instances" {
   description = "Instances in the cluster"
-  value       = openstack_compute_instance_v2.cluster_node.*.name
+  value       = openstack_compute_instance_v2.cluster_instance.*.name
 }

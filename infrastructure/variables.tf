@@ -15,7 +15,7 @@ variable "environment_short" {
 # Global project prefix
 variable "project_name_prefix" {
   type        = string
-  description = "# Global project prefix"
+  description = "Global project prefix"
 }
 
 # Public network ID
@@ -49,13 +49,6 @@ variable "k8s_network_cidr" {
   default     = ""
 }
 
-# K8S master instance flavor
-variable "k8s_master_flavor" {
-  type        = map(string)
-  description = "Kubernetes master instance flavor"
-  default     = {}
-}
-
 # K8S master instance parameters
 variable "k8s_master_instance" {
   type        = map(string)
@@ -85,13 +78,6 @@ variable "k8s_master_floatingips" {
   type        = list(string)
   description = "Kubernetes master assigned floating IP addresses"
   default     = []
-}
-
-# K8S worker instance flavor
-variable "k8s_worker_flavor" {
-  type        = map(string)
-  description = "Kubernetes worker instance flavor"
-  default     = {}
 }
 
 # K8S worker instance parameters
@@ -136,13 +122,6 @@ variable "galera_network_cidr" {
   default     = ""
 }
 
-# Galera instance flavor
-variable "galera_flavor" {
-  type        = map(string)
-  description = "Galera instance flavor"
-  default     = {}
-}
-
 # Galera instance parameters
 variable "galera_instance" {
   type        = map(string)
@@ -179,13 +158,6 @@ variable "mariadb_network_cidr" {
   type        = string
   description = "MariaDB network CIDR"
   default     = ""
-}
-
-# MariaDB instance flavor
-variable "mariadb_flavor" {
-  type        = map(string)
-  description = "MariaDB instance flavor"
-  default     = {}
 }
 
 # MariaDB instance parameters
@@ -226,13 +198,6 @@ variable "elastic_network_cidr" {
   default     = ""
 }
 
-# Elastic instance flavor
-variable "elastic_flavor" {
-  type        = map(string)
-  description = "Elastic instance flavor"
-  default     = {}
-}
-
 # Elastic instance parameters
 variable "elastic_instance" {
   type        = map(string)
@@ -269,13 +234,6 @@ variable "gluster_network_cidr" {
   type        = string
   description = "Gluster network CIDR"
   default     = ""
-}
-
-# Gluster instance flavor
-variable "gluster_flavor" {
-  type        = map(string)
-  description = "Gluster instance flavor"
-  default     = {}
 }
 
 # Gluster instance parameters

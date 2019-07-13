@@ -89,7 +89,7 @@ $ sudo install_3pp.sh
 ```
 Dopo aver installato i prerequisiti sul **controller** installare alcuni ruoli di ansible :
 ```bash
-$ ansible-galaxy install elastic.elasticsearch
+$ ansible-galaxy install elastic.elasticsearch,6.6.0
 ```
 ### Ruoli
 Il playbook per l'installazione di Web Analytics Italia contiene i seguenti ruoli:

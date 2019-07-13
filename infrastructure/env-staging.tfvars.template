@@ -8,18 +8,15 @@ mariadb_slug = "mariadb"
 # MariaDB network CIDR
 mariadb_network_cidr = "<CIDR>"
 
-# MariaDB instance flavor
-mariadb_flavor = {
-    vcpus = "<VCPU>"
-    ram = "<RAM_MB>"
-    disk = "<DISK_GB>"
-}
-
 # MariaDB instance parameters
 mariadb_instance = {
     image_id = "<IMAGE_ID>"
+    flavor_id = "<FLAVOR_ID>"
     num_instances = <NUM_OF_INSTANCES>
-    external_volume_size = <EXTERNAL_VOLUME_SIZE>
+    boot_volume_size = <VOLUME_SIZE>
+    boot_volume_type = <VOLUME_TYPE>
+    data_volume_size = <VOLUME_SIZE>
+    data_volume_type = <VOLUME_TYPE>
 }
 
 # MariaDB instance groups added to metadata for ansible dynamic inventory

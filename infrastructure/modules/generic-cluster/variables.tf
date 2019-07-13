@@ -52,12 +52,6 @@ variable "cluster_network_cidr" {
   description = "Cluster network CIDR"
 }
 
-# Cluster instance flavor
-variable "cluster_flavor" {
-  type        = map(string)
-  description = "Cluster instance flavor"
-}
-
 # Cluster instance parameters
 variable "cluster_instance" {
   type        = map(string)
@@ -86,8 +80,6 @@ locals {
   cluster_router_name         = "${var.project_name_prefix}-${var.cluster_slug}-router-${var.environment_short}"
   cluster_network_name        = "${var.project_name_prefix}-${var.cluster_slug}-network-${var.environment_short}"
   cluster_subnet_name         = "${var.project_name_prefix}-${var.cluster_slug}-subnet-${var.environment_short}"
-  cluster_flavor_name         = "${var.project_name_prefix}-${var.cluster_slug}-flavor-${var.environment_short}"
   cluster_node_name           = "${var.project_name_prefix}-${var.cluster_slug}-${var.environment_short}"
   cluster_port_name           = "${var.project_name_prefix}-${var.cluster_slug}-port-${var.environment_short}"
-  cluster_volume_name         = "${var.project_name_prefix}-${var.cluster_slug}-volume-${var.environment_short}"
 }

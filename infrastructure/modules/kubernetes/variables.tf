@@ -40,12 +40,6 @@ variable "k8s_network_cidr" {
   description = "Kubernetes network CIDR"
 }
 
-# K8S master instance flavor
-variable "k8s_master_flavor" {
-  type        = map(string)
-  description = "Kubernetes master instance flavor"
-}
-
 # K8S master instance parameters
 variable "k8s_master_instance" {
   type        = map(string)
@@ -71,12 +65,6 @@ variable "k8s_master_sec_rules" {
 variable "k8s_master_floatingips" {
   type        = list(string)
   description = "Kubernetes master assigned floating IP addresses"
-}
-
-# K8S worker instance flavor
-variable "k8s_worker_flavor" {
-  type        = map(string)
-  description = "Kubernetes worker instance flavor"
 }
 
 # K8S worker instance parameters
@@ -111,12 +99,8 @@ locals {
   k8s_router_name                = "${var.project_name_prefix}-k8s-router"
   k8s_network_name               = "${var.project_name_prefix}-k8s-network"
   k8s_subnet_name                = "${var.project_name_prefix}-k8s-subnet"
-  k8s_master_flavor_name         = "${var.project_name_prefix}-k8s-master-flavor"
   k8s_master_node_name           = "${var.project_name_prefix}-k8s-master"
   k8s_master_port_name           = "${var.project_name_prefix}-k8s-master-port"
-  k8s_master_volume_name         = "${var.project_name_prefix}-k8s-master-volume"
-  k8s_worker_flavor_name         = "${var.project_name_prefix}-k8s-worker-flavor"
   k8s_worker_node_name           = "${var.project_name_prefix}-k8s-worker"
   k8s_worker_port_name           = "${var.project_name_prefix}-k8s-worker-port"
-  k8s_worker_volume_name         = "${var.project_name_prefix}-k8s-worker-volume"
 }

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2019, Agenzia per l'Italia Digitale
@@ -24,7 +24,7 @@ def terraform_exec(terraform, command, *arguments, **options):
         if arguments:
             logfile.write('\narguments: ' + (', ').join(arguments) + '\n')
         if options:
-            logfile.write('options:\n')
+            logfile.write('\noptions:\n')
             for key, value in options.items():
                 logfile.write("   {0}={1}".format(key, value))
         logfile.write('\n========== start of terraform output ==========\n')
@@ -34,12 +34,12 @@ def terraform_exec(terraform, command, *arguments, **options):
         logfile.write(str(datetime.now()) + ' - ' + 'execution finished with return code ' + str(return_code) + '\n\n')
     if return_code != 0:
         cprint('[✘]', 'red', attrs=['bold'], end='', file=sys.stderr)
-        cprint('[workspace: ' + terraform_current_workspace(terraform) + ']', 'magenta', attrs=['bold'], end=' ', file=sys.stderr)
+        cprint('[workspace: ' + terraform_current_workspace(terraform) + ']', 'yellow', attrs=['bold'], end=' ', file=sys.stderr)
         cprint('terraform ' + command + ' ' + (' ').join(arguments), attrs=['bold'], file=sys.stderr)
         raise Exception('Something went wrong during the execution of terraform ' + command)
 
     cprint('[✔]', 'green', attrs=['bold'], end='')
-    cprint('[workspace: ' + terraform_current_workspace(terraform) + ']', 'magenta', attrs=['bold'], end=' ')
+    cprint('[workspace: ' + terraform_current_workspace(terraform) + ']', 'yellow', attrs=['bold'], end=' ')
     cprint('terraform ' + command + ' ' + (' ').join(arguments), attrs=['bold'])
 
 def terraform_workspace_exists(terraform, workspace):
@@ -90,18 +90,21 @@ def parse_args():
 def main():
     args = parse_args()
     terraform_basedir = os.path.dirname(os.path.realpath(__file__))
-    t = Terraform(working_dir=terraform_basedir)
+    t = Terraform(working_dir=terraform_basedir, parallelism=2)
     tfvars = [
         os.path.join(terraform_basedir, 'env-common.tfvars'),
     ]
 
     try:
-        terraform_exec(t, 'init')
+        terraform_exec(t, 'init', backend_config='backend-config')
 
         if not terraform_default_applied(t):
             if user_confirms('Default resources [keypair, external router] must be created before proceeding. Confirm [y/n]?'):
                 terraform_exec(t, 'plan', var_file=tfvars)
                 terraform_exec(t, 'apply', var_file=tfvars, auto_approve=IsFlagged)
+            else:
+                cprint('Operation cancelled by the user.', 'red', attrs=['bold'])
+                sys.exit(0)
 
         if not terraform_workspace_exists(t, args.environment):
             terraform_exec(t, 'workspace new', args.environment)
@@ -115,11 +118,15 @@ def main():
             if not args.dry_run and user_confirms('Confirm resources creation [y/n]?'):
                 cprint('This can take a while...', 'blue', attrs=['bold'])
                 terraform_exec(t, 'apply', var_file=tfvars, auto_approve=IsFlagged)
+            else:
+                cprint('Operation cancelled by the user.', 'red', attrs=['bold'])
         else:
             terraform_exec(t, 'plan', var_file=tfvars, destroy=IsFlagged)
             if not args.dry_run and user_confirms('Confirm resources destruction (cannot be undone) [y/n]?'):
                 cprint('This can take a while...', 'blue', attrs=['bold'])
                 terraform_exec(t, 'destroy', var_file=tfvars, auto_approve=IsFlagged)
+            else:
+                cprint('Operation cancelled by the user.', 'red', attrs=['bold'])
 
         terraform_exec(t, 'workspace select', 'default')
     except Exception as e:

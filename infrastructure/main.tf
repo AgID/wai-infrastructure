@@ -24,12 +24,10 @@ module "kubernetes" {
   ssh_user                   = var.ssh_user
   k8s_network_cidr           = var.k8s_network_cidr
   k8s_master_floatingips     = var.k8s_master_floatingips
-  k8s_master_flavor          = var.k8s_master_flavor
   k8s_master_instance        = var.k8s_master_instance
   k8s_master_instance_groups = var.k8s_master_instance_groups
   k8s_master_sec_rules       = var.k8s_master_sec_rules
   k8s_worker_floatingips     = var.k8s_worker_floatingips
-  k8s_worker_flavor          = var.k8s_worker_flavor
   k8s_worker_instance        = var.k8s_worker_instance
   k8s_worker_instance_groups = var.k8s_worker_instance_groups
   k8s_worker_sec_rules       = var.k8s_worker_sec_rules
@@ -50,7 +48,6 @@ module "elastic" {
   cluster_instance        = var.elastic_instance
   cluster_instance_groups = var.elastic_instance_groups
   cluster_sec_rules       = var.elastic_sec_rules
-  cluster_flavor          = var.elastic_flavor
 }
 
 # Glusterfs nodes
@@ -68,7 +65,6 @@ module "gluster" {
   cluster_instance        = var.gluster_instance
   cluster_instance_groups = var.gluster_instance_groups
   cluster_sec_rules       = var.gluster_sec_rules
-  cluster_flavor          = var.gluster_flavor
 }
 
 # Galera production nodes
@@ -86,7 +82,6 @@ module "galera_production" {
   cluster_instance        = var.galera_instance
   cluster_instance_groups = var.galera_instance_groups
   cluster_sec_rules       = var.galera_sec_rules
-  cluster_flavor          = var.galera_flavor
 }
 
 # MariaDB staging node
@@ -104,7 +99,6 @@ module "mariadb_staging" {
   cluster_instance        = var.mariadb_instance
   cluster_instance_groups = var.mariadb_instance_groups
   cluster_sec_rules       = var.mariadb_sec_rules
-  cluster_flavor          = var.mariadb_flavor
 }
 
 # Galera public playground nodes
@@ -122,5 +116,4 @@ module "galera_public-playground" {
   cluster_instance        = var.galera_instance
   cluster_instance_groups = var.galera_instance_groups
   cluster_sec_rules       = var.galera_sec_rules
-  cluster_flavor          = var.galera_flavor
 }
