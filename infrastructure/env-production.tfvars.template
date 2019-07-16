@@ -54,6 +54,19 @@ k8s_master_sec_rules = [
         from = 10250
         to = 10250
         cidr = "<CIDR>"
+    },
+    # See https://www.weave.works/docs/net/latest/install/using-weave/#creating-peer-connections-between-hosts
+    {
+        protocol = "tcp"
+        from = 6783
+        to = 6783
+        cidr = "10.0.10.0/24"
+    },
+    {
+        protocol = "udp"
+        from = 6783
+        to = 6784
+        cidr = "10.0.10.0/24"
     }
 ]
 
@@ -103,6 +116,19 @@ k8s_worker_sec_rules = [
         from = 10250
         to = 10250
         cidr = "<CIDR>"
+    },
+    # See https://www.weave.works/docs/net/latest/install/using-weave/#creating-peer-connections-between-hosts
+    {
+        protocol = "tcp"
+        from = 6783
+        to = 6783
+        cidr = "10.0.10.0/24"
+    },
+    {
+        protocol = "udp"
+        from = 6783
+        to = 6784
+        cidr = "10.0.10.0/24"
     }
 ]
 
