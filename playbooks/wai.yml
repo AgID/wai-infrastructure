@@ -1,8 +1,23 @@
 ---
 # Main WAI playbook
 
+# Ansible version (kubspray requirement - stop early if not met)
+- hosts: localhost
+  become: false
+  tasks:
+    - name: "Check ansible version >=2.7.8 and <2.8"
+      assert:
+        msg: "Ansible must be v2.7.8 or higher but lower than 2.8"
+        that:
+          - ansible_version.string is version("2.7.8", ">=")
+          - ansible_version.string is version("2.8.0", "<")
+      tags:
+        - check
+  vars:
+    ansible_connection: local
+
 # Infrastructure requirements
-- hosts: all
+- hosts: wai
   roles:
     - infrastructure
 
@@ -69,7 +84,7 @@
     - metricbeat
 
 # Enable apt automatic update
-- hosts: all
+- hosts: wai
   tasks:
   - name: Enable APT automatic update
     raw: systemctl enable --now {{ item }}

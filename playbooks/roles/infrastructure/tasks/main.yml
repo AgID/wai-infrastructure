@@ -18,10 +18,12 @@
 
 - include: proxy.yml
   when:
-    - (http_proxy is defined or https_proxy is defined)
+    - http_proxy is defined or https_proxy is defined
     
 - include: apt-lock.yml
   when: ansible_distribution == 'Ubuntu'
+
+- include: hosts.yml
 
 - name: Test storage_dev
   fail:

@@ -1,2 +1,0 @@
-# Override Kubespray: use weave network plugin
-kube_network_plugin: weave

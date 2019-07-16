@@ -3,7 +3,7 @@
 .vscode
 
 # Ignore downloaded playbook
-playbooks/kubespray-*
+playbooks/kubespray*
 
 # Ignore pyenv
 .python-version
@@ -33,6 +33,9 @@ override.tf.json
 clouds.yml
 *openrc*
 backend-config
+
+# Ignore ssh keys
+ssh*
 
 # Ignore ansible retry files
 *.retry

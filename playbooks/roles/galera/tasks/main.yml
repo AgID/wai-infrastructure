@@ -5,6 +5,12 @@
     msg: "Wrong configuration for Galera cluster: less than 3 members found"
   when: "groups[group_names[0]] | length < 3"
 
+# - name: Galera .:. Install galera dependencies
+#   apt:
+#     update_cache: true
+#     name: galera-3
+#     state: present
+
 - name: Galera .:. Test if galera has been configured
   stat:
     path: "/etc/mysql/conf.d/galera.cnf"
@@ -33,7 +39,7 @@
 
 - name: Galera .:. Stop MariaDB
   service:
-    name: mariadb
+    name: mysql
     state: stopped
     enabled: yes
   when: galera_present_result.stat.exists == false
@@ -46,7 +52,7 @@
 
 - name: Galera .:. Restart MariaDB on other nodes
   service:
-    name: mariadb
+    name: mysql
     state: restarted
     enabled: yes
   when:
