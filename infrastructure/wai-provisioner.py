@@ -90,7 +90,7 @@ def parse_args():
 def main():
     args = parse_args()
     terraform_basedir = os.path.dirname(os.path.realpath(__file__))
-    t = Terraform(working_dir=terraform_basedir, parallelism=2)
+    t = Terraform(working_dir=terraform_basedir, parallelism=1)
     tfvars = [
         os.path.join(terraform_basedir, 'env-common.tfvars'),
     ]
