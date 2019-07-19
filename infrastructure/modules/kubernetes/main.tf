@@ -88,6 +88,7 @@ resource "openstack_compute_instance_v2" "k8s_master_instance" {
   name      = format("%s-%02d", local.k8s_master_node_name, count.index + 1)
   flavor_id = var.k8s_master_instance["flavor_id"]
   key_pair  = data.openstack_compute_keypair_v2.ssh_keypair[0].name
+  user_data = file("cloud-init.conf")
   network {
     port = element(
       openstack_networking_port_v2.k8s_master_port.*.id,
@@ -174,6 +175,7 @@ resource "openstack_compute_instance_v2" "k8s_worker_instance" {
   name      = format("%s-%02d", local.k8s_worker_node_name, count.index + 1)
   flavor_id = var.k8s_worker_instance["flavor_id"]
   key_pair  = data.openstack_compute_keypair_v2.ssh_keypair[0].name
+  user_data = file("cloud-init.conf")
   network {
     port = element(
       openstack_networking_port_v2.k8s_worker_port.*.id,

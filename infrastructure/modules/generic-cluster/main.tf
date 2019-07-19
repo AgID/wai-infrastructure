@@ -69,6 +69,7 @@ resource "openstack_compute_instance_v2" "cluster_instance" {
   name      = format("%s-%02d", local.cluster_node_name, count.index + 1)
   flavor_id = var.cluster_instance["flavor_id"]
   key_pair  = data.openstack_compute_keypair_v2.ssh_keypair[0].name
+  user_data = file("cloud-init.conf")
   network {
     port = element(openstack_networking_port_v2.cluster_port.*.id, count.index)
   }
