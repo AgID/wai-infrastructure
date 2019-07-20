@@ -30,12 +30,6 @@ variable "public_dns_ips" {
   description = "DNS servers added to all instances"
 }
 
-# SSH public key authorized in all instances
-variable "keypair_pubkey" {
-  type        = string
-  description = "SSH public key authorized in all instances"
-}
-
 # SSH user added to instances metadata for ansible dynamic inventory
 variable "ssh_user" {
   type        = string

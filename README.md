@@ -29,11 +29,10 @@ $ pip install -r requirements.txt
 
 Per l'installazione è necessario utilizzare un host locale o remoto come
 **controller**; su questa macchina è necessario creare la chiave RSA per
-l'accesso tramite ssh utilizzando il comando prestando attenzione a non indicare
-alcuna *passphrase*.:
+l'accesso tramite ssh utilizzando il comando:
 
 ```bash
-$ ssh-keygen -t rsa -b 4096
+$ ssh-keygen -t rsa -b 4096 -N '' -f ssh_wai_key
 ```
 Il comando creerà una copia di chiavi (pubblica e privata) che saranno
 utilizzate per l'accesso agli host dell'infrastruttura.

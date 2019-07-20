@@ -2,7 +2,7 @@
 resource "openstack_compute_keypair_v2" "ssh_keypair" {
   count      = terraform.workspace == "default" ? 1 : 0
   name       = local.keypair_pubkey_name
-  public_key = var.keypair_pubkey
+  public_key = file("../ssh_wai_key.pub")
 }
 
 # Main network router
