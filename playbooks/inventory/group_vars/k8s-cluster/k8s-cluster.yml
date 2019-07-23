@@ -3,3 +3,6 @@ kube_network_plugin: weave
 
 # Add public ip address of wai-k8s-master-01 to ssl keys
 supplementary_addresses_in_ssl_keys: ["{{ hostvars['wai-k8s-master-01']['ansible_host'] }}"]
+
+# Add kubeconfig file to localhost
+kubeconfig_localhost: true

@@ -34,6 +34,9 @@ clouds.yml
 *openrc*
 backend-config
 
+# Ignore kubernetes credentials
+playbooks/inventory/artifacts
+
 # Ignore ssh keys
 ssh*
 
