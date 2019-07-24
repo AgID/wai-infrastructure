@@ -103,12 +103,12 @@ nella riga di comando.
 
 ### Ruoli e playbook esterni
 
-Prima di lanciare il playbook è necessario installare i ruoli relativi
-all'installazione di
+Prima di lanciare il playbook è necessario installare alcuni ruoli tra cui
+quello relativo all'installazione di
 [Elasticsearch](https://www.elastic.co/products/elasticsearch):
 
 ```bash
-$ ansible-galaxy install elastic.elasticsearch,6.6.0
+$ ansible-galaxy install -r playbooks/requirements.yml
 ```
 
 L'installazione del cluster [Kubernetes](https://kubernetes.io/) è effettuata

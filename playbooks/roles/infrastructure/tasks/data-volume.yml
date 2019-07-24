@@ -26,7 +26,7 @@
 - name: Add mount point
   mount:
       state: mounted
-      path: /opt/data 
+      path: /opt/data
       src: /dev/data-vg/data-lv-01
       boot: yes
       fstype: ext4

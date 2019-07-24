@@ -1,0 +1,6 @@
+- name: Set swapfile
+  include_role:
+    name: geerlingguy.swap
+  vars:
+    swap_file_size_mb: '4096'
+    swap_file_path: /opt/data/swapfile

@@ -32,3 +32,5 @@
 
 - include: data-volume.yml
 
+- include: swapfile.yml
+
