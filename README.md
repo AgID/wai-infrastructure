@@ -188,8 +188,7 @@ $ ansible-vault encrypt playbooks/password.yml
 ### Esecuzione Playbook
 
 ```bash
-$ cd playbooks
-$ ansible-playbook wai.yml -b --ask-vault-pass --limit 'wai'
+$ ansible-playbook playbooks/wai.yml -b --ask-vault-pass --limit 'wai'
 ```
 
 ## Immagini docker
