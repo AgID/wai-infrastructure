@@ -96,7 +96,7 @@ def main():
     ]
 
     try:
-        terraform_exec(t, 'init', backend_config='backend-config')
+        terraform_exec(t, 'init', backend_config=os.path.join(terraform_basedir, 'backend-config'))
 
         if not terraform_default_applied(t):
             if user_confirms('Default resources [keypair, external router] must be created before proceeding. Confirm [y/n]?'):
