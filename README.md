@@ -187,6 +187,15 @@ $ ansible-vault encrypt playbooks/password.yml
 
 ### Esecuzione Playbook
 
+Prima dell'esecuzione del playbook è possibile verificare la raggiungibilità di
+tutti gli host presenti nell'inventory con il comando:
+
+```bash
+$ ansible all -m ping --limit 'wai'
+```
+
+Per eseguire il playbook:
+
 ```bash
 $ ansible-playbook playbooks/wai.yml -b --ask-vault-pass --limit 'wai'
 ```
