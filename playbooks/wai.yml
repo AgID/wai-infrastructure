@@ -1,75 +1,138 @@
 ---
 # Main WAI playbook
 
+# Ansible version (kubspray requirement - stop early if not met)
+- hosts: localhost
+  become: false
+  tasks:
+    - name: "Check ansible version >=2.7.8 and <2.8"
+      assert:
+        msg: "Ansible must be v2.7.8 or higher but lower than 2.8"
+        that:
+          - ansible_version.string is version("2.7.8", ">=")
+          - ansible_version.string is version("2.8.0", "<")
+      tags:
+        - check
+  vars:
+    ansible_connection: local
+
 # Infrastructure requirements
-- hosts: all
+- hosts: wai
+  tags:
+    - infrastructure
   roles:
     - infrastructure
 
 # Install elastic search
 - hosts: elastic
+  tags:
+    - install
+    - elastic
+    - production
   roles:
     - elastic.elasticsearch
 
 # Install kibana
 - hosts: kibana
+  tags:
+    - install
+    - kibana
+    - production
   roles:
     - kibana
 
 # Install galera prod cluster
 - hosts: galera-prod
+  tags:
+    - install
+    - galera
+    - production
   roles:
     - galera
     - metricbeat
 
 # Install galera prod slave cluster
 - hosts: galera-prod-slave
+  tags:
+    - install
+    - galera
+    - production
   roles:
     - galera
     - metricbeat
 
 # Install galera public play ground cluster
 - hosts: galera-play
+  tags:
+    - install
+    - galera
+    - public-playground
   roles:
     - galera
     - metricbeat
 
 # Install mariadb stage server
 - hosts: mariadb-stag
+  tags:
+    - install
+    - mariadb
+    - staging
   roles:
     - mariadb
     - metricbeat
 
 # Install GlusterFS server
 - hosts: gluster
+  tags:
+    - install
+    - gluster
+    - production
   roles:
     - glusterfs
     - metricbeat
 
 # Install GlusterFS client
 - hosts: kube-node
+  tags:
+    - install
+    - gluster
+    - production
   roles:
     - glusterfs.client
 
 # Deploy Matomo database
 - name: Deploy Matomo database
+  tags:
+    - deploy
+    - matomo
   import_playbook: database.yml
 
 # Install K8S cluster
 - name: Kubernetes cluster
+  tags:
+    - install
+    - kubernetes
+    - production
   import_playbook: kubespray/cluster.yml
 
 # Configure K8S resources
 - name: Deploy WAI K8S resources
+  tags:
+    - deploy
+    - kubernetes-deploy
   import_playbook: k8s-deployment.yml
 
   # Install metricbeat on kube-master nodes
 - hosts: kube-master
+  tags:
+    - install
+    - metricbeat-k8s
+    - production
   roles:
     - metricbeat
 
 # Enable apt automatic update
-- hosts: all
+- hosts: wai
   tasks:
   - name: Enable APT automatic update
     raw: systemctl enable --now {{ item }}

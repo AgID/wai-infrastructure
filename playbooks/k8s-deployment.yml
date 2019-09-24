@@ -89,7 +89,7 @@
 
     - name: K8S .:. Build Elasticsearch host array
       set_fact:
-        kibana_elastic_hosts: '{{ kibana_elastic_hosts_list.results | map(attribute="ansible_facts.elastic_url") | list | to_yaml }}'
+        kibana_elastic_hosts: '{{ kibana_elastic_hosts_list.results | map(attribute="ansible_facts.elastic_url") | list }}'
 
     - name: K8S .:. Prepare Metricbeat DaemonSet and services
       template:

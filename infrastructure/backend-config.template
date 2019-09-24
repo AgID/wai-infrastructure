@@ -1,0 +1,8 @@
+# Swift backend auth URL
+auth_url  = "OPENSTACK_AUTH_URL"
+
+# Swift backend project id
+tenant_id = "SWIFT_TENANT_ID"
+
+# Swift backend project id
+tenant_name = "SWIFT_TENANT_NAME"

@@ -154,6 +154,6 @@ data:
 
     [QueuedTracking]
     notify_queue_threshold_single_queue = 250000
-    {% for email in wai_alert_email_destination | default([]) %}
+    {% for email in wai_alert_email_destination | default([]) -%}
     notify_queue_threshold_emails[]={{ email }}
-    {%endfor %}
+    {% endfor %}

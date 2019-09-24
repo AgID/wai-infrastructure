@@ -5,18 +5,15 @@ environment_short = "prod"
 # K8S network CIDR
 k8s_network_cidr = "<CIDR>"
 
-# K8S master instance flavor
-k8s_master_flavor = {
-    vcpus = "<VCPU>"
-    ram = "<RAM_MB>"
-    disk = "<DISK_GB>"
-}
-
 # K8S master instance parameters
 k8s_master_instance = {
     image_id = "<IMAGE_ID>"
+    flavor_id = "<FLAVOR_ID>"
     num_instances = <NUM_OF_INSTANCES>
-    external_volume_size = <EXTERNAL_VOLUME_SIZE>
+    boot_volume_size = <VOLUME_SIZE>
+    boot_volume_type = <VOLUME_TYPE>
+    data_volume_size = <VOLUME_SIZE>
+    data_volume_type = <VOLUME_TYPE>
 }
 
 # K8S master instance groups added to metadata for ansible dynamic inventory
@@ -57,27 +54,40 @@ k8s_master_sec_rules = [
         from = 10250
         to = 10250
         cidr = "<CIDR>"
+    },
+    # See https://www.weave.works/docs/net/latest/install/using-weave/#creating-peer-connections-between-hosts
+    {
+        protocol = "tcp"
+        from = 6783
+        to = 6783
+        cidr = "10.0.10.0/24"
+    },
+    {
+        protocol = "udp"
+        from = 6783
+        to = 6784
+        cidr = "10.0.10.0/24"
     }
 ]
 
 # K8S master assigned floating IPs
 k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
 
-# K8S worker instance flavor
-k8s_worker_flavor = {
-    vcpus = "<VCPU>"
-    ram = "<RAM_MB>"
-    disk = "<DISK_GB>"
-}
-
 # K8S worker instance parameters
 k8s_worker_instance = {
     image_id = "<IMAGE_ID>"
+    flavor_id = "<FLAVOR_ID>"
     num_instances = <NUM_OF_INSTANCES>
-    external_volume_size = <EXTERNAL_VOLUME_SIZE>
+    boot_volume_size = <VOLUME_SIZE>
+    boot_volume_type = <VOLUME_TYPE>
+    data_volume_size = <VOLUME_SIZE>
+    data_volume_type = <VOLUME_TYPE>
 }
 
 # K8S worker instance groups added to metadata for ansible dynamic inventory
+# Each item in the list will be added to the corresponding instance number
+# i.e. the first item in the list will be added to the first instance and so on
+# if there are more instances than items in the list it will restart from the first one
 k8s_worker_instance_groups = ["kube-node"]
 
 # K8S worker security rules
@@ -106,6 +116,19 @@ k8s_worker_sec_rules = [
         from = 10250
         to = 10250
         cidr = "<CIDR>"
+    },
+    # See https://www.weave.works/docs/net/latest/install/using-weave/#creating-peer-connections-between-hosts
+    {
+        protocol = "tcp"
+        from = 6783
+        to = 6783
+        cidr = "10.0.10.0/24"
+    },
+    {
+        protocol = "udp"
+        from = 6783
+        to = 6784
+        cidr = "10.0.10.0/24"
     }
 ]
 
@@ -118,18 +141,15 @@ galera_slug = "galera"
 # Galera network CIDR
 galera_network_cidr = "<CIDR>"
 
-# Galera instance flavor
-galera_flavor = {
-    vcpus = "<VCPU>"
-    ram = "<RAM_MB>"
-    disk = "<DISK_GB>"
-}
-
 # Galera instance parameters
 galera_instance = {
     image_id = "<IMAGE_ID>"
+    flavor_id = "<FLAVOR_ID>"
     num_instances = <NUM_OF_INSTANCES>
-    external_volume_size = <EXTERNAL_VOLUME_SIZE>
+    boot_volume_size = <VOLUME_SIZE>
+    boot_volume_type = <VOLUME_TYPE>
+    data_volume_size = <VOLUME_SIZE>
+    data_volume_type = <VOLUME_TYPE>
 }
 
 # Galera instance groups added to metadata for ansible dynamic inventory
@@ -191,18 +211,15 @@ elastic_slug = "elastic"
 # Elastic network CIDR
 elastic_network_cidr = "<CIDR>"
 
-# Elastic instance flavor
-elastic_flavor = {
-    vcpus = "<VCPU>"
-    ram = "<RAM_MB>"
-    disk = "<DISK_GB>"
-}
-
 # Elastic instance parameters
 elastic_instance = {
     image_id = "<IMAGE_ID>"
+    flavor_id = "<FLAVOR_ID>"
     num_instances = <NUM_OF_INSTANCES>
-    external_volume_size = <EXTERNAL_VOLUME_SIZE>
+    boot_volume_size = <VOLUME_SIZE>
+    boot_volume_type = <VOLUME_TYPE>
+    data_volume_size = <VOLUME_SIZE>
+    data_volume_type = <VOLUME_TYPE>
 }
 
 # Elastic instance groups added to metadata for ansible dynamic inventory
@@ -253,18 +270,15 @@ gluster_slug = "gluster"
 # Gluster network CIDR
 gluster_network_cidr = "<CIDR>"
 
-# Gluster instance flavor
-gluster_flavor = {
-    vcpus = "<VCPU>"
-    ram = "<RAM_MB>"
-    disk = "<DISK_GB>"
-}
-
 # Gluster instance parameters
 gluster_instance = {
     image_id = "<IMAGE_ID>"
+    flavor_id = "<FLAVOR_ID>"
     num_instances = <NUM_OF_INSTANCES>
-    external_volume_size = <EXTERNAL_VOLUME_SIZE>
+    boot_volume_size = <VOLUME_SIZE>
+    boot_volume_type = <VOLUME_TYPE>
+    data_volume_size = <VOLUME_SIZE>
+    data_volume_type = <VOLUME_TYPE>
 }
 
 # Gluster instance groups added to metadata for ansible dynamic inventory

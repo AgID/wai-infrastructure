@@ -1,10 +1,26 @@
 ---
 # MariaDB installation
-- name: MariaDB .:. Install python3-pymysql
+- name: MariaDB .:. Install required dependencies
   apt: 
     update_cache: true
-    name: python3-pymysql
+    name: ['software-properties-common', 'python3-pymysql']
     state: present
+
+# - name: MariaDB .:. Add MariaDB repository keys
+#   apt_key:
+#     keyserver: "{{ mariadb_repo_keyserver }}"
+#     id: "{{ mariadb_repo_key }}"
+#     state: "present"
+
+# - name: MariaDB .:. Pin MariaDB repository
+#   template:
+#     src: "mariadb_repo.j2"
+#     dest: "/etc/apt/preferences.d/mariadb"
+
+# - name: MariaDB .:. Add MariaDB repository
+#   apt_repository:
+#     repo: "{{ mariadb_repo }}"
+#     state: "present"
 
 - name: MariaDB .:. Test if root .mysql file exists
   stat:
@@ -25,9 +41,9 @@
 
 - name: MariaDB .:. Configure bind address
   replace:
-      path: /etc/mysql/mariadb.conf.d/50-server.cnf
-      regexp: "^bind-address.*"
-      replace: "bind-address={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    regexp: "^bind-address.*"
+    replace: "bind-address={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
   when: mariadb_mycnf_result.stat.exists == false
 
 - name: MariaDB .:. Copy mysql data directory to storage device
@@ -47,7 +63,7 @@
 
 - name: MariaDB .:. Restart if needed
   service:
-    name: mariadb
+    name: mysql
     state: restarted
     enabled: yes
   when: 
