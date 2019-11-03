@@ -11,12 +11,15 @@ es_config:
   node.name: "{{ ansible_hostname }}"
   network.host: "0.0.0.0"
   cluster.name: "wai-cluster"
-  discovery.zen.ping.unicast.hosts: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
+  discovery.seed_hosts: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
   http.port: 9200
-  transport.tcp.port: 9300
+  transport.port: 9300
   node.data: true
   node.master: true
   node.ingest: true
   bootstrap.memory_lock: true
   discovery.zen.minimum_master_nodes: 2
   xpack.monitoring.collection.enabled: true
+  xpack.license.self_generated.type: basic
+  xpack.security.enabled: false
+  cluster.initial_master_nodes: "{{ hostvars[groups['elastic'][0]]['ansible_hostname'] }}"

@@ -56,9 +56,10 @@ wai_base_https_port: 30443
 
 # Elastic version used for Elasticsearch, Kibana and Beats.
 # These vars override default settings of role elastic.elasticsearch and are used in wai roles kibana and metricbeat
-es_version: 6.6.0
+es_version: 7.4.1
+es_major_version: 7.x
 es_apt_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
-es_apt_url: "deb https://artifacts.elastic.co/packages/6.x/apt stable main"
+es_apt_url: "deb https://artifacts.elastic.co/packages/{{es_major_version}}/apt stable main"
 
 # Metricbeat output
 metricbeat_output_elastic: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list | to_json }}'
