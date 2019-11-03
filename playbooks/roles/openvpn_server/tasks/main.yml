@@ -16,8 +16,8 @@
   openssl_privatekey:
     path: /etc/openvpn/certs/wai-operation-root-ca.key
     passphrase: "{{ openvpn_root_ca_password }}"
-    cipher: aes256
-    size: 2048
+    cipher: des3
+    size: 4096
 
 - name: OpenVPN Server .:. Create root CA csr
   openssl_csr:
@@ -29,12 +29,13 @@
     organization_name: AgID
     organizational_unit_name: Operation
     email_address: jdoe@agid.com
-    common_name: WAI Root CA
+    common_name: AgID - WAI Root CA
+    basic_constraints: "CA:true"
+    basic_constraints_critical: true
     key_usage:
+      - keyCertSign
+      - cRLSign
       - digitalSignature
-      - keyAgreement
-    extended_key_usage:
-      - serverAuth
 
 - name: OpenVPN Server .:. Create root CA certificate
   openssl_certificate:
@@ -45,11 +46,6 @@
     privatekey_passphrase: "{{ openvpn_root_ca_password }}"
     privatekey_path: /etc/openvpn/certs/wai-operation-root-ca.key
     valid_in: 315360000
-
-- name: OpenVPN Server .:. Create dh param
-  openssl_dhparam:
-    path: /etc/openvpn/certs/dhparams.pem
-    size: 2048
 
 - name: OpenVPN Server .:. Create vpn server private key
   openssl_privatekey:
@@ -114,6 +110,11 @@
     ownca_privatekey_passphrase: "{{ openvpn_root_ca_password }}"
     ownca_privatekey_path: /etc/openvpn/certs/wai-operation-root-ca.key
     valid_in: 315360000
+
+- name: OpenVPN Server .:. Create dh param
+  openssl_dhparam:
+    path: /etc/openvpn/certs/dhparams.pem
+    size: 1024
 
 - name: OpenVPN Server .:. Copy configuration file
   template:
