@@ -28,7 +28,7 @@
     state_or_province_name: Roma
     organization_name: AgID
     organizational_unit_name: Operation
-    email_address: jdoe@agid.com
+    email_address: gfares@minsait.com
     common_name: AgID - WAI Root CA
     basic_constraints: "CA:true"
     basic_constraints_critical: true
@@ -60,7 +60,7 @@
     state_or_province_name: Roma
     organization_name: AgID
     organizational_unit_name: Operation
-    email_address: jdoe@agid.com
+    email_address: gfares@minsait.com
     common_name: vpn-server
     key_usage:
       - digitalSignature
@@ -92,7 +92,7 @@
     state_or_province_name: Roma
     organization_name: AgID
     organizational_unit_name: Operation
-    email_address: jdoe@agid.com
+    email_address: gfares@minsait.com
     common_name: user-admin
     key_usage:
       - digitalSignature
