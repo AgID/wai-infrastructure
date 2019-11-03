@@ -1,0 +1,8 @@
+prometheus_exporter_url:  https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz
+prometheus_exporter_user: node_exporter
+prometheus_exporter_uid: 10000
+prometheus_exporter_group: prometheus
+prometheus_exporter_gid: 10000
+prometheus_exporter_home: /opt/data/prometheus/node_exporter
+prometheus_exporter_service_description: Node Exporter
+prometheus_exporter_bin: node_exporter

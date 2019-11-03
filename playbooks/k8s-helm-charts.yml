@@ -1,0 +1,55 @@
+---
+# Deploy K8S WAI Resources
+- hosts: kube-master[0]
+  tasks:
+    - include_vars:
+        file: password.yml
+
+    # Base objects
+    - name: K8S Helm .:. Create helm distibution dir
+      file:
+        path: "{{ wai_k8s_deployment_dir }}/helm"
+        state: directory      
+
+    # Install Prometheus
+    - name: K8S Helm .:. Install Prometheus
+      helm:
+          namespace: monitoring
+          chart: prometheus
+          state: present
+          values: 
+            server:
+              ingress:
+                enabled: false
+              persistentVolume:
+                enabled: false
+                storageClass: storage-nfs
+            networkPolicy:
+              enabled: false
+            alertmanager:
+              persistentVolume:
+                enabled: false
+                storageClass: storage-nfs
+
+    # Install Grafana
+    - name: K8S Helm .:. Install Grafana
+      helm:
+          namespace: monitoring
+          chart: prometheus
+          state: present
+          values: 
+            ingress:
+              enabled: false
+            persistence:
+              enabled: false
+              size: 8Gi
+              storageClassName: storage-nfs
+            initChownData:
+              enabled: false
+            resources:
+              limits:
+                cpu: "0.25"
+                memory: "1024Mi"
+              requests:    
+                cpu: "0.25"
+                memory: "512Mi"
