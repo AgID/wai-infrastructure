@@ -7,31 +7,33 @@ metadata:
 ---
 # Create external elasticsearch service
 kind: "Service"
-  apiVersion: "v1"
-  metadata:
-    name: "elasticsearch"
-    namespace: kube-logging
-  spec:
-    ports:
-      - name: "elasticsearch"
-        protocol: "TCP"
-        port: 9200
-        targetPort: 9200
-        nodePort: 0
-  selector: {} 
+apiVersion: "v1"
+metadata:
+  name: "elasticsearch"
+  namespace: kube-logging
+spec:
+  ports:
+  - name: "elasticsearch"
+    protocol: "TCP"
+    port: 9200
+    targetPort: 9200
+    nodePort: 0
+  selector: {}
 ---
 kind: "Endpoints"
-  apiVersion: "v1"
-  metadata:
-    name: "elasticsearch" 
-    namespace: kube-logging
-  subsets: 
-    - addresses:
-      {{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | to_yaml }}
-      ports:
-        - port: 9200 
-          name: "elasticsearch"
----          
+apiVersion: "v1"
+metadata:
+  name: "elasticsearch"
+  namespace: kube-logging
+subsets:
+  - addresses:
+    - ip: 10.0.30.101
+    - ip: 10.0.30.102
+    - ip: 10.0.30.103
+    ports:
+      - port: 9200
+        name: "elasticsearch"
+---
 # Deploy fluentd
 apiVersion: v1
 kind: ServiceAccount
