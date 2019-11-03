@@ -22,6 +22,28 @@
           - pyhelm
           - grpcio
 
+    # Install cert manager
+    - name: K8S Helm .:. Download Cert-Manager requirements
+      get_url:
+        url: https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml
+        dest: "{{ wai_k8s_deployment_dir }}/crds.yaml"
+
+    - name: K8S Helm .:. Install Cert-Manager requirements
+      raw: "{{ wai_kubectl }} apply --validate=false -f {{ wai_k8s_deployment_dir }}/crds.yaml"
+
+    - name: K8S Helm .:. Install Cert-Manager
+      helm:
+        namespace: cert-manager
+        name: cert-manager
+        chart: 
+          name: cert-manager
+          source:
+            type: repo
+            location: https://charts.jetstack.io
+            path: jetstack/cert-manager
+        host: 10.233.5.45
+        state: present
+
     # Install Prometheus
     - name: K8S Helm .:. Install Prometheus
       helm:
