@@ -29,7 +29,7 @@
     organization_name: AgID
     organizational_unit_name: Operation
     email_address: jdoe@agid.com
-    common_name: root-ca
+    common_name: WAI Root CA
     key_usage:
       - digitalSignature
       - keyAgreement
