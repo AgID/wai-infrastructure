@@ -1,3 +1,6 @@
+- include_vars:
+    file: password.yml
+
 - name: Prometheus MySql Exporter .:. Base directory
   file:
     path: '{{prometheus_mysqld_exporter_home}}' 
