@@ -23,6 +23,13 @@
   roles:
     - infrastructure
 
+# Open VPN Server
+- hosts: localhost
+  tags:
+    - openvpn
+  roles:
+    - openvpn_server
+
 # Install elastic search
 - hosts: elastic
   tags:
