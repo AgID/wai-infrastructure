@@ -37,6 +37,21 @@
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-deployment.yml"
       with_items: "{{ wai_k8s_namespaces }}"
+      
+    # Deploy roles
+    - name: K8S .:. Prepare roles
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-rbac-{{ item }}.yml"
+        src: "k8s/k8s-rbac-{{ item }}.yml.j2"
+      with_items: "{{ wai_k8s_namespaces }}"
+
+    - name: K8S .:. Apply roles
+      kube:
+        name: "k8s-roles"
+        kubectl: "{{ wai_kubectl }}"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-rbac-{{ item }}.yml"
+      with_items: "{{ wai_k8s_namespaces }}"
 
     # GlusterFS
     - name: K8S .:. Prepare GlusterFS endpoints
