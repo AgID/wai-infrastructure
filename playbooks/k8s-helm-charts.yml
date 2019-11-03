@@ -5,18 +5,35 @@
     - include_vars:
         file: password.yml
 
-    # Base objects
-    - name: K8S Helm .:. Create helm distibution dir
-      file:
-        path: "{{ wai_k8s_deployment_dir }}/helm"
-        state: directory      
+      # Install pyhton3
+    - name: K8S Helm .:. Install python
+      apt:
+        update_cache: true
+        name: 
+          - python3
+          - git
+        state: present
+
+    # Install PYHelm
+    - name: K8S Helm .:. Install requirements
+      pip:
+        name: 
+          - pygit2
+          - pyhelm
+          - grpcio
 
     # Install Prometheus
     - name: K8S Helm .:. Install Prometheus
       helm:
         namespace: monitoring
+        name: prometheus
         chart: 
           name: prometheus
+          source:
+            type: git
+            location: https://github.com/helm/charts.git
+            path: stable/prometheus
+        host: 10.233.5.45
         state: present
         values: 
           server:
@@ -36,9 +53,15 @@
     - name: K8S Helm .:. Install Grafana
       helm:
         namespace: monitoring
+        name: grafana
         chart:
           name: grafana
+          source:
+            type: git
+            location: https://github.com/helm/charts.git
+            path: stable/grafana
         state: present
+        host: 10.233.5.45
         values: 
           ingress:
             enabled: false
