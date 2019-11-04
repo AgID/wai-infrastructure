@@ -5,6 +5,12 @@
     - include_vars:
         file: password.yml
 
+    # Base objects
+    - name: K8S .:. Create destination directory
+      file:
+        path: "{{ wai_k8s_deployment_dir }}"
+        state: directory
+
       # Install pyhton3
     - name: K8S Helm .:. Install python
       apt:
@@ -22,6 +28,10 @@
           - pygit2
           - pyhelm
           - grpcio
+    # Get tiller clusterID
+    - name: K8S Helm .:. Find tiller Cluster IP
+      shell: kubectl get svc -n kube-system tiller-deploy -o=jsonpath='{.spec.clusterIP}'
+      register: clusterIP
 
     # Install cert manager
     - name: K8S Helm .:. Download Cert-Manager requirements
@@ -42,7 +52,7 @@
             type: repo
             location: https://charts.jetstack.io
             path: jetstack/cert-manager
-        host: 10.233.5.45
+        host: "{{ clusterIP.stdout }}"
         state: present
 
     # Install Prometheus
@@ -56,7 +66,7 @@
             type: git
             location: https://github.com/helm/charts.git
             path: stable/prometheus
-        host: 10.233.5.45
+        host: "{{ clusterIP.stdout }}"
         state: present
         values: 
           server:
@@ -84,7 +94,7 @@
             location: https://github.com/helm/charts.git
             path: stable/grafana
         state: present
-        host: 10.233.5.45
+        host: "{{ clusterIP.stdout }}"
         values: 
           ingress:
             enabled: false
