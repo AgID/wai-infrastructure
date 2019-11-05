@@ -46,7 +46,7 @@
     dest: '/etc/default/mysqld_exporter'
     src: 'mysqld_exporter_config.j2'
 
-- name: Prometheus MySql Exporter .:. Enable and start  service
+- name: Prometheus MySql Exporter .:. Enable and start service
   systemd:
     name: 'mysqld_exporter' 
     enabled: yes
