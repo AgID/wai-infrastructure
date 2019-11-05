@@ -3,7 +3,6 @@
 Description={{ prometheus_mysqld_exporter_service_description }}
 
 [Service]
-Environment=DATA_SOURCE_NAME='exporter:password.1@(localhost:3306)/'
 User={{ prometheus_mysqld_exporter_user }}
 EnvironmentFile=/etc/default/{{ prometheus_mysqld_exporter_bin }}
 ExecStart={{ prometheus_mysqld_exporter_home }}/{{ prometheus_mysqld_exporter_bin }} $OPTIONS
