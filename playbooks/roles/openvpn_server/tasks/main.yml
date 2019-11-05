@@ -26,7 +26,7 @@
     privatekey_path: /etc/openvpn/certs/wai-operation-root-ca.key
     country_name: IT
     state_or_province_name: Roma
-    organization_name: AgID
+    organization_name: AGID
     organizational_unit_name: Operation
     email_address: gfares@minsait.com
     common_name: AgID - WAI Root CA
