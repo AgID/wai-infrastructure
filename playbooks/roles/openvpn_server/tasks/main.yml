@@ -57,7 +57,7 @@
     privatekey_path: /etc/openvpn/certs/vpn-server.key
     country_name: IT
     state_or_province_name: Roma
-    organization_name: AgID
+    organization_name: AGID
     organizational_unit_name: Operation
     email_address: protocollo@pec.agid.gov.it
     common_name: vpn-server
