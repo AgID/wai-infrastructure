@@ -3,7 +3,7 @@
 
 - name: Prometheus MySql Exporter .:. Base directory
   file:
-    path: '{{prometheus_mysqld_exporter_home}}' 
+    path: '{{ prometheus_mysqld_exporter_home }}' 
     state: directory
 
 - name: Prometheus MySql Exporter .:. Add Group
