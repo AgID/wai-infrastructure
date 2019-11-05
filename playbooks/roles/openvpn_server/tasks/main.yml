@@ -89,7 +89,7 @@
     privatekey_path: /etc/openvpn/certs/user-admin.key
     country_name: IT
     state_or_province_name: Roma
-    organization_name: AgID
+    organization_name: AGID
     email_address: gfares@minsait.com
     common_name: user-admin
     key_usage:
