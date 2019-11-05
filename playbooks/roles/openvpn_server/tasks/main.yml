@@ -58,7 +58,6 @@
     country_name: IT
     state_or_province_name: Roma
     organization_name: AGID
-    organizational_unit_name: Operation
     email_address: protocollo@pec.agid.gov.it
     common_name: vpn-server
     key_usage:
