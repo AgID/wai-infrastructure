@@ -43,7 +43,7 @@
     dest: '/etc/default/node_exporter'
     src: 'node_exporter_config.j2'
 
-- name: Prometheus Node Exporter .:. Enable and start  service
+- name: Prometheus Node Exporter .:. Enable and start service
   systemd:
     name: 'node_exporter' 
     enabled: yes
