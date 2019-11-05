@@ -30,7 +30,7 @@
 - name: Prometheus MySql Exporter .:. Explode distribution
   unarchive:
     src: /tmp/mysqld_exporter.tar.gz
-    dest: '{{prometheus_mysqld_exporter_home}}'
+    dest: '{{ prometheus_mysqld_exporter_home }}'
     owner: '{{ prometheus_mysqld_exporter_user }}'
     group: '{{ prometheus_mysqld_exporter_group }}'
     extra_opts: [--strip-components=1]
