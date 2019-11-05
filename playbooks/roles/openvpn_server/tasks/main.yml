@@ -139,5 +139,5 @@
     protocol: tcp
     match: tcp
     jump: MASQUERADE
-    comment: Masquerade traffic
+    comment: Masquerade OpenVPN traffic
   become: yes
