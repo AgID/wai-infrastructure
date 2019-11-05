@@ -24,7 +24,7 @@
 
 - name: Prometheus MySql Exporter .:. Download file
   get_url:
-    url: '{{prometheus_mysqld_exporter_url}}'
+    url: '{{ prometheus_mysqld_exporter_url }}'
     dest: /tmp/mysqld_exporter.tar.gz
 
 - name: Prometheus MySql Exporter .:. Explode distribution
