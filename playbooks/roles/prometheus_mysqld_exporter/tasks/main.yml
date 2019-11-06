@@ -17,7 +17,7 @@
     name: '{{ prometheus_mysqld_exporter_user }}'
     create_home: yes 
     home: '{{ prometheus_mysqld_exporter_home }}'
-    uid: '{{prometheus_mysqld_exporter_uid}}' 
+    uid: '{{ prometheus_mysqld_exporter_uid }}'
     group: '{{ prometheus_mysqld_exporter_group }}'
     state: present
     shell: /bin/false
