@@ -56,6 +56,18 @@
         host: "{{ clusterIP.stdout }}"
         state: present
 
+    - name: K8S Helm .:. Prepare cluster issuer
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
+        src: k8s/cluster-issuer.yml.j2
+
+    - name: K8S Helm .:. Deploy cluster issuer
+      kube:
+        name: "k8s-deployment"
+        kubectl: "{{ wai_kubectl }}"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
+
     # Install Prometheus
     - name: K8S Helm .:. Install Prometheus
       helm:
