@@ -19,6 +19,16 @@ spec:
       labels:
         app: {{ matomo_name }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{ matomo_name }}
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - image: {{ wai_matomo_base_image }}
         name: {{ matomo_name }}

@@ -22,7 +22,7 @@ spec:
   policyTypes:
   - Ingress
   egress:
-  # Allow connect to elatic
+  # Allow connect to elastic
   - to:
 {% for es in  groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) %}
       - ipBlock:
@@ -34,7 +34,7 @@ spec:
   # Allow connect to mariadb
   - to:
       - ipBlock:
-          cidr: {{ groups['mariadb-stag']['rdbms_load_balancer']}}/32
+          cidr: {{ hostvars[groups['mariadb-stag'][0]]['rdbms_load_balancer']}}/32
       ports:
       - protocol: TCP
-        port: 9200
+        port: 3306

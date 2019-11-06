@@ -204,6 +204,16 @@ spec:
         prometheus.io/port: "10254"
         prometheus.io/scrape: "true"
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - ingress-nginx
+            topologyKey: "kubernetes.io/hostname"
       serviceAccountName: nginx-ingress-sa-{{ ns }}
       containers:
         - name: nginx-ingress-controller

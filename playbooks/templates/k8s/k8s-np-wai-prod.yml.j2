@@ -34,7 +34,7 @@ spec:
   # Allow connect to mariadb
   - to:
       - ipBlock:
-          cidr: {{ hostvars[groups['galera-play'][0]]['rdbms_load_balancer']}}/32
+          cidr: {{ hostvars[groups['galera-prod'][0]]['rdbms_load_balancer']}}/32
       ports:
       - protocol: TCP
         port: 3306
