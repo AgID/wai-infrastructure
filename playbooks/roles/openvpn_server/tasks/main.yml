@@ -89,7 +89,7 @@
     country_name: IT
     state_or_province_name: Roma
     organization_name: AGID
-    email_address: gfares@minsait.com
+    email_address: protocollo@pec.agid.gov.it
     common_name: user-admin
     key_usage:
       - digitalSignature
