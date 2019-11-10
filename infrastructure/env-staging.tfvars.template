@@ -44,5 +44,19 @@ mariadb_sec_rules = [
         from = 3306
         to = 3306
         cidr = "0.0.0.0/0"
+    },
+    # Prometheus Node Exporter
+    {
+            protocol = "tcp"
+            from = 9100
+            to = 9100
+            cidr = "0.0.0.0/0"
+    },
+    # Prometheus MYSQLD Exporter
+    {
+        protocol = "tcp"
+        from = 9104
+        to = 9104
+        cidr = "0.0.0.0/0"
     }
 ]

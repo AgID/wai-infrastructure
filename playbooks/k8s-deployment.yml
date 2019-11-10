@@ -38,6 +38,21 @@
         filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-deployment.yml"
       with_items: "{{ wai_k8s_namespaces }}"
 
+   # Network policies
+    - name: K8S .:. Prepare network policy
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-np-{{ item }}.yml"
+        src: "k8s/k8s-np-{{ item }}.yml.j2"
+      with_items: "{{ wai_k8s_namespaces }}"
+
+    - name: K8S .:. Apply network policy
+      kube:
+        name: "k8s-network-policy"
+        kubectl: "{{ wai_kubectl }}"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-np-{{ item }}.yml"
+      with_items: "{{ wai_k8s_namespaces }}"
+
     # GlusterFS
     - name: K8S .:. Prepare GlusterFS endpoints
       template:

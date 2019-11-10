@@ -23,6 +23,16 @@ spec:
       labels:
         app: ingestion-redis-node
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - ingestion-redis-node
+            topologyKey: "kubernetes.io/hostname"
       initContainers:
         - name: wait-for-sentinel
           image: redis:{{ redis_image_version }}
