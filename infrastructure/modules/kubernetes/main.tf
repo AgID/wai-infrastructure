@@ -246,3 +246,113 @@ resource "openstack_compute_volume_attach_v2" "k8s_worker_data_volume_attach" {
     count.index,
   )
 }
+
+# Kubernetes Load Balancer Production
+resource "openstack_lb_loadbalancer_v2" "lb_k8s_production" {
+  count = length(var.k8s_worker_load_balancers)
+  name = format("lb-%s", var.k8s_worker_load_balancers[count.index])
+  vip_subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
+} 
+
+resource "openstack_lb_listener_v2" "lb_k8s_production_listener_443" {
+  count = length(var.k8s_worker_load_balancers)
+  name = format("lb-%s-listener-443", var.k8s_worker_load_balancers[count.index])
+  protocol        = "HTTP"
+  protocol_port   = 443
+  loadbalancer_id = openstack_lb_loadbalancer_v2.lb_k8s_production[count.index].id
+}
+
+resource "openstack_lb_listener_v2" "lb_k8s_production_listener_80" {
+  count = length(var.k8s_worker_load_balancers)
+  name = format("lb-%s-listener-80", var.k8s_worker_load_balancers[count.index])
+  protocol        = "HTTP"
+  protocol_port   = 80
+  loadbalancer_id = openstack_lb_loadbalancer_v2.lb_k8s_production[count.index].id
+}
+
+resource "openstack_lb_pool_v2" "lb_k8s_production_listener_443_pool" {
+  count = length(var.k8s_worker_load_balancers)
+  name = format("lb-%s-listener-443-pool", var.k8s_worker_load_balancers[count.index])
+  protocol    = "HTTP"
+  lb_method   = "SOURCE_IP"
+  listener_id = openstack_lb_listener_v2.lb_k8s_production_listener_443[count.index].id
+}
+
+resource "openstack_lb_pool_v2" "lb_k8s_production_listener_80_pool" {
+  count = length(var.k8s_worker_load_balancers)
+  name = format("lb-%s-listener-80-pool", var.k8s_worker_load_balancers[count.index])
+  protocol    = "HTTP"
+  lb_method   = "SOURCE_IP"
+  listener_id = openstack_lb_listener_v2.lb_k8s_production_listener_80[count.index].id
+}
+
+resource "openstack_lb_monitor_v2" "lb_k8s_production_listener_443_pool_monitor" {
+  count = length(var.k8s_worker_load_balancers)
+  pool_id     = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[count.index].id
+  type        = "TCP"
+  delay       = 20
+  timeout     = 10
+  max_retries = 5
+  admin_state_up = "true"
+}
+
+resource "openstack_lb_monitor_v2" "lb_k8s_production_listener_80_pool_monitor" {
+  count = length(var.k8s_worker_load_balancers)
+  pool_id     = openstack_lb_pool_v2.lb_k8s_production_listener_80_pool[count.index].id
+  type        = "TCP"
+  delay       = 20
+  timeout     = 10
+  max_retries = 5
+  admin_state_up = "true"
+}
+
+# K8S Production Members
+resource "openstack_lb_member_v2" "lb_k8s_production_listener_443_pool_members" {
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
+  pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[0].id
+  address = openstack_compute_instance_v2.k8s_worker_instance[count.index].access_ip_v4
+  subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
+  protocol_port = 30433
+}
+
+resource "openstack_lb_member_v2" "lb_k8s_production_listener_80_pool_members" {
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
+  pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_80_pool[0].id
+  address = openstack_compute_instance_v2.k8s_worker_instance[count.index].access_ip_v4
+  subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
+  protocol_port = 30080
+}
+
+# K8S Public Play Ground Members
+resource "openstack_lb_member_v2" "lb_k8s_public_play_listener_443_pool_members" {
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
+  pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[1].id
+  address = openstack_compute_instance_v2.k8s_worker_instance[count.index].access_ip_v4
+  subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
+  protocol_port = 30434
+}
+
+resource "openstack_lb_member_v2" "lb_k8s_public_play_listener_80_pool_members" {
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
+  pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_80_pool[1].id
+  address = openstack_compute_instance_v2.k8s_worker_instance[count.index].access_ip_v4
+  subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
+  protocol_port = 30081
+}
+
+# K8S Staging  Members
+resource "openstack_lb_member_v2" "lb_k8s_staging_listener_443_pool_members" {
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
+  pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[2].id
+  address = openstack_compute_instance_v2.k8s_worker_instance[count.index].access_ip_v4
+  subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
+  protocol_port = 30435
+}
+
+resource "openstack_lb_member_v2" "lb_k8s_staging_listener_80_pool_members" {
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
+  pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_80_pool[2].id
+  address = openstack_compute_instance_v2.k8s_worker_instance[count.index].access_ip_v4
+  subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
+  protocol_port = 30082
+}

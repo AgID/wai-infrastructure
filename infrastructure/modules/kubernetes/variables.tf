@@ -91,6 +91,12 @@ variable "k8s_worker_floatingips" {
   description = "Kubernetes worker assigned floating IP addresses"
 }
 
+# K8S worker assigned floating IPs
+variable "k8s_worker_load_balancers" {
+  type      = list(string)
+  default = ["production", "public-playground", "staging"]
+}
+
 locals {
   # Define resource names based on the following convention:
   # {project_name_prefix}-RESOURCE_TYPE
