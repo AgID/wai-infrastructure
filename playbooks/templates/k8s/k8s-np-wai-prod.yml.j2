@@ -20,21 +20,23 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
-  - Ingress
+  - Egress
   egress:
   # Allow connect to elastic
   - to:
 {% for es in  groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) %}
-      - ipBlock:
-          cidr: {{es}}/32
+    - ipBlock:
+        cidr: {{es}}/32
 {% endfor %}
-      ports:
-      - protocol: TCP
-        port: 9200
+    ports:
+    - protocol: TCP
+      port: 9200
   # Allow connect to mariadb
   - to:
-      - ipBlock:
-          cidr: {{ hostvars[groups['galera-prod'][0]]['rdbms_load_balancer']}}/32
-      ports:
-      - protocol: TCP
-        port: 3306
+    - ipBlock:
+        cidr: {{ hostvars[groups['galera-prod'][0]]['rdbms_load_balancer']}}/32
+    ports:
+    - protocol: TCP
+      port: 3306
+
+
