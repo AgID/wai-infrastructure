@@ -247,7 +247,7 @@ resource "openstack_compute_volume_attach_v2" "k8s_worker_data_volume_attach" {
   )
 }
 
-# Kubernetes Load Balancer Production
+# Kubernetes Load Balancer
 resource "openstack_lb_loadbalancer_v2" "lb_k8s_production" {
   count = length(var.k8s_worker_load_balancers)
   name = format("lb-%s", var.k8s_worker_load_balancers[count.index])
@@ -306,7 +306,7 @@ resource "openstack_lb_monitor_v2" "lb_k8s_production_listener_80_pool_monitor" 
   admin_state_up = "true"
 }
 
-# K8S Production Members
+# K8S Load Balancer Production Members
 resource "openstack_lb_member_v2" "lb_k8s_production_listener_443_pool_members" {
   count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
   pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[0].id
@@ -323,7 +323,7 @@ resource "openstack_lb_member_v2" "lb_k8s_production_listener_80_pool_members" {
   protocol_port = 30080
 }
 
-# K8S Public Play Ground Members
+# K8S Load Balancer Public Play Ground Members
 resource "openstack_lb_member_v2" "lb_k8s_public_play_listener_443_pool_members" {
   count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
   pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[1].id
@@ -340,7 +340,7 @@ resource "openstack_lb_member_v2" "lb_k8s_public_play_listener_80_pool_members" 
   protocol_port = 30081
 }
 
-# K8S Staging  Members
+# K8S Load Balancer Staging  Members
 resource "openstack_lb_member_v2" "lb_k8s_staging_listener_443_pool_members" {
   count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
   pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[2].id
