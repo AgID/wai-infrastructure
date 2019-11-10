@@ -1,2 +1,4 @@
 # Override Kubespray: enable metrics server addon
 metrics_server_enabled: true
+# Enable helm
+helm_enabled: true

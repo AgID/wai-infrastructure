@@ -79,3 +79,8 @@ mariadb_repo_key: '0xF1656F24C74CD1D8'
 mariadb_repo_keyserver: 'keyserver.ubuntu.com'
 mariadb_repo_origin: ftp.heanet.ie
 mariadb_version: '10.4'
+
+# Prometheus Node Exporter override vars
+prometheus_exporter_url:  https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz
+# Prometheus MySQL exporter override vars
+prometheus_mysqld_exporter_url:  https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mysqld_exporter-0.12.1.linux-amd64.tar.gz

@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+[Unit]
+Description={{ prometheus_mysqld_exporter_service_description }}
+
+[Service]
+User={{ prometheus_mysqld_exporter_user }}
+EnvironmentFile=/etc/default/{{ prometheus_mysqld_exporter_bin }}
+ExecStart={{ prometheus_mysqld_exporter_home }}/{{ prometheus_mysqld_exporter_bin }} $OPTIONS
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

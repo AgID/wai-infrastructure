@@ -1,0 +1,126 @@
+---
+# Deploy K8S WAI Resources
+- hosts: kube-master[0]
+  tasks:
+    - include_vars:
+        file: password.yml
+
+    # Base objects
+    - name: K8S .:. Create destination directory
+      file:
+        path: "{{ wai_k8s_deployment_dir }}"
+        state: directory
+
+      # Install pyhton3
+    - name: K8S Helm .:. Install python
+      apt:
+        update_cache: true
+        name: 
+          - python3
+          - git
+          - python3-pip
+        state: present
+
+    # Install PYHelm
+    - name: K8S Helm .:. Install requirements
+      pip:
+        name: 
+          - pygit2
+          - pyhelm
+          - grpcio
+
+    # Get tiller clusterID
+    - name: K8S Helm .:. Find tiller Cluster IP
+      shell: kubectl get svc -n kube-system tiller-deploy -o=jsonpath='{.spec.clusterIP}'
+      register: clusterIP
+
+    # Install cert manager
+    - name: K8S Helm .:. Download Cert-Manager requirements
+      get_url:
+        url: https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml
+        dest: "{{ wai_k8s_deployment_dir }}/crds.yaml"
+
+    - name: K8S Helm .:. Install Cert-Manager requirements
+      raw: "{{ wai_kubectl }} apply --validate=false -f {{ wai_k8s_deployment_dir }}/crds.yaml"
+
+    - name: K8S Helm .:. Install Cert-Manager
+      helm:
+        namespace: cert-manager
+        name: cert-manager
+        chart: 
+          name: cert-manager
+          source:
+            type: repo
+            location: https://charts.jetstack.io
+            path: jetstack/cert-manager
+        host: "{{ clusterIP.stdout }}"
+        state: present
+
+    - name: K8S Helm .:. Prepare cluster issuer
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
+        src: k8s/cluster-issuer.yml.j2
+
+    - name: K8S Helm .:. Deploy cluster issuer
+      kube:
+        name: "k8s-deployment"
+        kubectl: "{{ wai_kubectl }}"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
+
+    # Install Prometheus
+    - name: K8S Helm .:. Install Prometheus
+      helm:
+        namespace: monitoring
+        name: prometheus
+        chart: 
+          name: prometheus
+          source:
+            type: git
+            location: https://github.com/helm/charts.git
+            path: stable/prometheus
+        host: "{{ clusterIP.stdout }}"
+        state: present
+        values: 
+          server:
+            ingress:
+              enabled: false
+            persistentVolume:
+              enabled: false
+              storageClass: storage-nfs
+          networkPolicy:
+            enabled: false
+          alertmanager:
+            persistentVolume:
+              enabled: false
+              storageClass: storage-nfs
+
+    # Install Grafana
+    - name: K8S Helm .:. Install Grafana
+      helm:
+        namespace: monitoring
+        name: grafana
+        chart:
+          name: grafana
+          source:
+            type: git
+            location: https://github.com/helm/charts.git
+            path: stable/grafana
+        state: present
+        host: "{{ clusterIP.stdout }}"
+        values: 
+          ingress:
+            enabled: false
+          persistence:
+            enabled: false
+            size: 8Gi
+            storageClassName: storage-nfs
+          initChownData:
+            enabled: false
+          resources:
+            limits:
+              cpu: "0.25"
+              memory: "1024Mi"
+            requests:    
+              cpu: "0.25"
+              memory: "512Mi"
