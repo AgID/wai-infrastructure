@@ -6,21 +6,21 @@
     name: ['software-properties-common', 'python3-pymysql']
     state: present
 
-# - name: MariaDB .:. Add MariaDB repository keys
-#   apt_key:
-#     keyserver: "{{ mariadb_repo_keyserver }}"
-#     id: "{{ mariadb_repo_key }}"
-#     state: "present"
+- name: MariaDB .:. Add MariaDB repository keys
+  apt_key:
+    keyserver: "{{ mariadb_repo_keyserver }}"
+    id: "{{ mariadb_repo_key }}"
+    state: "present"
 
-# - name: MariaDB .:. Pin MariaDB repository
-#   template:
-#     src: "mariadb_repo.j2"
-#     dest: "/etc/apt/preferences.d/mariadb"
+- name: MariaDB .:. Pin MariaDB repository
+  template:
+    src: "mariadb_repo.j2"
+    dest: "/etc/apt/preferences.d/mariadb"
 
-# - name: MariaDB .:. Add MariaDB repository
-#   apt_repository:
-#     repo: "{{ mariadb_repo }}"
-#     state: "present"
+- name: MariaDB .:. Add MariaDB repository
+  apt_repository:
+    repo: "{{ mariadb_repo }}"
+    state: "present"
 
 - name: MariaDB .:. Test if root .mysql file exists
   stat:
@@ -35,7 +35,7 @@
 - name: MariaDB .:. Install MariaDB
   apt: 
     update_cache: false
-    name: mariadb-server
+    name: mariadb-server-10.4
     state: present
   when: mariadb_mycnf_result.stat.exists == false
 
