@@ -35,7 +35,7 @@
 - name: MariaDB .:. Install MariaDB
   apt: 
     update_cache: false
-    name: mariadb-server-10.4
+    name: "mariadb-server-{{ mariadb_version }}"
     state: present
   when: mariadb_mycnf_result.stat.exists == false
 
