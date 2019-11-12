@@ -6,20 +6,36 @@ metadata:
   name: matomo-php-config
   namespace: {{ item }}
 data:
-  config.ini.php-configmap: |-
+  config.ini.php: |-
 
     [database]
-    host = "@DATABASE_HOST@"
-    username = "@DATABASE_USER@"
-    password = "@DATABASE_PASSWORD@"
+    host = "{{ wai_rdbms_load_balancer[item][0] }}"
+    username = "matomo-admin"
+    password = "{{ wai_database_password[item]['matomo-admin'] }}"
     dbname = "matomo"
-    tables_prefix = "matomo_"
+
+    {% if wai_rdbms_load_balancer[item] | length > 1 %}
+    
+    [database_reader]
+    host = "{{ wai_rdbms_load_balancer[item][1] }}"
+    username = "matomo-user"
+    password = "{{ wai_database_password[item]['matomo-user'] }}"
+    dbname = "matomo"
+    {% endif %}
 
     [General]
     salt = "{{ ansible_date_time.iso8601_micro | md5 }}"
     trusted_hosts[] = "localhost"
     trusted_hosts[] = "127.0.0.1"
     enable_update_users_email = 0
+    enable_trusted_host_check = 0
+    force_ssl = 0
+    enable_update_users_email = 0
+    emails_enabled = 0
+    assume_secure_protocol = 1
+    enable_update_communication = 0
+    enable_auto_update = 0
+    show_update_notification_to_superusers_only = 1
 
     [Plugins]
     Plugins[] = "CorePluginsAdmin"
