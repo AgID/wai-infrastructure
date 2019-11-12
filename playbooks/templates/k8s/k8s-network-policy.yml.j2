@@ -21,6 +21,10 @@ spec:
   podSelector: {}
   policyTypes:
   - Egress
+  - Ingress
+  ingress:
+  - ports:
+    - port: 80
   egress:
   # Allow connect to elastic
   - to:
@@ -40,4 +44,10 @@ spec:
     ports:
     - protocol: TCP
       port: 3306
-
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
