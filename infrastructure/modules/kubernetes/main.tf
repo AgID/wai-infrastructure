@@ -312,7 +312,7 @@ resource "openstack_lb_member_v2" "lb_k8s_production_listener_443_pool_members" 
   pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[0].id
   address = openstack_compute_instance_v2.k8s_worker_instance[count.index].access_ip_v4
   subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
-  protocol_port = 30433
+  protocol_port = 30443
 }
 
 resource "openstack_lb_member_v2" "lb_k8s_production_listener_80_pool_members" {
@@ -329,7 +329,7 @@ resource "openstack_lb_member_v2" "lb_k8s_public_play_listener_443_pool_members"
   pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[1].id
   address = openstack_compute_instance_v2.k8s_worker_instance[count.index].access_ip_v4
   subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
-  protocol_port = 30434
+  protocol_port = 30444
 }
 
 resource "openstack_lb_member_v2" "lb_k8s_public_play_listener_80_pool_members" {
@@ -346,7 +346,7 @@ resource "openstack_lb_member_v2" "lb_k8s_staging_listener_443_pool_members" {
   pool_id = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[2].id
   address = openstack_compute_instance_v2.k8s_worker_instance[count.index].access_ip_v4
   subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
-  protocol_port = 30435
+  protocol_port = 30445
 }
 
 resource "openstack_lb_member_v2" "lb_k8s_staging_listener_80_pool_members" {
