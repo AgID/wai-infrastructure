@@ -249,13 +249,13 @@ resource "openstack_compute_volume_attach_v2" "k8s_worker_data_volume_attach" {
 
 # Kubernetes Load Balancer
 resource "openstack_lb_loadbalancer_v2" "lb_k8s_production" {
-  count = length(var.k8s_worker_load_balancers)
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", length(var.k8s_worker_load_balancers)) : 0  
   name = format("lb-%s", var.k8s_worker_load_balancers[count.index])
   vip_subnet_id = openstack_networking_subnet_v2.k8s_subnet[0].id
 } 
 
 resource "openstack_lb_listener_v2" "lb_k8s_production_listener_443" {
-  count = length(var.k8s_worker_load_balancers)
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", length(var.k8s_worker_load_balancers)) : 0  
   name = format("lb-%s-listener-443", var.k8s_worker_load_balancers[count.index])
   protocol        = "TCP"
   protocol_port   = 443
@@ -263,7 +263,7 @@ resource "openstack_lb_listener_v2" "lb_k8s_production_listener_443" {
 }
 
 resource "openstack_lb_listener_v2" "lb_k8s_production_listener_80" {
-  count = length(var.k8s_worker_load_balancers)
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", length(var.k8s_worker_load_balancers)) : 0  
   name = format("lb-%s-listener-80", var.k8s_worker_load_balancers[count.index])
   protocol        = "TCP"
   protocol_port   = 80
@@ -271,7 +271,7 @@ resource "openstack_lb_listener_v2" "lb_k8s_production_listener_80" {
 }
 
 resource "openstack_lb_pool_v2" "lb_k8s_production_listener_443_pool" {
-  count = length(var.k8s_worker_load_balancers)
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", length(var.k8s_worker_load_balancers)) : 0  
   name = format("lb-%s-listener-443-pool", var.k8s_worker_load_balancers[count.index])
   protocol    = "TCP"
   lb_method   = "SOURCE_IP"
@@ -279,7 +279,7 @@ resource "openstack_lb_pool_v2" "lb_k8s_production_listener_443_pool" {
 }
 
 resource "openstack_lb_pool_v2" "lb_k8s_production_listener_80_pool" {
-  count = length(var.k8s_worker_load_balancers)
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", length(var.k8s_worker_load_balancers)) : 0  
   name = format("lb-%s-listener-80-pool", var.k8s_worker_load_balancers[count.index])
   protocol    = "TCP"
   lb_method   = "SOURCE_IP"
@@ -287,7 +287,7 @@ resource "openstack_lb_pool_v2" "lb_k8s_production_listener_80_pool" {
 }
 
 resource "openstack_lb_monitor_v2" "lb_k8s_production_listener_443_pool_monitor" {
-  count = length(var.k8s_worker_load_balancers)
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", length(var.k8s_worker_load_balancers)) : 0  
   pool_id     = openstack_lb_pool_v2.lb_k8s_production_listener_443_pool[count.index].id
   type        = "TCP"
   delay       = 20
@@ -297,7 +297,7 @@ resource "openstack_lb_monitor_v2" "lb_k8s_production_listener_443_pool_monitor"
 }
 
 resource "openstack_lb_monitor_v2" "lb_k8s_production_listener_80_pool_monitor" {
-  count = length(var.k8s_worker_load_balancers)
+  count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", length(var.k8s_worker_load_balancers)) : 0  
   pool_id     = openstack_lb_pool_v2.lb_k8s_production_listener_80_pool[count.index].id
   type        = "TCP"
   delay       = 20
