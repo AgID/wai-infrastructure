@@ -133,7 +133,7 @@
             slaveCount: 2
           usePassword: true
           existingSecret: redis-master-secret
-          existingSecretPasswordKey: "{{ item[1] }}"
+          existingSecretPasswordKey: "{{ item[1] }}-password"
           fullnameOverride: "{{ item[1] }}"
           metrics:
             enabled: true
