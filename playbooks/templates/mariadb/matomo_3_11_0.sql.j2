@@ -855,3 +855,51 @@ CREATE TABLE `queuedtracking_queue` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+INSERT INTO `plugin_setting` VALUES
+    ('Tour','view_visits_log_completed','1',0,'admin',8),
+	('Tour','view_visitor_profile_completed','1',0,'admin',10),
+	('Tour','browse_marketplace_completed','1',0,'admin',12),
+	('CoreUpdater','enable_plugin_update_communication','0',0,'',13),
+	('QueuedTracking','backend','redis',0,'',25),
+	('QueuedTracking','useSentinelBackend','1',0,'',26),
+	('QueuedTracking','sentinelMasterName','mymaster',0,'',27),
+	('QueuedTracking','redisHost','192.168.50.200',0,'',28),
+	('QueuedTracking','redisPort','26379',0,'',29),
+	('QueuedTracking','redisDatabase','0',0,'',30),
+	('QueuedTracking','redisPassword','',0,'',31),
+	('QueuedTracking','queueEnabled','1',0,'',32),
+	('QueuedTracking','numQueueWorkers','8',0,'',33),
+	('QueuedTracking','numRequestsToProcess','25',0,'',34),
+	('QueuedTracking','processDuringTrackingRequest','1',0,'',35),
+	('ProtectTrackID','baseSetting','ABCDEFGHIJKLMNOPijklmnopqrstuvxwyz12345',0,'',36),
+	('ProtectTrackID','saltSetting','lkasjdhsaljh',0,'',37),
+	('ProtectTrackID','lengthSetting','10',0,'',38);
+
+
+  CREATE TABLE `custom_dimensions` (
+  `idcustomdimension` bigint(20) unsigned NOT NULL,
+  `idsite` bigint(20) unsigned NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `index` smallint(5) unsigned NOT NULL,
+  `scope` varchar(10) NOT NULL,
+  `active` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `extractions` text NOT NULL DEFAULT '',
+  `case_sensitive` tinyint(3) unsigned NOT NULL DEFAULT 1,
+  PRIMARY KEY (`idcustomdimension`,`idsite`),
+  UNIQUE KEY `uniq_hash` (`idsite`,`scope`,`index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `abilities` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `entity_id` int(10) unsigned DEFAULT NULL,
+  `entity_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `only_owned` tinyint(1) NOT NULL DEFAULT 0,
+  `options` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`options`)),
+  `scope` int(11) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `abilities_scope_index` (`scope`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
