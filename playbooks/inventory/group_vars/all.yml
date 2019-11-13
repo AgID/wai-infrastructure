@@ -27,6 +27,7 @@ wai_base_domain:
   wai-stag: staging.webanalytics.italia.it
 
 # RDBMS Load Balancer
+# The following IP addresses are just placeholders and must be replaced with the real ones after all the LBs are created.
 wai_rdbms_load_balancer:
   wai-prod:  
     - 1.1.1.1
