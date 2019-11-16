@@ -29,6 +29,11 @@ wai_base_domain:
 # Hostnames
 wai_hostname: { ingestion: ingestion, matomo: matomo, portal: www, api: api}
 
+# Helm 
+helm:
+  cert_manager:
+    version: v0.11.0
+    
 # Matomo POD size configuration
 wai_matomo_pod_size:
   wai-prod: { wai-portal: 4, wai-reporting: 4, wai-api: 4, matomo-portal: 4, matomo-worker: 8, matomo-ingestion: 8, matomo-api: 4 }

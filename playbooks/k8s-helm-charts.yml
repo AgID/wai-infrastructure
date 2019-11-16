@@ -49,7 +49,7 @@
         name: cert-manager
         chart: 
           name: cert-manager
-          version: v0.11.0
+          version: {{ helm.cert_manager.version }}
           source:
             type: repo
             location: https://charts.jetstack.io
