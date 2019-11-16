@@ -43,6 +43,7 @@ wai_k8s_resource_quota:
 
 # Portal base image
 wai_portal_base_image: giafar/portal:dev4
+wai_portal_matomo_sub_path: /matomo
 # Base Matomo Image    
 wai_matomo_base_image: giafar/matomo:dev2
 wai_kube_state_metrics_version: v1.5.0
