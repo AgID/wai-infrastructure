@@ -131,6 +131,8 @@
           image:
             repository: "{{ wai_redis_base_image }}"
             tag: "{{ wai_redis_base_image_tag }}"
+          configmap:
+            - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
           cluster:
             enabled: true
             slaveCount: 2
