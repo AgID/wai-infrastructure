@@ -20,7 +20,15 @@ data:
     trusted_hosts[] = "localhost"
     trusted_hosts[] = "127.0.0.1"
     enable_update_users_email = 0
-
+    enable_trusted_host_check = 0
+    force_ssl = 1
+    enable_update_users_email = 0
+    emails_enabled = 0
+    assume_secure_protocol = 1
+    enable_update_communication = 0
+    enable_auto_update = 0
+    show_update_notification_to_superusers_only = 1
+    
     [Plugins]
     Plugins[] = "CorePluginsAdmin"
     Plugins[] = "CoreAdminHome"
@@ -31,7 +39,6 @@ data:
     Plugins[] = "CoreVisualizations"
     Plugins[] = "Proxy"
     Plugins[] = "API"
-    Plugins[] = "ExamplePlugin"
     Plugins[] = "Widgetize"
     Plugins[] = "Transitions"
     Plugins[] = "LanguagesManager"
@@ -51,7 +58,6 @@ data:
     Plugins[] = "VisitFrequency"
     Plugins[] = "VisitTime"
     Plugins[] = "VisitorInterest"
-    Plugins[] = "ExampleAPI"
     Plugins[] = "RssWidget"
     Plugins[] = "Feedback"
     Plugins[] = "Monolog"
@@ -83,9 +89,11 @@ data:
     Plugins[] = "Marketplace"
     Plugins[] = "ProfessionalServices"
     Plugins[] = "UserId"
-    Plugins[] = "CustomPiwikJs"
+    Plugins[] = "CustomPiwikJs" 
     Plugins[] = "QueuedTracking"
     Plugins[] = "VisitorGenerator"
+    Plugins[] = "ProtectTrackID"
+    Plugins[] = "CustomDimensions"
 
     [PluginsInstalled]
     PluginsInstalled[] = "Diagnostics"
@@ -103,7 +111,6 @@ data:
     PluginsInstalled[] = "CoreVisualizations"
     PluginsInstalled[] = "Proxy"
     PluginsInstalled[] = "API"
-    PluginsInstalled[] = "ExamplePlugin"
     PluginsInstalled[] = "Widgetize"
     PluginsInstalled[] = "Transitions"
     PluginsInstalled[] = "LanguagesManager"
@@ -123,7 +130,6 @@ data:
     PluginsInstalled[] = "VisitFrequency"
     PluginsInstalled[] = "VisitTime"
     PluginsInstalled[] = "VisitorInterest"
-    PluginsInstalled[] = "ExampleAPI"
     PluginsInstalled[] = "RssWidget"
     PluginsInstalled[] = "Feedback"
     PluginsInstalled[] = "TwoFactorAuth"
@@ -151,6 +157,8 @@ data:
     PluginsInstalled[] = "UserId"
     PluginsInstalled[] = "CustomPiwikJs"
     PluginsInstalled[] = "QueuedTracking"
+    PluginsInstalled[] = "ProtectTrackID"
+    PluginsInstalled[] = "CustomDimensions"
 
     [QueuedTracking]
     notify_queue_threshold_single_queue = 250000
