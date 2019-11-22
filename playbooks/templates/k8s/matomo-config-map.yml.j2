@@ -32,7 +32,6 @@ data:
 
     trusted_hosts[] = "{{ wai_hostname[attr] }}.{{ wai_base_domain[item] }}"
     {%endif %}
-    enable_update_users_email = 0
     enable_trusted_host_check = 1
     force_ssl = 1
     enable_update_users_email = 0
