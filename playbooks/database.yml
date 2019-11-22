@@ -88,7 +88,7 @@
         name: matomo-user
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
         password: "{{ wai_database_password[wai_environment]['matomo-user'] }}"
-        priv: "matomo.*:SELECT"
+        priv: "matomo.*:SELECT,CREATE TEMPORARY TABLES,LOCK TABLES"
         host: "%"
         state: present
 
