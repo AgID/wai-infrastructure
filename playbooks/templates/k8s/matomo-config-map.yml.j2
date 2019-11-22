@@ -11,7 +11,7 @@ data:
     [database]
     host = "{{ wai_rdbms_load_balancer[item][0] }}"
     username = "matomo-admin"
-    password = "{{ wai_database_password[item]['matomo-admin'] }}"
+    password = "{{ wai_database_credentials[item]['matomo-admin'] }}"
     dbname = "matomo"
 
     {% if wai_rdbms_load_balancer[item] | length > 1 %}
@@ -19,7 +19,7 @@ data:
     [database_reader]
     host = "{{ wai_rdbms_load_balancer[item][1] }}"
     username = "matomo-user"
-    password = "{{ wai_database_password[item]['matomo-user'] }}"
+    password = "{{ wai_database_credentials[item]['matomo-user'] }}"
     dbname = "matomo"
     {% endif %}
 

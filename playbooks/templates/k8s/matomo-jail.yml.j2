@@ -63,16 +63,6 @@ spec:
         - name: {{ matomo_name }}-config
           mountPath: /var/www/html/config/config.ini.php
           subPath: config.ini.php
-        env:
-        - name: DATABASE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: matomo-secret-{{ matomo_database_user }}
-              key: password
-        - name: DATABASE_USER
-          value: {{ matomo_database_user }}
-        - name: DATABASE_HOST
-          value: {{ matomo_database_host }}
       - image: nginx:1.15.8
         name: nginx
         resources:
