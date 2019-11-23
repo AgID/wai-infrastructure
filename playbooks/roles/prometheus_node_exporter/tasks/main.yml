@@ -1,0 +1,56 @@
+- name: Prometheus Node Exporter .:. Base directory
+  file:
+    path: '{{prometheus_exporter_home}}' 
+    state: directory
+
+- name: Prometheus Node Exporter .:. Add Group
+  group:
+    name: '{{ prometheus_exporter_group }}'
+    state: present 
+    gid: '{{ prometheus_exporter_gid}}'
+
+- name: Prometheus Node Exporter .:. Add user
+  user:
+    name: '{{prometheus_exporter_user}}'
+    create_home: yes 
+    home: '{{prometheus_exporter_home}}'
+    uid: '{{prometheus_exporter_uid}}' 
+    group: '{{prometheus_exporter_group}}' 
+    state: present
+    shell: /bin/false
+
+- name: Prometheus Node Exporter .:. Download file
+  get_url:
+    url: '{{prometheus_exporter_url}}'
+    dest: /tmp/node_exporter.tar.gz
+
+- name: Prometheus Node Exporter .:. Explode distribution
+  unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: '{{prometheus_exporter_home}}'
+    owner: '{{ prometheus_exporter_user }}'
+    group: '{{ prometheus_exporter_group }}'
+    extra_opts: [--strip-components=1]
+    remote_src: yes
+
+- name: Prometheus Node Exporter .:. Create systemctl service file
+  template:
+    dest: '/etc/systemd/system/node_exporter.service'
+    src: 'node_exporter.service.j2'
+
+- name: Prometheus Node Exporter .:. Environment file
+  template:
+    dest: '/etc/default/node_exporter'
+    src: 'node_exporter_config.j2'
+
+- name: Prometheus Node Exporter .:. Enable and start service
+  systemd:
+    name: 'node_exporter' 
+    enabled: yes
+    daemon_reload: yes
+    state: started
+
+- name: Prometheus Node Exporter .:. Clean up
+  file:
+    state: absent
+    path: '/tmp/node_exporter.tar.gz'

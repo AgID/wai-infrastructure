@@ -19,6 +19,16 @@ spec:
       labels:
         app: {{ matomo_name }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{ matomo_name }}
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - image: {{ wai_matomo_base_image }}
         name: {{ matomo_name }}
@@ -183,6 +193,7 @@ metadata:
   namespace: {{ item }}
   annotations:
     kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod    
     {% if matomo_enable_session is defined and matomo_enable_session %}
     nginx.ingress.kubernetes.io/affinity: "cookie"
     nginx.ingress.kubernetes.io/session-cookie-name: "route"
@@ -190,6 +201,10 @@ metadata:
     {% endif %}
 
 spec:
+  tls:
+  - hosts:
+    - {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
+    secretName: ingress-acme-tls
   rules:
     - host: {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
       http:

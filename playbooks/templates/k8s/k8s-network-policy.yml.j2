@@ -1,0 +1,53 @@
+# {{ ansible_managed }}
+# Deny all traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-network-policy
+  namespace: {{ item }}
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+# Allow egresss to Elastic search
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-network-policy
+  namespace: {{ item }}
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  - Ingress
+  ingress:
+  - ports:
+    - port: 80
+  egress:
+  # Allow connect to elastic
+  - to:
+{% for es in  groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) %}
+    - ipBlock:
+        cidr: {{es}}/32
+{% endfor %}
+    ports:
+    - protocol: TCP
+      port: 9200
+  # Allow connect to mariadb
+  - to:
+{% for host in  wai_rdbms_load_balancer[item] %}
+    - ipBlock:
+        cidr: {{ host }}/32
+{% endfor %}
+    ports:
+    - protocol: TCP
+      port: 3306
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53

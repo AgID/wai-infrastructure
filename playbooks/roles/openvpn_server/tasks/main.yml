@@ -1,0 +1,143 @@
+- include_vars:
+    file: password.yml
+
+- name: OpenVPN Server .:. Installing server
+  apt:
+    update_cache: true
+    name: openvpn
+    state: present
+
+- name: OpenVPNServer .:. Ensure directories
+  file:
+    path: /etc/openvpn/certs 
+    state: directory
+
+- name: OpenVPN Server .:. Create root CA private key
+  openssl_privatekey:
+    path: /etc/openvpn/certs/wai-operation-root-ca.key
+    passphrase: "{{ openvpn_root_ca_password }}"
+    cipher: des3
+    size: 4096
+
+- name: OpenVPN Server .:. Create root CA csr
+  openssl_csr:
+    path: /etc/openvpn/certs/wai-operation-root-ca.csr
+    privatekey_passphrase: "{{ openvpn_root_ca_password }}"
+    privatekey_path: /etc/openvpn/certs/wai-operation-root-ca.key
+    country_name: IT
+    state_or_province_name: Roma
+    organization_name: AGID
+    email_address: protocollo@pec.agid.gov.it
+    common_name: AGID - Web Analytics Italia Root CA
+    basic_constraints: "CA:true"
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+      - cRLSign
+      - digitalSignature
+
+- name: OpenVPN Server .:. Create root CA certificate
+  openssl_certificate:
+    path: /etc/openvpn/certs/wai-operation-root-ca.crt
+    provider: selfsigned 
+    subject_alt_name_strict: false
+    csr_path: /etc/openvpn/certs/wai-operation-root-ca.csr
+    privatekey_passphrase: "{{ openvpn_root_ca_password }}"
+    privatekey_path: /etc/openvpn/certs/wai-operation-root-ca.key
+    valid_in: 315360000
+
+- name: OpenVPN Server .:. Create vpn server private key
+  openssl_privatekey:
+    path: /etc/openvpn/certs/vpn-server.key
+    size: 2048
+
+- name: OpenVPN Server .:. Create vpn server csr
+  openssl_csr:
+    path: /etc/openvpn/certs/vpn-server.csr
+    privatekey_path: /etc/openvpn/certs/vpn-server.key
+    country_name: IT
+    state_or_province_name: Roma
+    organization_name: AGID
+    email_address: protocollo@pec.agid.gov.it
+    common_name: vpn-server
+    key_usage:
+      - digitalSignature
+      - keyAgreement
+    extended_key_usage:
+      - serverAuth
+
+- name: OpenVPN Server .:. Create vpn server certificate
+  openssl_certificate:
+    path: /etc/openvpn/certs/vpn-server.crt
+    provider: ownca 
+    subject_alt_name_strict: false
+    csr_path: /etc/openvpn/certs/vpn-server.csr
+    ownca_path: /etc/openvpn/certs/wai-operation-root-ca.crt
+    ownca_privatekey_passphrase: "{{ openvpn_root_ca_password }}"
+    ownca_privatekey_path: /etc/openvpn/certs/wai-operation-root-ca.key
+    valid_in: 315360000
+
+- name: OpenVPN Server .:. Create default user private key
+  openssl_privatekey:
+    path: /etc/openvpn/certs/user-admin.key
+    size: 2048
+
+- name: OpenVPN Server .:. Create default user csr
+  openssl_csr:
+    path: /etc/openvpn/certs/user-admin.crs
+    privatekey_path: /etc/openvpn/certs/user-admin.key
+    country_name: IT
+    state_or_province_name: Roma
+    organization_name: AGID
+    email_address: protocollo@pec.agid.gov.it
+    common_name: user-admin
+    key_usage:
+      - digitalSignature
+      - keyAgreement
+    extended_key_usage:
+      - clientAuth
+
+- name: OpenVPN Server .:. Create default user certificate
+  openssl_certificate:
+    path: /etc/openvpn/certs/user-admin.crt
+    provider: ownca 
+    subject_alt_name_strict: false
+    csr_path: /etc/openvpn/certs/user-admin.crs
+    ownca_path: /etc/openvpn/certs/wai-operation-root-ca.crt
+    ownca_privatekey_passphrase: "{{ openvpn_root_ca_password }}"
+    ownca_privatekey_path: /etc/openvpn/certs/wai-operation-root-ca.key
+    valid_in: 315360000
+
+- name: OpenVPN Server .:. Create dh param
+  openssl_dhparam:
+    path: /etc/openvpn/certs/dhparams.pem
+    size: 1024
+
+- name: OpenVPN Server .:. Copy configuration file
+  template:
+    dest: /etc/openvpn/server.conf
+    src: server.conf.j2
+
+- name: OpenVPN Server .:. Ensure server restart
+  service:
+    name: openvpn@server
+    state: restarted
+    enabled: yes
+
+- name: OpenVPN Server .:. Enable ip forward
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: OpenVPN Server .:. Enable masquerade
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    protocol: tcp
+    match: tcp
+    jump: MASQUERADE
+    comment: Masquerade OpenVPN traffic
+  become: yes

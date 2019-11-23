@@ -23,6 +23,13 @@
   roles:
     - infrastructure
 
+# Open VPN Server
+- hosts: localhost
+  tags:
+    - openvpn
+  roles:
+    - openvpn_server
+
 # Install elastic search
 - hosts: elastic
   vars_files:
@@ -33,6 +40,7 @@
     - production
   roles:
     - elastic.elasticsearch
+    - prometheus_node_exporter
 
 # Install kibana
 - hosts: kibana
@@ -53,7 +61,8 @@
     - production
   roles:
     - galera
-    - metricbeat
+    - prometheus_node_exporter
+    - prometheus_mysqld_exporter
 
 # Install galera prod slave cluster
 - hosts: galera-prod-slave
@@ -63,7 +72,8 @@
     - production
   roles:
     - galera
-    - metricbeat
+    - prometheus_node_exporter
+    - prometheus_mysqld_exporter
 
 # Install galera public play ground cluster
 - hosts: galera-play
@@ -73,7 +83,8 @@
     - public-playground
   roles:
     - galera
-    - metricbeat
+    - prometheus_node_exporter
+    - prometheus_mysqld_exporter
 
 # Install mariadb stage server
 - hosts: mariadb-stag
@@ -83,7 +94,8 @@
     - staging
   roles:
     - mariadb
-    - metricbeat
+    - prometheus_node_exporter
+    - prometheus_mysqld_exporter
 
 # Install GlusterFS server
 - hosts: gluster
@@ -93,7 +105,7 @@
     - production
   roles:
     - glusterfs
-    - metricbeat
+    - prometheus_node_exporter
 
 # Install GlusterFS client
 - hosts: kube-node
@@ -125,6 +137,13 @@
     - deploy
     - kubernetes-deploy
   import_playbook: k8s-deployment.yml
+
+# Configure K8S helm resources
+- name: Deploy WAI K8S Helm resources
+  tags:
+    - deploy
+    - kubernetes-deploy-helm
+  import_playbook: k8s-helm-charts.yml
 
   # Install metricbeat on kube-master nodes
 - hosts: kube-master
