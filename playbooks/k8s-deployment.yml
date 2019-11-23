@@ -37,12 +37,27 @@
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-deployment.yml"
       with_items: "{{ wai_k8s_namespaces }}"
+      
+    # Deploy roles
+    - name: K8S .:. Prepare roles
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-rbac-{{ item }}.yml"
+        src: "k8s/k8s-rbac-{{ item }}.yml.j2"
+      with_items: "{{ wai_k8s_namespaces }}"
+
+    - name: K8S .:. Apply roles
+      kube:
+        name: "k8s-roles"
+        kubectl: "{{ wai_kubectl }}"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-rbac-{{ item }}.yml"
+      with_items: "{{ wai_k8s_namespaces }}"
 
    # Network policies
     - name: K8S .:. Prepare network policy
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-np-{{ item }}.yml"
-        src: "k8s/k8s-np-{{ item }}.yml.j2"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-network-policy.yml"
+        src: "k8s/k8s-network-policy.yml.j2"
       with_items: "{{ wai_k8s_namespaces }}"
 
     - name: K8S .:. Apply network policy
@@ -50,7 +65,7 @@
         name: "k8s-network-policy"
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
-        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-np-{{ item }}.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-network-policy.yml"
       with_items: "{{ wai_k8s_namespaces }}"
 
     # GlusterFS
@@ -248,18 +263,3 @@
         filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/redis-secrets.yml"
         state: "latest"
       with_items: "{{ wai_k8s_namespaces }}"
-
-    # Deploy Redis Sentinel
-    - name: K8S .:. Prepare Redis & Sentinel template
-      template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/ingestion-redis.yml"
-        src: k8s/redis-ingestion.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}" 
-
-    - name: K8S .:. Deploy Redis & Sentinel
-      kube:
-        name: "redis-ingestion"
-        kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/ingestion-redis.yml"
-        state: "latest"
-      with_items: "{{ wai_k8s_namespaces }}" 
