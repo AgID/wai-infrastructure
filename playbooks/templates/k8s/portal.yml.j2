@@ -132,10 +132,16 @@ data:
 
     ELASTICSEARCH_HOST=elasticsearch
     ELASTICSEARCH_PORT=9200
-    ELASTICSEARCH_INDEX_PREFIX=prefix
-    ELASTICSEARCH_INDEX_NAME=wai
+    ELASTICSEARCH_INDEX_PREFIX=wai
+    ELASTICSEARCH_INDEX_NAME=application-log
     ELASTICSEARCH_IGNORE_EXCEPTIONS=false
-    ELASTICSEARCH_SEARCH_TEMPLATE_NAME=search
+    ELASTICSEARCH_SEARCH_TEMPLATE_NAME=wai-portal-search-template
+    ELASTICSEARCH_USER=portal_user
+    ELASTICSEARCH_PASSWORD={{ elasticsearch_secrets.portal_user }}
+
+    SESSION_ENCRYPT=true
+    SPID_VALIDATOR_URL=https://validator.spid.gov.it/samlsso
+    SESSION_SECURE_COOKIE=true
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -320,3 +326,58 @@ spec:
             name: portal-env-configmap
         - name: html
           emptyDir: {}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: portal-queue-worker
+  namespace: {{ item }}
+spec:
+  containers:
+  - image: {{ wai_portal_base_image }}
+    name: portal
+    command: [“/usr/local/bin/php”, “artisan”, “queue:work”]
+    resources:
+      limits:
+        cpu: “0.75"
+        memory: “250Mi”
+    volumeMounts:
+    - name: portal-env-conf
+      mountPath: /var/www/html/.env
+      subPath: env
+  volumes:
+    - name: portal-env-conf
+      configMap:
+        name: portal-env-configmap
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ipa-redisearch
+  namespace: {{ item }}
+  labels:
+    app: ipa-redisearch
+spec:
+  containers:
+  - image: {{ wai_ipa_redisearch_image }}
+    name: ipa-redisearch
+    ports:
+    - name: redis
+      containerPort: 6379
+    resources:
+      limits:
+        cpu: "0.75"
+        memory: "250Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ipa-redisearch
+  namespace: {{ item }}
+spec:
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379
+  selector:
+    app: ipa-redisearch
