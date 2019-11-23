@@ -6,21 +6,33 @@ metadata:
   name: matomo-php-config
   namespace: {{ item }}
 data:
-  config.ini.php-configmap: |-
+  config.ini.php: |-
 
     [database]
-    host = "@DATABASE_HOST@"
-    username = "@DATABASE_USER@"
-    password = "@DATABASE_PASSWORD@"
+    host = "{{ wai_rdbms_load_balancer[item][0] }}"
+    username = "matomo-admin"
+    password = "{{ wai_database_credentials[item]['matomo-admin'] }}"
     dbname = "matomo"
-    tables_prefix = "matomo_"
+
+    {% if wai_rdbms_load_balancer[item] | length > 1 %}
+    
+    [database_reader]
+    host = "{{ wai_rdbms_load_balancer[item][1] }}"
+    username = "matomo-user"
+    password = "{{ wai_database_credentials[item]['matomo-user'] }}"
+    dbname = "matomo"
+    {% endif %}
 
     [General]
     salt = "{{ ansible_date_time.iso8601_micro | md5 }}"
     trusted_hosts[] = "localhost"
     trusted_hosts[] = "127.0.0.1"
-    enable_update_users_email = 0
-    enable_trusted_host_check = 0
+    trusted_hosts[] = "{{ wai_base_domain[item] }}"
+    {% for attr in wai_hostname %}
+
+    trusted_hosts[] = "{{ wai_hostname[attr] }}.{{ wai_base_domain[item] }}"
+    {%endif %}
+    enable_trusted_host_check = 1
     force_ssl = 1
     enable_update_users_email = 0
     emails_enabled = 0
@@ -28,7 +40,7 @@ data:
     enable_update_communication = 0
     enable_auto_update = 0
     show_update_notification_to_superusers_only = 1
-    
+
     [Plugins]
     Plugins[] = "CorePluginsAdmin"
     Plugins[] = "CoreAdminHome"
@@ -90,8 +102,9 @@ data:
     Plugins[] = "ProfessionalServices"
     Plugins[] = "UserId"
     Plugins[] = "CustomPiwikJs"
+    Plugins[] = "DisableTracking"
+    Plugins[] = "WAIMatomoTheme"
     Plugins[] = "QueuedTracking"
-    Plugins[] = "VisitorGenerator"
     Plugins[] = "ProtectTrackID"
     Plugins[] = "CustomDimensions"
 
@@ -156,9 +169,15 @@ data:
     PluginsInstalled[] = "ProfessionalServices"
     PluginsInstalled[] = "UserId"
     PluginsInstalled[] = "CustomPiwikJs"
+    PluginsInstalled[] = "DisableTracking"
+    PluginsInstalled[] = "Tour"
+    PluginsInstalled[] = "WAIMatomoTheme"
     PluginsInstalled[] = "QueuedTracking"
     PluginsInstalled[] = "ProtectTrackID"
     PluginsInstalled[] = "CustomDimensions"
+
+    [WAIMatomoTheme]
+    waiUrl = "https://webanalytics.italia.it"
 
     [QueuedTracking]
     notify_queue_threshold_single_queue = 250000

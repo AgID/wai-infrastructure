@@ -55,7 +55,8 @@ spec:
         - name: matomo-worker-conf
           mountPath: /var/www/scripts
         - name: matomo-php-config
-          mountPath: /tmp/config
+          mountPath: /var/www/html/config/config.ini.php
+          subPath: config.ini.php
         env:
         - name: DATABASE_PASSWORD
           valueFrom:

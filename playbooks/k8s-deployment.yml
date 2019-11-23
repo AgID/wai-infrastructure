@@ -37,12 +37,27 @@
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-deployment.yml"
       with_items: "{{ wai_k8s_namespaces }}"
+      
+    # Deploy roles
+    - name: K8S .:. Prepare roles
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-rbac-{{ item }}.yml"
+        src: "k8s/k8s-rbac-{{ item }}.yml.j2"
+      with_items: "{{ wai_k8s_namespaces }}"
+
+    - name: K8S .:. Apply roles
+      kube:
+        name: "k8s-roles"
+        kubectl: "{{ wai_kubectl }}"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-rbac-{{ item }}.yml"
+      with_items: "{{ wai_k8s_namespaces }}"
 
    # Network policies
     - name: K8S .:. Prepare network policy
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-np-{{ item }}.yml"
-        src: "k8s/k8s-np-{{ item }}.yml.j2"
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-network-policy.yml"
+        src: "k8s/k8s-network-policy.yml.j2"
       with_items: "{{ wai_k8s_namespaces }}"
 
     - name: K8S .:. Apply network policy
@@ -50,7 +65,7 @@
         name: "k8s-network-policy"
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
-        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-np-{{ item }}.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-network-policy.yml"
       with_items: "{{ wai_k8s_namespaces }}"
 
     # GlusterFS
@@ -145,21 +160,6 @@
         state: "latest"
       with_items: "{{ wai_k8s_namespaces }}"
 
-    # Deploy K8S matomo secrets
-    - name: K8S .:. Prepare matomo secrets
-      template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-secrets.yml"
-        src: k8s/matomo-secrets.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}"
-
-    - name: K8S .:. Deploy Matomo secrets
-      kube:
-        name: "matomo-secrets"
-        kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-secrets.yml"
-        state: "latest"
-      with_items: "{{ wai_k8s_namespaces }}"
-    
     # Matomo Ingestion
     - name: K8S .:. Prepare Matomo Ingestion template vars
       set_fact:
@@ -170,8 +170,6 @@
         matomo_create_ingress: true
         matomo_enable_session: false
         matomo_ingress_fqdn_index: "ingestion"
-        matomo_database_user: "matomo-admin"
-        matomo_database_host: "FAKEHOST" # TO BE FIXED
 
     - name: K8S .:. Prepare Matomo Ingestion deployment file
       template:
@@ -196,8 +194,6 @@
         matomo_nginx_jailed: true
         matomo_create_ingress: false
         matomo_enable_session: false
-        matomo_database_user: "matomo-admin"
-        matomo_database_host: "FAKEHOST" # TO BE FIXED
 
     - name: K8S .:. Prepare Matomo API deployment file
       template:
@@ -213,12 +209,34 @@
         state: "latest"
       with_items: "{{ wai_k8s_namespaces }}"
 
+    # Matomo Portal
+    - name: K8S .:. Prepare Matomo portal template vars
+      set_fact:
+        matomo_app_filename: "/index.php"
+        matomo_name: "matomo"
+        matomo_pod_size_index: "matomo-portal"
+        matomo_nginx_jailed: false
+        matomo_create_ingress: false
+        matomo_enable_session: true
+
+    - name: K8S .:. Prepare Matomo portal deployment file
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-portal.yml"
+        src: k8s/matomo-jail.yml.j2
+      with_items: "{{ wai_k8s_namespaces }}" 
+
+    - name: K8S .:. Deploy Matomo Portal
+      kube:
+        name: "{{ matomo_name }}"
+        kubectl: "{{ wai_kubectl }}"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-portal.yml"
+        state: "latest"
+      with_items: "{{ wai_k8s_namespaces }}"
+
     # Matomo Worker
     - name: K8S .:. Prepare Matomo Worker template
       set_fact:
         matomo_pod_size_index: "matomo-worker"
-        matomo_database_user: "matomo-admin"
-        matomo_database_host: "FAKEHOST" # TO BE FIXED
 
     - name: K8S .:. Prepare Matomo Worker deployment file
       template:
@@ -248,18 +266,3 @@
         filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/redis-secrets.yml"
         state: "latest"
       with_items: "{{ wai_k8s_namespaces }}"
-
-    # Deploy Redis Sentinel
-    - name: K8S .:. Prepare Redis & Sentinel template
-      template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/ingestion-redis.yml"
-        src: k8s/redis-ingestion.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}" 
-
-    - name: K8S .:. Deploy Redis & Sentinel
-      kube:
-        name: "redis-ingestion"
-        kubectl: "{{ wai_kubectl }}"
-        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/ingestion-redis.yml"
-        state: "latest"
-      with_items: "{{ wai_k8s_namespaces }}" 

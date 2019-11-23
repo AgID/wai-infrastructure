@@ -31,7 +31,7 @@
     - name: Database .:. Fail if password is not found
       fail:
         msg: "Password for the current environment not found"
-      when: "wai_environment is not defined or wai_database_password[wai_environment] is not defined"
+      when: "wai_environment is not defined or wai_database_credentials[wai_environment] is not defined"
 
     - name: Database .:. Calculate matomo super user password
       set_fact:
@@ -78,7 +78,7 @@
       mysql_user:
         name: matomo-admin
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
-        password: "{{ wai_database_password[wai_environment]['matomo-admin'] }}"
+        password: "{{ wai_database_credentials[wai_environment]['matomo-admin'] }}"
         priv: "matomo.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES/*.*:FILE"
         host: "%"
         state: present
@@ -87,8 +87,8 @@
       mysql_user:
         name: matomo-user
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
-        password: "{{ wai_database_password[wai_environment]['matomo-user'] }}"
-        priv: "matomo.*:SELECT,CREATE TEMPORARY TABLES,LOCK TABLES"
+        password: "{{ wai_database_credentials[wai_environment]['matomo-user'] }}"
+        priv: "matomo.*:SELECT,CREATE TEMPORARY TABLES"
         host: "%"
         state: present
 
@@ -96,7 +96,7 @@
       mysql_user:
         name: wai-admin
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
-        password: "{{ wai_database_password[wai_environment]['wai-admin'] }}"
+        password: "{{ wai_database_credentials[wai_environment]['wai-admin'] }}"
         priv: "wai.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES"
         host: "%"
         state: present
@@ -105,12 +105,12 @@
       mysql_user:
         login_user: "root"
         name: root
-        password: "{{ wai_database_password[wai_environment]['root'] }}"
+        password: "{{ wai_database_credentials[wai_environment]['root'] }}"
         login_unix_socket: /var/run/mysqld/mysqld.sock
 
     - name: Database .:. Set database password
       set_fact:
-        database_root_password: "{{ wai_database_password[wai_environment]['root'] }}"
+        database_root_password: "{{ wai_database_credentials[wai_environment]['root'] }}"
 
     - name: Database .:. Create root configuration file
       template:
