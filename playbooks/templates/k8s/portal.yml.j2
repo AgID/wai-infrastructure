@@ -327,28 +327,51 @@ spec:
         - name: html
           emptyDir: {}
 ---
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: portal-queue-worker
   namespace: {{ item }}
-spec:
-  containers:
-  - image: {{ wai_portal_base_image }}
-    name: portal
-    command: [“/usr/local/bin/php”, “artisan”, “queue:work”]
-    resources:
-      limits:
-        cpu: “0.75"
-        memory: “250Mi”
-    volumeMounts:
-    - name: portal-env-conf
-      mountPath: /var/www/html/.env
-      subPath: env
-  volumes:
-    - name: portal-env-conf
-      configMap:
-        name: portal-env-configmap
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: portal
+  template:
+    metadata:
+      labels:
+        app: portal
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - portal
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - image: {{ wai_portal_base_image }}
+        name: portal
+        command: [“/usr/local/bin/php”, “artisan”, “queue:work”]
+        resources:
+          limits:
+            cpu: “0.75"
+            memory: “250Mi”
+        volumeMounts:
+        - name: portal-env-conf
+          mountPath: /var/www/html/.env
+          subPath: env
+      volumes:
+        - name: portal-env-conf
+          configMap:
+            name: portal-env-configmap
 ---
 apiVersion: v1
 kind: Pod
