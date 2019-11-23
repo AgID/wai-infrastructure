@@ -75,14 +75,16 @@
             ingress:
               enabled: false
             persistentVolume:
-              enabled: false
-              storageClass: storage-nfs
+              enabled: true
+              size: 50Gi
+              storageClass: storage-heketi
           networkPolicy:
             enabled: false
           alertmanager:
             persistentVolume:
-              enabled: false
-              storageClass: storage-nfs
+              enabled: true
+              size: 2Gi
+              storageClass: storage-heketi
 
     # Install Grafana
     - name: K8S Helm .:. Install Grafana
@@ -101,9 +103,9 @@
           ingress:
             enabled: false
           persistence:
-            enabled: false
+            enabled: true
             size: 8Gi
-            storageClassName: storage-nfs
+            storageClassName: storage-heketi
           initChownData:
             enabled: false
           resources:
@@ -151,7 +153,9 @@
                 memory: 128Mi
           master:
             persistence:
-              enabled: false
+              enabled: true
+              storageClass: storage-heketi
+              size: 5Gi
             resources:
               limits:
                 cpu: 250m
@@ -161,7 +165,9 @@
                 memory: 4Gi
           slave:
             persistence:
-              enabled: false
+              enabled: true
+              storageClass: storage-heketi
+              size: 5Gi
             resources:
               limits:
                 cpu: 250m
