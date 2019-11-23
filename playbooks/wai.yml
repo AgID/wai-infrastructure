@@ -25,6 +25,8 @@
 
 # Install elastic search
 - hosts: elastic
+  vars_files:
+    - password.yml
   tags:
     - install
     - elastic
@@ -34,6 +36,8 @@
 
 # Install kibana
 - hosts: kibana
+  vars_files:
+    - password.yml
   tags:
     - install
     - kibana

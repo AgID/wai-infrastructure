@@ -13,16 +13,6 @@
     update_cache: yes
     name: kibana={{ es_version }}
 
-- name: Configure Elasticsearch hosts
-  set_fact: 
-    elastic_url: 'http://{{ item }}:9200'
-  with_items: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
-  register: kibana_elastic_hosts_list
-
-- name: Build hosts array
-  set_fact: 
-    kibana_elastic_hosts: '{{ kibana_elastic_hosts_list.results | map(attribute="ansible_facts.elastic_url") | list }}'
-
 - name: Configure Kibana
   template:
     src: kibana.yml.j2

@@ -27,9 +27,9 @@ metadata:
   namespace: kube-logging
 subsets:
   - addresses:
-    - ip: 10.0.30.101
-    - ip: 10.0.30.102
-    - ip: 10.0.30.103
+{% for es in  groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) %}
+    - ip: {{es}}
+{% endfor %}s
     ports:
       - port: 9200
         name: "elasticsearch"
@@ -104,6 +104,10 @@ spec:
             value: "9200"
           - name: FLUENT_ELASTICSEARCH_SCHEME
             value: "http"
+          - name: FLUENT_ELASTICSEARCH_USER
+            value: fluentd
+          - name: FLUENT_ELASTICSEARCH_PASSWORD
+            value: {{ elasticsearch_secrets.fluentd }}
           - name: FLUENTD_SYSTEMD_CONF
             value: disable
         resources:
