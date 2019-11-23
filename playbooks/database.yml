@@ -97,7 +97,7 @@
 
     - name: Database .:. Set database password
       set_fact:
-        database_root_password: "{{ v[wai_environment]['root'] }}"
+        database_root_password: "{{ wai_database_credentials[wai_environment]['root'] }}"
 
     - name: Database .:. Create root configuration file
       template:
