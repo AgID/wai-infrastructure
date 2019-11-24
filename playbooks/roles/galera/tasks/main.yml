@@ -21,6 +21,9 @@
   when: galera_present_result.stat.exists == false
 
 - name: Galera .:. Create configuration file
+  vars:
+    production_master_node: "{{ (groups['galera-prod'] | intersect(inventory_hostname) | list | length > 0) }}"
+    production_slave_node: "{{ (groups['galera-prod-slave'] | intersect(inventory_hostname) | list | length > 0) }}"
   template:
     src: "galera.yml.j2"
     dest: "/etc/mysql/conf.d/galera.cnf"
@@ -29,10 +32,18 @@
     mode: "0644"
   when: galera_present_result.stat.exists == false
 
+- name: Galera .:. Prepare binlog dir on production master nodes
+  file:
+    path: '/opt/data/mysql-binlog' 
+    state: directory
+    group: mysql
+    owner: mysql
+  when: (groups['galera-prod'] | intersect(inventory_hostname) | list | length > 0)
+
 - name: Galera .:. Identify first node
   set_fact:
     galera_first_node: true
-  with_items: ["galera-prod", "galera-play"]
+  with_items: ["galera-prod", "galera-prod-slave", "galera-play"]
   when: 
     - groups[item]|length > 0
     - inventory_hostname == groups[item][0]
@@ -58,3 +69,31 @@
   when:
     - "galera_first_node is not defined"
     - "galera_present_result.stat.exists == false"
+
+- name: Galera .:. Create replication user on production master primary node
+  mysql_user:
+    login_user: "root"
+    name: replica-user
+    password: "{{ wai_database_credentials['wai-prod']['replica-user'] }}"
+    priv: "*.*:REPLICATION SLAVE"
+    host: "%"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when: 
+    - inventory_hostname == groups['galera-prod'][0]
+
+- name: Galera .:. Activate replica on production slave primary node
+  mysql_replication:
+    mode: changemaster
+    master_user: replica-user
+    master_password: "{{ wai_database_credentials['wai-prod']['replica-user'] }}"
+    master_host: "{{ hostvars[groups['galera-prod'][0]]['ansible_default_ipv4']['address'] }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when: 
+    - inventory_hostname == groups['galera-prod-slave'][0]
+
+- name: Galera .:. Start slave on slave primary node
+  mysql_replication:
+    mode: startslave
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when: 
+    - inventory_hostname == groups['galera-prod-slave'][0]

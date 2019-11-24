@@ -51,6 +51,8 @@
 
 # Install galera prod cluster
 - hosts: galera-prod
+  vars_files:
+    - password.yml
   tags:
     - install
     - galera
@@ -62,6 +64,8 @@
 
 # Install galera prod slave cluster
 - hosts: galera-prod-slave
+  vars_files:
+    - password.yml
   tags:
     - install
     - galera
