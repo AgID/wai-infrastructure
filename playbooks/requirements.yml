@@ -1,6 +1,6 @@
 # Elasticsearch
 - src: elastic.elasticsearch
-  version: 6.6.0
+  version: 7.4.1
 
 # Swap
 - src: geerlingguy.swap
