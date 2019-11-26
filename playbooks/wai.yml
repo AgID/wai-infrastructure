@@ -99,14 +99,16 @@
 
 # Install GlusterFS server
 - hosts: gluster
+  vars_files: password.yml
   tags:
     - install
     - gluster
     - production
   roles:
     - glusterfs
+    - heketi
     - prometheus_node_exporter
-
+    
 # Install GlusterFS client
 - hosts: kube-node
   tags:

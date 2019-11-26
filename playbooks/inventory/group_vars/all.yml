@@ -94,8 +94,8 @@ docker_daemon_graph: "/opt/data/docker"
 redis_image_version: 5.0.3
 
 # GlusterFS
-gluster_apt_repo:  ppa:gluster/glusterfs-4.1
-gluster_package_version: 4.*
+gluster_apt_repo:  ppa:gluster/glusterfs-5
+gluster_package_version: 5.*
 
 # MariaDB repo info
 mariadb_repo: "deb [arch=amd64,i386,ppc64el] http://ftp.heanet.ie/mirrors/mariadb/repo/{{ mariadb_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main"
@@ -108,3 +108,5 @@ mariadb_version: '10.4'
 prometheus_exporter_url:  https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz
 # Prometheus MySQL exporter override vars
 prometheus_mysqld_exporter_url:  https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mysqld_exporter-0.12.1.linux-amd64.tar.gz
+# Heketi role overrides
+heketi_url: https://github.com/heketi/heketi/releases/download/v9.0.0/heketi-v9.0.0.linux.amd64.tar.gz

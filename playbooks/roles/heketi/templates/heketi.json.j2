@@ -1,0 +1,36 @@
+{
+  "port": "8080",
+  "enable_tls": false,
+  "cert_file": "",
+  "key_file": "",
+  "use_auth": true,
+  "jwt": {
+    "admin": {
+      "key": "{{ heketi_secrets.admin }}"
+    },
+    "user": {
+      "key": "{{ heketi_secrets.user }}"
+    }
+  },
+  "backup_db_to_kube_secret": false,
+  "profiling": false,
+  "glusterfs": {
+    "executor": "ssh",
+    "sshexec": {
+      "keyfile": "{{ heketi_home }}/.ssh/id_rsa",
+      "user": "{{ heketi_user }}",
+      "backup_lvm_metadata": false,
+      "debug_umount_failures": true,
+      "sudo": true
+    },
+    "db": "{{ heketi_home }}/heketi.db",
+    "refresh_time_monitor_gluster_nodes": 120,
+    "start_time_monitor_gluster_nodes": 10,
+    "loglevel": "debug",
+    "auto_create_block_hosting_volume": true,
+    "block_hosting_volume_size": 500,
+    "block_hosting_volume_options": "group gluster-block",
+    "pre_request_volume_options": "",
+    "post_request_volume_options": ""
+  }
+}
