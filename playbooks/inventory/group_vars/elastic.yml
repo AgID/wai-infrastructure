@@ -33,6 +33,10 @@ es_users:
       roles:
         - wai_user
         - kibana_user
+    portal_user:
+      password: "{{ elasticsearch_secrets.portal_user }}"
+      roles:
+        - portal_user
 es_roles:
   native:
     wai_admin:
@@ -47,6 +51,14 @@ es_roles:
         - names: '*'
           privileges:
             - read
+    portal_user:
+      indices:
+        - names: 'wai-application-log*'
+          privileges:
+            - read
+            - write
+            - delete
+            - create_index
 es_config:
   node.name: "{{ ansible_hostname }}"
   network.host: "0.0.0.0"
