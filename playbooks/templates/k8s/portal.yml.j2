@@ -359,7 +359,7 @@ metadata:
       containers:
       - image: {{ wai_portal_base_image }}
         name: portal
-        command: [“/usr/local/bin/php”, “artisan”, “queue:work”]
+        command: ["/usr/local/bin/php", "artisan", "queue:work", "--tries=3", "--sleep=5"]
         resources:
           limits:
             cpu: “0.75"
