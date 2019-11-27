@@ -22,54 +22,6 @@ k8s_master_instance = {
 # if there are more instances than items in the list it will restart from the first one
 k8s_master_instance_groups = ["kube-master, etcd"]
 
-# K8S master security group rules
-# See https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
-k8s_master_sec_rules = [
-    {
-        protocol = "icmp"
-        from = 0
-        to = 0
-        cidr = "0.0.0.0/0"
-    },
-    {
-        protocol = "tcp"
-        from = 22
-        to = 22
-        cidr = "0.0.0.0/0"
-    },
-    {
-        protocol = "tcp"
-        from = 6443
-        to = 6443
-        cidr = "0.0.0.0/0"
-    },
-    {
-        protocol = "tcp"
-        from = 2379
-        to = 2380
-        cidr = "<CIDR>"
-    },
-    {
-        protocol = "tcp"
-        from = 10250
-        to = 10250
-        cidr = "<CIDR>"
-    },
-    # See https://www.weave.works/docs/net/latest/install/using-weave/#creating-peer-connections-between-hosts
-    {
-        protocol = "tcp"
-        from = 6783
-        to = 6783
-        cidr = "10.0.10.0/24"
-    },
-    {
-        protocol = "udp"
-        from = 6783
-        to = 6784
-        cidr = "10.0.10.0/24"
-    }
-]
-
 # K8S master assigned floating IPs
 k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
 
@@ -89,48 +41,6 @@ k8s_worker_instance = {
 # i.e. the first item in the list will be added to the first instance and so on
 # if there are more instances than items in the list it will restart from the first one
 k8s_worker_instance_groups = ["kube-node"]
-
-# K8S worker security rules
-# See https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
-k8s_worker_sec_rules = [
-    {
-        protocol = "icmp"
-        from = 0
-        to = 0
-        cidr = "0.0.0.0/0"
-    },
-    {
-        protocol = "tcp"
-        from = 22
-        to = 22
-        cidr = "0.0.0.0/0"
-    },
-    {
-        protocol = "tcp"
-        from = 30000
-        to = 32767
-        cidr = "0.0.0.0/0"
-    },
-    {
-        protocol = "tcp"
-        from = 10250
-        to = 10250
-        cidr = "<CIDR>"
-    },
-    # See https://www.weave.works/docs/net/latest/install/using-weave/#creating-peer-connections-between-hosts
-    {
-        protocol = "tcp"
-        from = 6783
-        to = 6783
-        cidr = "10.0.10.0/24"
-    },
-    {
-        protocol = "udp"
-        from = 6783
-        to = 6784
-        cidr = "10.0.10.0/24"
-    }
-]
 
 # K8S worker assigned floating IPs
 k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]

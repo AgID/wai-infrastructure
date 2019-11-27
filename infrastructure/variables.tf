@@ -60,13 +60,6 @@ variable "k8s_master_instance_groups" {
   default     = []
 }
 
-# K8S master security rules
-variable "k8s_master_sec_rules" {
-  type        = list
-  description = "Kubernetes master security rules"
-  default     = []
-}
-
 # K8S master assigned floating IPs
 variable "k8s_master_floatingips" {
   type        = list(string)
@@ -85,13 +78,6 @@ variable "k8s_worker_instance" {
 variable "k8s_worker_instance_groups" {
   type        = list(string)
   description = "Groups in kubernetes worker instances metadata"
-  default     = []
-}
-
-# K8S worker security rules
-variable "k8s_worker_sec_rules" {
-  type        = list
-  description = "Kubernetes worker security rules"
   default     = []
 }
 

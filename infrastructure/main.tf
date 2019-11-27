@@ -26,11 +26,9 @@ module "kubernetes" {
   k8s_master_floatingips     = var.k8s_master_floatingips
   k8s_master_instance        = var.k8s_master_instance
   k8s_master_instance_groups = var.k8s_master_instance_groups
-  k8s_master_sec_rules       = var.k8s_master_sec_rules
   k8s_worker_floatingips     = var.k8s_worker_floatingips
   k8s_worker_instance        = var.k8s_worker_instance
   k8s_worker_instance_groups = var.k8s_worker_instance_groups
-  k8s_worker_sec_rules       = var.k8s_worker_sec_rules
 }
 
 # Elastic nodes
