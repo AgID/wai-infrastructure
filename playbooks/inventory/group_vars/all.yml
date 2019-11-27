@@ -29,6 +29,20 @@ wai_base_domain:
 # Hostnames
 wai_hostname: { ingestion: ingestion, matomo: matomo, portal: www, api: api}
 
+# Mappinng between public ip address and internal load balancer
+# The following IP addresses are just placeholders and must be replaced with the real ones after all the private ip ports are created.
+wai_ip_addresses:
+  wai-prod:
+    public_ip: 1.1.1.1
+    private_ip: 1.1.1.1
+  wai-play:
+    public_ip: 1.1.1.1
+    private_ip: 1.1.1.1
+  wai-stag:
+    public_ip: 1.1.1.1
+    private_ip: 1.1.1.1
+
+
 # Matomo POD size configuration
 wai_matomo_pod_size:
   wai-prod: { wai-portal: 4, wai-reporting: 4, wai-api: 4, matomo-portal: 4, matomo-worker: 8, matomo-ingestion: 8, matomo-api: 4 }
