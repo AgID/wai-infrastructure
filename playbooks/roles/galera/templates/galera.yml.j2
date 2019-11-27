@@ -1,5 +1,19 @@
 [mysqld]
 
+{% if production_slave_node is defined and production_slave_node == true %}
+# Configure settings for replication
+server_id=02
+{% endif %}
+
+{% if production_master_node is defined and production_master_node == true %}
+# Configure settings for replication
+server_id=01
+log_bin = /opt/data/mysql-binlog/binlog
+log_slave_updates = ON
+expire_logs_days = 7
+gtid-domain-id = 1
+{% endif %}
+
 binlog_format=ROW
 default-storage-engine=innodb
 innodb_autoinc_lock_mode=2

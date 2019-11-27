@@ -1,3 +1,6 @@
 server.port: 5601
 server.host: 0.0.0.0
 elasticsearch.hosts: {{ kibana_elastic_hosts }}
+elasticsearch.username: "kibana"
+elasticsearch.password: {{ elasticsearch_secrets.kibana }}
+xpack.security.encryptionKey: {{ 999999 | random | to_uuid }}

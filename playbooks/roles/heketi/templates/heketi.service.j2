@@ -1,0 +1,14 @@
+[Unit]
+Description=Heketi Server
+
+[Service]
+Type=simple
+WorkingDirectory={{ heketi_home }}
+User={{ heketi_user }}
+ExecStart={{ heketi_home }}/heketi --config={{ heketi_home }}/heketi.json
+Restart=on-failure
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

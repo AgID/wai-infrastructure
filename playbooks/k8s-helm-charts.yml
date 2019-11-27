@@ -49,24 +49,13 @@
         name: cert-manager
         chart: 
           name: cert-manager
+          version: {{ helm.cert_manager.version }}
           source:
             type: repo
             location: https://charts.jetstack.io
             path: jetstack/cert-manager
         host: "{{ clusterIP.stdout }}"
         state: present
-
-    - name: K8S Helm .:. Prepare cluster issuer
-      template:
-        dest: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
-        src: k8s/cluster-issuer.yml.j2
-
-    - name: K8S Helm .:. Deploy cluster issuer
-      kube:
-        name: "k8s-deployment"
-        kubectl: "{{ wai_kubectl }}"
-        state: "latest"
-        filename: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
 
     # Install Prometheus
     - name: K8S Helm .:. Install Prometheus
@@ -86,14 +75,16 @@
             ingress:
               enabled: false
             persistentVolume:
-              enabled: false
-              storageClass: storage-nfs
+              enabled: true
+              size: 50Gi
+              storageClass: storage-heketi
           networkPolicy:
             enabled: false
           alertmanager:
             persistentVolume:
-              enabled: false
-              storageClass: storage-nfs
+              enabled: true
+              size: 2Gi
+              storageClass: storage-heketi
 
     # Install Grafana
     - name: K8S Helm .:. Install Grafana
@@ -112,9 +103,9 @@
           ingress:
             enabled: false
           persistence:
-            enabled: false
+            enabled: true
             size: 8Gi
-            storageClassName: storage-nfs
+            storageClassName: storage-heketi
           initChownData:
             enabled: false
           resources:
@@ -124,3 +115,92 @@
             requests:    
               cpu: "0.25"
               memory: "512Mi"
+
+    # Install redis-ingestion
+    - name: K8S Helm .:. Install Redis
+      helm:
+        namespace: "{{ item[0] }}"
+        name: "{{ item[1] }}-{{ item[0] }}"
+        chart:
+          name: redis
+          source:
+            type: git
+            location: https://github.com/helm/charts.git
+            path: stable/redis
+        state: present
+        host: "{{ clusterIP.stdout }}"
+        values: 
+          image:
+            repository: "{{ wai_redis_base_image }}"
+            tag: "{{ wai_redis_base_image_tag }}"
+          configmap:
+            - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
+          cluster:
+            enabled: true
+            slaveCount: 2
+          usePassword: true
+          existingSecret: redis-master-secret
+          existingSecretPasswordKey: "{{ item[1] }}-password"
+          fullnameOverride: "{{ item[1] }}"
+          metrics:
+            enabled: true
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+          master:
+            persistence:
+              enabled: true
+              storageClass: storage-heketi
+              size: 5Gi
+            resources:
+              limits:
+                cpu: 250m
+                memory: 4Gi
+              requests:
+                cpu: 250m
+                memory: 4Gi
+          slave:
+            persistence:
+              enabled: true
+              storageClass: storage-heketi
+              size: 5Gi
+            resources:
+              limits:
+                cpu: 250m
+                memory: 4Gi
+              requests:
+                cpu: 250m
+                memory: 4Gi
+          sentinel:
+            enabled: true
+            masterSet: "{{ item[1] }}-master"
+            downAfterMilliseconds: 5000
+            failoverTimeout: 5000
+            resources:
+              limits:
+                cpu: 250m
+                memory: 512Mi
+              requests:
+                cpu: 250m
+                memory: 512Mi
+      with_nested:
+        - "{{ wai_k8s_namespaces }}" 
+        - ["ingestion-redis", "application-redis"]
+
+    # At the end.
+    - name: K8S Helm .:. Prepare cluster issuer
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
+        src: k8s/cluster-issuer.yml.j2
+
+    - name: K8S Helm .:. Deploy cluster issuer
+      kube:
+        name: "k8s-deployment"
+        kubectl: "{{ wai_kubectl }}"
+        state: "latest"
+        filename: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
+

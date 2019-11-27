@@ -20,17 +20,17 @@
 
 - name: Metricbeat .:. Get database root password for prod environment
   set_fact:
-    database_password: "{{ wai_database_password['wai-prod']['root'] }}"
+    database_password: "{{ wai_database_credentials['wai-prod']['root'] }}"
   when: "inventory_hostname in groups['galera-prod'] or inventory_hostname in groups['galera-prod-slave']"
 
 - name: Metricbeat .:. Get database root password for play environment
   set_fact:
-    database_password: "{{ wai_database_password['wai-play']['root'] }}"
+    database_password: "{{ wai_database_credentials['wai-play']['root'] }}"
   when: "inventory_hostname in groups['galera-play']"
 
 - name: Metricbeat .:. Get database root password for stage environment
   set_fact:
-    database_password: "{{ wai_database_password['wai-stag']['root'] }}"
+    database_password: "{{ wai_database_credentials['wai-stag']['root'] }}"
   when: "inventory_hostname in groups['mariadb-stag']"
 
 - name: Metricbeat .:. Add metricbeat mysql module
