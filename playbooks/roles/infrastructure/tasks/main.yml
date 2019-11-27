@@ -31,6 +31,7 @@
   when: storage_dev is not defined
 
 - include: data-volume.yml
+  when: groups['gluster'] | intersect(inventory_hostname) | length == 0
 
 - include: swapfile.yml
 

@@ -32,6 +32,8 @@
 
 # Install elastic search
 - hosts: elastic
+  vars_files:
+    - password.yml
   tags:
     - install
     - elastic
@@ -42,6 +44,8 @@
 
 # Install kibana
 - hosts: kibana
+  vars_files:
+    - password.yml
   tags:
     - install
     - kibana
@@ -51,6 +55,8 @@
 
 # Install galera prod cluster
 - hosts: galera-prod
+  vars_files:
+    - password.yml
   tags:
     - install
     - galera
@@ -62,6 +68,8 @@
 
 # Install galera prod slave cluster
 - hosts: galera-prod-slave
+  vars_files:
+    - password.yml
   tags:
     - install
     - galera
@@ -95,14 +103,16 @@
 
 # Install GlusterFS server
 - hosts: gluster
+  vars_files: password.yml
   tags:
     - install
     - gluster
     - production
   roles:
     - glusterfs
+    - heketi
     - prometheus_node_exporter
-
+    
 # Install GlusterFS client
 - hosts: kube-node
   tags:

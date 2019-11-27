@@ -1,0 +1,6 @@
+heketi_url: https://github.com/heketi/heketi/releases/download/v9.0.0/heketi-v9.0.0.linux.amd64.tar.gz
+heketi_home: /opt/data/heketi
+heketi_user: heketi
+heketi_uid: 1010
+heketi_group: heketi
+heketi_gid: 1010
