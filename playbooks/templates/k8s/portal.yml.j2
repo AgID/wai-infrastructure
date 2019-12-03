@@ -332,7 +332,7 @@ kind: Deployment
 metadata:
   name: portal-queue-worker
   namespace: {{ item }}
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
