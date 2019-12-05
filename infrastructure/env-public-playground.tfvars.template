@@ -6,7 +6,7 @@ environment_short = "play"
 galera_slug = "galera"
 
 # Galera network CIDR
-galera_network_cidr = "<CIDR>"
+galera_network_cidr = "<GALERA_CIDR>"
 
 # Galera instance parameters
 galera_instance = {
@@ -32,56 +32,56 @@ galera_sec_rules = [
         protocol = "icmp"
         from = 0
         to = 0
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 22
         to = 22
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 3306
         to = 3306
-        cidr = "0.0.0.0/0"
+        cidr = "<K8S_CIDR>"
     },
     {
         protocol = "tcp"
         from = 4567
         to = 4567
-        cidr = "<CIDR>"
+        cidr = "<GALERA_CIDR>"
     },
     {
         protocol = "udp"
         from = 4567
         to = 4567
-        cidr = "<CIDR>"
+        cidr = "<GALERA_CIDR>"
     },
     {
         protocol = "tcp"
         from = 4568
         to = 4568
-        cidr = "<CIDR>"
+        cidr = "<GALERA_CIDR>"
     },
     {
         protocol = "tcp"
         from = 4444
         to = 4444
-        cidr = "<CIDR>"
+        cidr = "<GALERA_CIDR>"
     },
     # Prometheus Node Exporter
     {
-            protocol = "tcp"
-            from = 9100
-            to = 9100
-            cidr = "0.0.0.0/0"
+        protocol = "tcp"
+        from = 9100
+        to = 9100
+        cidr = "<K8S_CIDR>"
     },
     # Prometheus MYSQLD Exporter
     {
         protocol = "tcp"
         from = 9104
         to = 9104
-        cidr = "0.0.0.0/0"
+        cidr = "<K8S_CIDR>"
     }
 ]
