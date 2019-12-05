@@ -366,7 +366,7 @@ gluster_sec_rules = [
     {
         protocol = "tcp"
         from = 49152
-        to = 49162
+        to = 49652
         cidr = "<GLUSTER_CIDR>"
     },
     # Heketi
