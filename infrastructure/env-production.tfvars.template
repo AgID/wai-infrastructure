@@ -112,6 +112,19 @@ k8s_worker_sec_rules = [
         to = 22
         cidr = "<CIDR>"
     },
+    # Allow http/https traffic since nginx ingress controller is publicy exposed via MetalLB
+    {
+        protocol = "tcp"
+        from = 80
+        to = 80
+        cidr = "0.0.0.0/0"
+    },
+    {
+        protocol = "tcp"
+        from = 443
+        to = 443
+        cidr = "0.0.0.0/0"
+    },
     # change to cidr = "0.0.0.0/0" if you expose services via NodePort publicly
     {
         protocol = "tcp"
