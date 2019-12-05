@@ -77,8 +77,8 @@ k8s_master_sec_rules = [
     }
 ]
 
-# K8S master assigned floating IPs
-k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
+# K8S master assigned floating IPs (uncomment if needed)
+#k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
 
 # K8S worker instance parameters
 k8s_worker_instance = {
@@ -147,8 +147,8 @@ k8s_worker_sec_rules = [
     }
 ]
 
-# K8S worker assigned floating IPs
-k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
+# K8S worker assigned floating IPs  (uncomment if needed)
+#k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
 
 # Galera slug name
 galera_slug = "galera"
