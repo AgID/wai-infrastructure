@@ -93,18 +93,20 @@ data:
     REDIS_PASSWORD={{ redis_password.application_redis_master[item] }}
     REDIS_PORT=26379
     REDIS_QUEUE=default
-    REDIS_REDISEARCH_HOST=ipa-redisearch
-    REDIS_REDISEARCH_PASSWORD=null
-    REDIS_REDISEARCH_PORT=6379
     REDIS_SENTINELS=tcp://application-redis:26379
     REDIS_SENTINEL_SERVICE=application-redis-master
     REDIS_INDEXES_USE_SENTINELS=true
-    REDIS_REDISEARCH_USE_SENTINELS=false
-    REDIS_REDISEARCH_SENTINELS=tcp://application-redis:26379
-    REDIS_REDISEARCH_SENTINEL_SERVICE=application-redis-master
+
     REDIS_CACHE_DB=1
     REDIS_SESSIONS_DB=2
     REDIS_QUEUE_DB=3
+
+    REDIS_IPA_INDEX_HOST=ipa-redisearch
+    REDIS_IPA_INDEX_PASSWORD={{ redis_password.ipa_redisearch_master[item] }}
+    REDIS_IPA_INDEX_PORT=26379
+    REDIS_IPA_INDEX_USE_SENTINELS=true
+    REDIS_IPA_INDEX_SENTINELS=tcp://ipa-redisearch:26379
+    REDIS_IPA_INDEX_SENTINEL_SET=ipa-redisearch-master
 
 {% if wai_settings[item].mail is defined &&  wai_settings[item].mail.enabled %}    
     MAIL_DRIVER=smtp

@@ -59,7 +59,9 @@ wai_k8s_resource_quota:
   wai-stag: { requests.cpu: "24", requests.memory: "30Gi", limits.cpu: "34", limits.memory: "40Gi" }
 
 # IPA Redisearch  image
-wai_ipa_redisearch_image: pdavide/ipa-redisearch:latest
+wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
+wai_ipa_redisearch_image_tag: stable 
+
 # Portal base image
 wai_portal_base_image: giafar/portal:dev4
 wai_portal_matomo_sub_path: /matomo
