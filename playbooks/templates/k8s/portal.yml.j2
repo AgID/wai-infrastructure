@@ -35,7 +35,7 @@ spec:
       - backend:
           serviceName: matomo-service
           servicePort: 80
-        path: /{{ wai_portal_matomo_sub_path }}/(.*)
+        path: {{ wai_portal_matomo_sub_path }}/(.*)
   tls:
   - hosts:
     - {{ wai_base_domain[item] }}
@@ -128,7 +128,7 @@ data:
     ANALYTICS_ADMIN_TOKEN={{ matomo_vars.super_user.token }}
     ANALYTICS_API_BASE_URL=http://matomo-service
     ANALYTICS_API_SSL_VERIFY=false
-    ANALYTICS_PUBLIC_URL=https://{{ wai_base_domain[item] }}/{{ wai_portal_matomo_sub_path }}
+    ANALYTICS_PUBLIC_URL=https://{{ wai_base_domain[item] }}{{ wai_portal_matomo_sub_path }}
 
     ELASTICSEARCH_HOST=elasticsearch
     ELASTICSEARCH_PORT=9200
