@@ -215,7 +215,7 @@
             slaveCount: 2
           usePassword: true
           existingSecret: redis-master-secret
-          existingSecretPasswordKey: ipa-redis-password
+          existingSecretPasswordKey: ipa-redisearch-password
           fullnameOverride: ipa-redisearch
           metrics:
             enabled: true
@@ -277,4 +277,3 @@
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
-
