@@ -132,7 +132,7 @@
         values: 
           image:
             repository: "{{ wai_redis_base_image }}"
-            tag: "{{ wai_redis_base_image_tag }}"
+            tag: "{% if item=='wai-stag' %}latest{% else %}stable{% endif %}"
           configmap:
             - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
           cluster:
@@ -207,7 +207,7 @@
         values: 
           image:
             repository: "{{ wai_ipa_redisearch_image }}"
-            tag: "{{ wai_ipa_redisearch_image_tag }}"
+            tag: "{% if item=='wai-stag' %}latest{% else %}stable{% endif %}"
           configmap:
             - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
           cluster:

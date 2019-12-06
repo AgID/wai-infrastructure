@@ -60,18 +60,17 @@ wai_k8s_resource_quota:
 
 # IPA Redisearch  image
 wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
-wai_ipa_redisearch_image_tag: stable 
 
 # Portal base image
-wai_portal_base_image: webanalyticsitalia/wai-portal:dev-15
+wai_portal_base_image: webanalyticsitalia/wai-portal
 wai_portal_matomo_sub_path: /matomo
 
 # RediSearch Image
 wai_redis_base_image: webanalyticsitalia/wai-redis-search
-wai_redis_base_image_tag: 5.0.3-dev-1
 
 # Base Matomo Image    
-wai_matomo_base_image: webanalyticsitalia/wai-matomo:dev-3
+wai_matomo_base_image: webanalyticsitalia/wai-matomo
+
 wai_kube_state_metrics_version: v1.5.0
 wai_kube_state_metrics_output_dir: kube-state-metrics-1.5.0
 wai_kube_state_metrics: 'https://codeload.github.com/kubernetes/kube-state-metrics/zip/{{ wai_kube_state_metrics_version }}'

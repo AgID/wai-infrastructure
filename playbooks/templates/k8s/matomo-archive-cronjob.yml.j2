@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
           - name: matomo
-            image: {{ wai_portal_base_image}}
+            image: {{ wai_portal_base_image}}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
             args:
             - /var/www/html/console 
             - core:archive

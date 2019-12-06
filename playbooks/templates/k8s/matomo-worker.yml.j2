@@ -28,7 +28,7 @@ spec:
                 - matomo-worker
             topologyKey: "kubernetes.io/hostname"
       containers:
-      - image: {{ wai_matomo_base_image }}
+      - image: {{ wai_matomo_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
         name: matomo-worker
         resources:
           limits:
