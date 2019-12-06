@@ -856,24 +856,24 @@ CREATE TABLE `queuedtracking_queue` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 INSERT INTO `plugin_setting` VALUES
-    ('Tour','view_visits_log_completed','1',0,'admin',8),
+  ('Tour','view_visits_log_completed','1',0,'admin',8),
 	('Tour','view_visitor_profile_completed','1',0,'admin',10),
 	('Tour','browse_marketplace_completed','1',0,'admin',12),
 	('CoreUpdater','enable_plugin_update_communication','0',0,'',13),
 	('QueuedTracking','backend','redis',0,'',25),
 	('QueuedTracking','useSentinelBackend','1',0,'',26),
-	('QueuedTracking','sentinelMasterName','mymaster',0,'',27),
-	('QueuedTracking','redisHost','192.168.50.200',0,'',28),
+	('QueuedTracking','sentinelMasterName','ingestion-redis-master',0,'',27),
+	('QueuedTracking','redisHost','ingestion-redis',0,'',28),
 	('QueuedTracking','redisPort','26379',0,'',29),
 	('QueuedTracking','redisDatabase','0',0,'',30),
-	('QueuedTracking','redisPassword','',0,'',31),
+	('QueuedTracking','redisPassword','{{ redis_password.ingestion_redis_master[item] }}',0,'',31),
 	('QueuedTracking','queueEnabled','1',0,'',32),
-	('QueuedTracking','numQueueWorkers','8',0,'',33),
+	('QueuedTracking','numQueueWorkers','{{ wai_matomo_pod_size[item]['matomo-worker'] }}',0,'',33),
 	('QueuedTracking','numRequestsToProcess','25',0,'',34),
-	('QueuedTracking','processDuringTrackingRequest','1',0,'',35),
-	('ProtectTrackID','baseSetting','ABCDEFGHIJKLMNOPijklmnopqrstuvxwyz12345',0,'',36),
-	('ProtectTrackID','saltSetting','lkasjdhsaljh',0,'',37),
-	('ProtectTrackID','lengthSetting','10',0,'',38);
+	('QueuedTracking','processDuringTrackingRequest','0',0,'',35),
+	('ProtectTrackID','baseSetting','{{ matomo_vars.plugins.protect_track_id[item].base_settings }}',0,'',36),
+	('ProtectTrackID','saltSetting',','{{ matomo_vars.plugins.protect_track_id[item].salt_settings }}',0,'',37),
+	('ProtectTrackID','lengthSetting','{{ matomo_vars.plugins.protect_track_id[item].length_settings }}',0,'',38);
 
 
   CREATE TABLE `custom_dimensions` (
