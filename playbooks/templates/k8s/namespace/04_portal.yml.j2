@@ -19,6 +19,7 @@ spec:
     - {{ wai_base_domain[item] }}
     secretName: portal-ingress-acme-tls
 ---
+apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
@@ -74,11 +75,11 @@ data:
     ARCHIVING_WEBSITE_DAILY_NOTIFICATION=3
 
     DB_CONNECTION=mysql
-    DB_HOST={{ wai_rdbms_load_balancer[item][0] }}
+    DB_HOST={{ wai_load_balancer[item].rdbms[0] }}
     DB_PORT=3306
     DB_DATABASE=wai
-    DB_USERNAME=wai-user
-    DB_PASSWORD={{ wai_database_password[item]['wai-users'] }}
+    DB_USERNAME=wai-admin
+    DB_PASSWORD={{ wai_database_credentials[item]['wai-admin'] }}
 
     BROADCAST_DRIVER=log
     CACHE_DRIVER=redis
@@ -108,7 +109,7 @@ data:
     REDIS_IPA_INDEX_SENTINELS=tcp://ipa-redisearch:26379
     REDIS_IPA_INDEX_SENTINEL_SET=ipa-redisearch-master
 
-{% if wai_settings[item].mail is defined &&  wai_settings[item].mail.enabled %}    
+{% if wai_settings[item].mail is defined and  wai_settings[item].mail.enabled %}    
     MAIL_DRIVER=smtp
     MAIL_HOST={{ wai_settings[item].mail.host }}
     MAIL_PORT={{ wai_settings[item].mail.port }}
@@ -119,7 +120,7 @@ data:
     MAIL_FROM_NAME="{{ wai_settings[item].mail.from_name }}"
 {% endif %}
 
-{% if wai_settings[item].pec is defined &&  wai_settings[item].pec.enabled %}    
+{% if wai_settings[item].pec is defined and  wai_settings[item].pec.enabled %}    
     PEC_HOST={{ wai_settings[item].pec.host }}
     PEC_PORT={{ wai_settings[item].pec.port }}
     PEC_USERNAME={{ wai_settings[item].pec.user }}
@@ -287,7 +288,7 @@ spec:
         command: ["sh", "-c", "cp -R /var/www/html/* /html/ ; chown -R 33:33 /html/"]
         resources:
           limits:
-            cpu: 0.1
+            cpu: "0.1"
             memory: "50Mi"
         volumeMounts:
         - mountPath: /html
@@ -338,6 +339,7 @@ kind: Deployment
 metadata:
   name: portal-queue-worker
   namespace: {{ item }}
+spec:
   replicas: 2
   strategy:
     type: RollingUpdate
@@ -368,8 +370,8 @@ metadata:
         command: ["/usr/local/bin/php", "artisan", "queue:work", "--tries=3", "--sleep=10"]
         resources:
           limits:
-            cpu: “0.75"
-            memory: “250Mi”
+            cpu: "0.75"
+            memory: "250Mi"
         volumeMounts:
         - name: portal-env-conf
           mountPath: /var/www/html/.env

@@ -5,7 +5,7 @@ metadata:
   name: matomo-worker
   namespace: {{ item }}
 spec:
-  replicas: {{ wai_matomo_pod_size[item][matomo_pod_size_index] }}
+  replicas: {{ wai_matomo_pod_size[item]['matomo-worker'] }}
   updateStrategy:
     type: RollingUpdate
   selector:

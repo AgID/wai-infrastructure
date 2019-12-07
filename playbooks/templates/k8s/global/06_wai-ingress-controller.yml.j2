@@ -188,7 +188,7 @@ metadata:
     app.kubernetes.io/part-of: ingress-nginx
 ---
 apiVersion: apps/v1
-kind: Daemonset
+kind: DaemonSet
 metadata:
   name: nginx-ingress-controller
   namespace: {{ ns }}
