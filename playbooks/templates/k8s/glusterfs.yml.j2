@@ -4,6 +4,6 @@ metadata:
   name: storage-heketi
 provisioner: kubernetes.io/glusterfs
 parameters:
-  resturl: "http://{{ hostvars[gluster[0]]['ansible_default_ipv4'] }}:8080"
+  resturl: "http://{{ hostvars[groups['gluster'][0]]['ansible_default_ipv4']['address'] }}:8080"
   restuser: "admin"
   restuserkey: "{{ heketi_secrets.admin }}"
