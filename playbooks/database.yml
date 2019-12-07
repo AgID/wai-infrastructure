@@ -39,6 +39,8 @@
         portal_database_superuser_password: "{{ portal_vars.super_user.password  | password_hash('bcrypt') }}"
 
     - name: Database .:. Prepare matomo template sql script
+      vars:
+        item: "{{ wai_environment }}"
       template:
         src: "mariadb/matomo_3_12_0.sql.j2"
         dest: "/root/matomo_3_12_0.sql"
