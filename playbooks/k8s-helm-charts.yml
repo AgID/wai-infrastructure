@@ -26,7 +26,7 @@
       pip:
         name: 
           - pygit2
-          - pyhelm=2.11.5
+          - pyhelm==2.11.5
           - grpcio
 
     # Get tiller clusterID
@@ -195,10 +195,10 @@
         - ["ingestion-redis", "application-redis"]
 
     # Install IPA Redis Search
-    - name: K8S Helm .:. Install Redis
+    - name: K8S Helm .:. Install IPA Redisearch
       helm:
         namespace: "{{ item }}"
-        name: "ipa-redisearch"
+        name: "ipa-redisearch-{{ item }}"
         chart:
           name: redis
           source:
@@ -270,12 +270,12 @@
     # At the end.
     - name: K8S Helm .:. Prepare cluster issuer
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
-        src: k8s/cluster-issuer.yml.j2
+        dest: "{{ wai_k8s_deployment_dir }}/99_cluster-issuer.yml"
+        src: k8s/helm/cluster-issuer.yml.j2
 
     - name: K8S Helm .:. Deploy cluster issuer
       kube:
         name: "k8s-deployment"
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
-        filename: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/99_cluster-issuer.yml"
