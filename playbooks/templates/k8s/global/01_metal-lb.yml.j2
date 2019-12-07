@@ -295,6 +295,7 @@ spec:
       hostNetwork: true
       nodeSelector:
         beta.kubernetes.io/os: linux
+        role: metallb
       serviceAccountName: speaker
       terminationGracePeriodSeconds: 0
       tolerations:
@@ -364,5 +365,5 @@ data:
       protocol: layer2
       addresses:
   {% for item in wai_k8s_namespaces %}
-    - {{ wai_ip_addresses[item].private_ip }}
+    - {{ wai_ip_addresses[item].private_ip }}:{{ wai_ip_addresses[item].private_ip }}
   {% endfor %}
