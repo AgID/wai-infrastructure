@@ -188,7 +188,7 @@ metadata:
     app.kubernetes.io/part-of: ingress-nginx
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: Daemonset
 metadata:
   name: nginx-ingress-controller
   namespace: {{ ns }}
@@ -196,7 +196,6 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: ingress-nginx
@@ -210,16 +209,6 @@ spec:
         prometheus.io/port: "10254"
         prometheus.io/scrape: "true"
     spec:
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - ingress-nginx
-            topologyKey: "kubernetes.io/hostname"
       serviceAccountName: nginx-ingress-sa-{{ ns }}
       containers:
         - name: nginx-ingress-controller
