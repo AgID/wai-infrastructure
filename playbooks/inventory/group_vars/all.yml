@@ -26,20 +26,41 @@ wai_base_domain:
   wai-play: play.webanalytics.italia.it
   wai-stag: staging.webanalytics.italia.it
 
-# RDBMS Load Balancer
+# WAI Load Balancer
 # The following IP addresses are just placeholders and must be replaced with the real ones after all the LBs are created.
-wai_rdbms_load_balancer:
-  wai-prod:  
-    - 1.1.1.1
-    - 1.1.1.2
+wai_load_balancer:
+  wai-prod:
+    elastic:
+      - 10.0.30.101
+    rdbms:
+      - 10.0.20.101
+      - 10.0.20.104
   wai-play:
-    - 1.1.1.3
+    elastic:
+      - 10.0.30.101
+    rdbms:
+      - 10.0.200.101
   wai-stag:
-    - 1.1.1.4
+    elastic:
+      - 10.0.30.101
+    rdbms:
+      - 10.0.100.101
   
-
 # Hostnames
 wai_hostname: { ingestion: ingestion, matomo: matomo, portal: www, api: api}
+
+# Mappinng between public ip address and internal load balancer
+# The following IP addresses are just placeholders and must be replaced with the real ones after all the private ip ports are created.
+wai_ip_addresses:
+  wai-prod:
+    public_ip: 1.1.1.1
+    private_ip: 1.1.1.1
+  wai-play:
+    public_ip: 1.1.1.1
+    private_ip: 1.1.1.1
+  wai-stag:
+    public_ip: 1.1.1.1
+    private_ip: 1.1.1.1
 
 # Helm 
 helm:
