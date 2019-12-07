@@ -6,7 +6,7 @@ environment_short = "stag"
 mariadb_slug = "mariadb"
 
 # MariaDB network CIDR
-mariadb_network_cidr = "<CIDR>"
+mariadb_network_cidr = "<MARIADB_CIDR>"
 
 # MariaDB instance parameters
 mariadb_instance = {
@@ -31,32 +31,32 @@ mariadb_sec_rules = [
         protocol = "icmp"
         from = 0
         to = 0
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 22
         to = 22
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 3306
         to = 3306
-        cidr = "0.0.0.0/0"
+        cidr = "<K8S_CIDR>"
     },
     # Prometheus Node Exporter
     {
-            protocol = "tcp"
-            from = 9100
-            to = 9100
-            cidr = "0.0.0.0/0"
+        protocol = "tcp"
+        from = 9100
+        to = 9100
+        cidr = "<K8S_CIDR>"
     },
     # Prometheus MYSQLD Exporter
     {
         protocol = "tcp"
         from = 9104
         to = 9104
-        cidr = "0.0.0.0/0"
+        cidr = "<K8S_CIDR>"
     }
 ]
