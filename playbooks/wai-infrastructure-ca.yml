@@ -59,6 +59,7 @@
         passphrase: "{{ wai_infrastructure_ca.secrets.key_password }}"
         cipher: des3
         size: 4096
+        mode: 0644
       with_items: "{{ pki_hosts }}"
 
     - name: WAI Infrastructure CA  .:. Create  hosts csr
