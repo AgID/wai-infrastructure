@@ -45,7 +45,7 @@
       copy:
         src: "{{ item }}"
         dest: "{{ wai_infrastructure_ca.root_folder }}/"
-        mode: "0600"
+        mode: "0444"
         owner: root
         group: root
       with_items:
@@ -145,6 +145,9 @@
 # Install GlusterFS server
 - hosts: gluster
   vars_files: password.yml
+  vars:
+    heketi_cert_file: "{{ wai_infrastructure_ca.root_folder }}/{{ inventory_hostname }}.crt"
+    heketi_key_file: "{{ wai_infrastructure_ca.root_folder }}/{{ inventory_hostname }}.key"
   tags:
     - install
     - gluster

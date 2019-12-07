@@ -56,8 +56,6 @@
     - name: WAI Infrastructure CA .:. Create private key
       openssl_privatekey:
         path: "{{ wai_infrastructure_ca.root_folder }}/key/{{ item.hostname }}.key"
-        passphrase: "{{ wai_infrastructure_ca.secrets.key_password }}"
-        cipher: des3
         size: 4096
         mode: 0644
       with_items: "{{ pki_hosts }}"
@@ -66,7 +64,6 @@
       openssl_csr:
         path: "{{ wai_infrastructure_ca.root_folder }}/csr/{{ item.hostname }}.csr"
         privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/{{ item.hostname }}.key"
-        privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.key_password }}"
         country_name: IT
         state_or_province_name: Roma
         organization_name: AGID
@@ -74,6 +71,7 @@
         common_name: "{{ item.hostname }}"
         subject_alt_name:
           - "IP:{{ item.ip }}"
+          - "{{ item.hostname }}"
         key_usage:
           - digitalSignature
           - keyAgreement
