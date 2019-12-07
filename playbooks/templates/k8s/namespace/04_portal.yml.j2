@@ -95,7 +95,7 @@ data:
     REDIS_PORT=26379
     REDIS_QUEUE=default
     REDIS_SENTINELS=tcp://application-redis:26379
-    REDIS_SENTINEL_SERVICE=application-redis-master
+    REDIS_SENTINEL_SET=application-redis-master
     REDIS_INDEXES_USE_SENTINELS=true
 
     REDIS_CACHE_DB=1
@@ -133,7 +133,7 @@ data:
     ANALYTICS_API_SSL_VERIFY=false
     ANALYTICS_PUBLIC_URL=https://{{ wai_base_domain[item] }}{{ wai_portal_matomo_sub_path }}
 
-    ELASTICSEARCH_HOST=elasticsearch
+    ELASTICSEARCH_HOST={{ wai_load_balancer[item].elastic[0] }}
     ELASTICSEARCH_PORT=9200
     ELASTICSEARCH_INDEX_PREFIX=wai
     ELASTICSEARCH_INDEX_NAME=application-log
