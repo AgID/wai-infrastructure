@@ -365,6 +365,6 @@ data:
       addresses:
   {% for item in wai_k8s_namespaces %}
   {% for host in  wai_ip_addresses[item] %}
-      - {{ host }}-{{ host }}
+      - {{ host.private_ip }}-{{ host.private_ip }}
   {% endfor %}
   {% endfor %}
