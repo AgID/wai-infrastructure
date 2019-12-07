@@ -31,7 +31,7 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       initContainers:
       - name: copy
-        image: {{ wai_matomo_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
+        image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
         command: ["sh", "-c", "cp -R /var/www/html/* /html/ ;  ; chown -R 33:33 /html/"]
         resources:
           limits:
@@ -41,7 +41,7 @@ spec:
         - mountPath: /html
           name: html
       containers:
-      - image: {{ wai_matomo_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
+      - image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
         name: {{ matomo_name }}
         resources:
           limits:
