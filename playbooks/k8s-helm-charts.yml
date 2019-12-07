@@ -112,7 +112,7 @@
             limits:
               cpu: "0.25"
               memory: "1024Mi"
-            requests:    
+            requests:
               cpu: "0.25"
               memory: "512Mi"
 
@@ -159,10 +159,10 @@
             resources:
               limits:
                 cpu: 250m
-                memory: 4Gi
+                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '2Gi' }}"
               requests:
                 cpu: 250m
-                memory: 4Gi
+                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '1Gi' }}"
           slave:
             extraFlags:
               - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
@@ -173,10 +173,10 @@
             resources:
               limits:
                 cpu: 250m
-                memory: 4Gi
+                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '2Gi' }}"
               requests:
                 cpu: 250m
-                memory: 4Gi
+                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '1Gi' }}"
           sentinel:
             usePassword: false
             enabled: true
@@ -231,26 +231,26 @@
             persistence:
               enabled: true
               storageClass: storage-heketi
-              size: 5Gi
+              size: 2Gi
             resources:
               limits:
                 cpu: 250m
-                memory: 4Gi
+                memory: 2Gi
               requests:
                 cpu: 250m
-                memory: 4Gi
+                memory: 1Gi
           slave:
             persistence:
               enabled: true
               storageClass: storage-heketi
-              size: 5Gi
+              size: 2Gi
             resources:
               limits:
                 cpu: 250m
-                memory: 4Gi
+                memory: 2Gi
               requests:
                 cpu: 250m
-                memory: 4Gi
+                memory: 1Gi
           sentinel:
             usePassword: false
             enabled: true
