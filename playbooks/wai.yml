@@ -16,12 +16,53 @@
   vars:
     ansible_connection: local
 
+# Load data from hosts
+- hosts: wai
+  tasks:
+    - name: WAI Gather facts
+      debug:
+        msg: "Just to load data"
+
+# Prepare infrastructure Root CA
+- name: Prepare infrastructure Root CA
+  tags:
+    - install
+    - infrastructure
+    - wai-infrastructure-ca
+  vars:
+    ansible_connection: local
+  import_playbook: wai-infrastructure-ca.yml
+
 # Infrastructure requirements
 - hosts: wai
   tags:
     - infrastructure
   roles:
     - infrastructure
+  vars_files: password.yml
+  post_tasks:
+    - name: WAI Infrastructure CA .:. Copy SSL artifacts
+      copy:
+        src: "{{ item }}"
+        dest: "{{ wai_infrastructure_ca.root_folder }}/"
+        mode: "0600"
+        owner: root
+        group: root
+      with_items:
+      - "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
+      - "{{ wai_infrastructure_ca.root_folder }}/key/{{ inventory_hostname }}.key"
+      - "{{ wai_infrastructure_ca.root_folder }}/crt/{{ inventory_hostname }}.crt"
+
+    - name: WAI Infrastructure CA .:. Copy WAI Infrastructure CA 
+      copy:
+        src: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
+        dest: "/usr/local/share/ca-certificates"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: WAI Infrastructure CA .:. Update root CA
+      shell: /usr/sbin/update-ca-certificates
 
 # Open VPN Server
 - hosts: localhost
