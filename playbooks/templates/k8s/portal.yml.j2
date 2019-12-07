@@ -283,7 +283,7 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       initContainers:
       - name: copy
-        image: {{ wai_portal_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
+        image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         command: ["sh", "-c", "cp -R /var/www/html/* /html/ ; chown -R 33:33 /html/"]
         resources:
           limits:
@@ -293,7 +293,7 @@ spec:
         - mountPath: /html
           name: html
       containers:
-      - image: {{ wai_portal_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
+      - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         name: portal
         resources:
           limits:
@@ -363,7 +363,7 @@ metadata:
                 - portal
             topologyKey: "kubernetes.io/hostname"
       containers:
-      - image: {{ wai_portal_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
+      - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         name: portal
         command: ["/usr/local/bin/php", "artisan", "queue:work", "--tries=3", "--sleep=10"]
         resources:
