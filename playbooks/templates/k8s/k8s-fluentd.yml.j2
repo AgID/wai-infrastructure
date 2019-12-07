@@ -5,35 +5,6 @@ apiVersion: v1
 metadata:
   name: kube-logging
 ---
-# Create external elasticsearch service
-kind: "Service"
-apiVersion: "v1"
-metadata:
-  name: "elasticsearch"
-  namespace: kube-logging
-spec:
-  ports:
-  - name: "elasticsearch"
-    protocol: "TCP"
-    port: 9200
-    targetPort: 9200
-    nodePort: 0
-  selector: {}
----
-kind: "Endpoints"
-apiVersion: "v1"
-metadata:
-  name: "elasticsearch"
-  namespace: kube-logging
-subsets:
-  - addresses:
-{% for es in  groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) %}
-    - ip: {{es}}
-{% endfor %}s
-    ports:
-      - port: 9200
-        name: "elasticsearch"
----
 # Deploy fluentd
 apiVersion: v1
 kind: ServiceAccount
@@ -99,7 +70,7 @@ spec:
         image: fluent/fluentd-kubernetes-daemonset:v1.7.3-debian-elasticsearch7-1.0
         env:
           - name:  FLUENT_ELASTICSEARCH_HOST
-            value: elasticsearch
+            value: {{ wai_load_balancer['wai-prod'].elastic[0] }}
           - name:  FLUENT_ELASTICSEARCH_PORT
             value: "9200"
           - name: FLUENT_ELASTICSEARCH_SCHEME
