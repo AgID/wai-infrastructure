@@ -1,7 +1,5 @@
 - hosts: localhost
   become: true
-  vars:
-    ansible_connection: local
   tasks:
     - include_vars:
         file: password.yml
