@@ -13,6 +13,6 @@ spec:
           - name: matomo
             image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
             args:
-            - /var/www/html/console 
+            - /var/www/html/console
             - core:archive
           restartPolicy: OnFailure

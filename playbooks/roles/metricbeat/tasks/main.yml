@@ -4,7 +4,7 @@
     file: password.yml
 
 - name: Metricbeat .:. Adding Elastic PGP key
-  apt_key: 
+  apt_key:
     url: "{{ es_apt_key }}"
     state: present
 
@@ -34,21 +34,21 @@
   when: "inventory_hostname in groups['mariadb-stag']"
 
 - name: Metricbeat .:. Add metricbeat mysql module
-  set_fact: 
+  set_fact:
     metric_configure_mysql_module: true
   when: "'mariadb' in role_names or 'galera' in role_names"
 
 - name: Metricbeat .:. Add mysql module with galera
-  set_fact: 
+  set_fact:
     metric_configure_mysql_module_galera: true
-  when: 
+  when:
     - "metric_configure_mysql_module | default(false)"
     - "'galera' in role_names"
-  
+
 - name: Metricbeat .:. Add etcd module
-  set_fact: 
+  set_fact:
     metric_configure_etcd: true
-  when: 
+  when:
     - "'etcd' in group_names"
 
 - name: Metricbeat .:. Configure metricbeat

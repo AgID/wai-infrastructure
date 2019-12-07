@@ -20,6 +20,6 @@ fi
 sed -e "s/@DATABASE_HOST@/${DATABASE_HOST}/g; s/@DATABASE_USER@/${DATABASE_USER}/g; s/@DATABASE_PASSWORD@/${DATABASE_PASSWORD}/g" \
   /tmp/config/config.ini.php-configmap > /var/www/html/config/config.ini.php
 
-chown -R www-data . 
+chown -R www-data .
 
 exec "$@"

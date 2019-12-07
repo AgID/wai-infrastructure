@@ -1,7 +1,7 @@
 - name: Heketi .:. Identify first node
   set_fact:
     heketi_first_node: true
-  when: 
+  when:
     - inventory_hostname == groups['gluster'][0]
 
 - name: Heketi .:. Install requirements
@@ -9,26 +9,26 @@
     update_cache: true
     name: thin-provisioning-tools
     state: present
-    
+
 - name: Heketi .:. Add Group
   group:
     name: '{{ heketi_group }}'
-    state: present 
+    state: present
     gid: '{{ heketi_gid }}'
 
 - name: Heketi .:. Add user
   user:
     name: '{{ heketi_user }}'
-    create_home: yes 
+    create_home: yes
     home: '{{ heketi_home }}'
-    uid: '{{ heketi_uid }}' 
-    group: '{{ heketi_group }}' 
+    uid: '{{ heketi_uid }}'
+    group: '{{ heketi_group }}'
     state: present
     shell: /bin/bash
 
 - name: Heketi .:. Base directory
   file:
-    path: '{{ item }}' 
+    path: '{{ item }}'
     state: directory
     owner: '{{ heketi_user }}'
     group: '{{ heketi_group }}'
@@ -103,7 +103,7 @@
 
 - name: Heketi .:. Enable and start service
   systemd:
-    name: 'heketi' 
+    name: 'heketi'
     enabled: yes
     daemon_reload: yes
     state: started

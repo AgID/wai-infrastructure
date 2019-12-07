@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y git automake build-essential cmake && \
   git clone --branch ${REDISEARCH_GITHUB_BRANCH} https://github.com/RedisLabsModules/RediSearch.git && \
   cd RediSearch && \
   make all && \
-  rm -rf /var/lib/apt/lists/* 
+  rm -rf /var/lib/apt/lists/*
 
 # Package the runner
 FROM docker.io/bitnami/redis:${REDIS_VERSION}

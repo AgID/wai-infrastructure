@@ -40,7 +40,7 @@ spec:
   - hosts:
     - {{ wai_base_domain[item] }}
     secretName: portal-ingress-acme-tls
----  
+---
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -108,7 +108,7 @@ data:
     REDIS_IPA_INDEX_SENTINELS=tcp://ipa-redisearch:26379
     REDIS_IPA_INDEX_SENTINEL_SET=ipa-redisearch-master
 
-{% if wai_settings[item].mail is defined &&  wai_settings[item].mail.enabled %}    
+{% if wai_settings[item].mail is defined &&  wai_settings[item].mail.enabled %}
     MAIL_DRIVER=smtp
     MAIL_HOST={{ wai_settings[item].mail.host }}
     MAIL_PORT={{ wai_settings[item].mail.port }}
@@ -119,7 +119,7 @@ data:
     MAIL_FROM_NAME="{{ wai_settings[item].mail.from_name }}"
 {% endif %}
 
-{% if wai_settings[item].pec is defined &&  wai_settings[item].pec.enabled %}    
+{% if wai_settings[item].pec is defined &&  wai_settings[item].pec.enabled %}
     PEC_HOST={{ wai_settings[item].pec.host }}
     PEC_PORT={{ wai_settings[item].pec.port }}
     PEC_USERNAME={{ wai_settings[item].pec.user }}
@@ -231,7 +231,7 @@ data:
         location ~* \.(jpg|jpeg|png|gif|svg|ico|css|js|pdf|woff|woff2)(\?id\=.+)?$ {
             expires max;
         }
-        
+
         location ~ /\.ht {
             deny all;
         }
@@ -257,7 +257,7 @@ metadata:
   name: portal
   namespace: {{ item }}
 spec:
-  replicas: {{ wai_matomo_pod_size[item]['wai-portal']}}
+  replicas: {{ wai_matomo_pod_size[item]['wai-portal'] }}
   strategy:
     type: RollingUpdate
     rollingUpdate:

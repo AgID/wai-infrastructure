@@ -6,7 +6,7 @@
 
     - name: WAI Infrastructure CA .:. Ensure folders
       file:
-        path: '{{ item }}' 
+        path: '{{ item }}'
         state: directory
       with_items:
         - "{{ wai_infrastructure_ca.root_folder }}/crt"
@@ -40,7 +40,7 @@
     - name: WAI Infrastructure CA .:. Create root CA certificate
       openssl_certificate:
         path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
-        provider: selfsigned 
+        provider: selfsigned
         subject_alt_name_strict: false
         csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/wai-ca.csr"
         privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
@@ -84,7 +84,7 @@
     - name: WAI Infrastructure CA .:.  Create  hosts certificate
       openssl_certificate:
         path: "{{ wai_infrastructure_ca.root_folder }}/crt/{{ item.hostname }}.crt"
-        provider: ownca 
+        provider: ownca
         subject_alt_name_strict: false
         csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/{{ item.hostname }}.csr"
         ownca_path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
@@ -92,4 +92,3 @@
         ownca_privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
         valid_in: 315360000
       with_items: "{{ pki_hosts }}"
-    

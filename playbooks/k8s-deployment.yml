@@ -37,7 +37,7 @@
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/k8s-deployment.yml"
       with_items: "{{ wai_k8s_namespaces }}"
-      
+
     # Deploy roles
     - name: K8S .:. Prepare roles
       template:
@@ -94,7 +94,7 @@
         filename: "{{ wai_k8s_deployment_dir }}/glusterfs.yml"
 
     # MetalLB
-    - name: K8S .:. Prepare MetalLB 
+    - name: K8S .:. Prepare MetalLB
       template:
         dest: "{{ wai_k8s_deployment_dir }}/metal-lb.yml"
         src: k8s/metal-lb.yml.j2
@@ -105,7 +105,7 @@
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/metal-lb.yml"
-        
+
     # Kube State Metrics
     - name: K8S .:. Download Kube State Metrics
       get_url:
@@ -198,7 +198,7 @@
       template:
         dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-ingestion.yml"
         src: k8s/matomo-jail.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}" 
+      with_items: "{{ wai_k8s_namespaces }}"
 
     - name: K8S .:. Deploy Matomo Ingestion
       kube:
@@ -222,7 +222,7 @@
       template:
         dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-api.yml"
         src: k8s/matomo-jail.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}" 
+      with_items: "{{ wai_k8s_namespaces }}"
 
     - name: K8S .:. Deploy Matomo API
       kube:
@@ -246,7 +246,7 @@
       template:
         dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-portal.yml"
         src: k8s/matomo-jail.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}" 
+      with_items: "{{ wai_k8s_namespaces }}"
 
     - name: K8S .:. Deploy Matomo Portal
       kube:
@@ -265,7 +265,7 @@
       template:
         dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-worker.yml"
         src: k8s/matomo-worker.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}" 
+      with_items: "{{ wai_k8s_namespaces }}"
 
     - name: K8S .:. Deploy Matomo Worker
       kube:
@@ -273,9 +273,9 @@
         kubectl: "{{ wai_kubectl }}"
         filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-worker.yml"
         state: "latest"
-      with_items: "{{ wai_k8s_namespaces }}" 
+      with_items: "{{ wai_k8s_namespaces }}"
 
-    # Deploy Redis secrets 
+    # Deploy Redis secrets
     - name: K8S .:. Prepare Redis Ingestion secrets
       template:
         dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/redis-secrets.yml"
@@ -294,7 +294,7 @@
       template:
         dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-archive-cronjob.yml."
         src: k8s/matomo-archive-cronjob.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}" 
+      with_items: "{{ wai_k8s_namespaces }}"
 
     - name: K8S .:. Deploy Matomo Cron Job
       kube:
@@ -302,5 +302,4 @@
         kubectl: "{{ wai_kubectl }}"
         filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-archive-cronjob.yml"
         state: "latest"
-      with_items: "{{ wai_k8s_namespaces }}" 
-      
+      with_items: "{{ wai_k8s_namespaces }}"

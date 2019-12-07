@@ -53,7 +53,7 @@
       - "{{ wai_infrastructure_ca.root_folder }}/key/{{ inventory_hostname }}.key"
       - "{{ wai_infrastructure_ca.root_folder }}/crt/{{ inventory_hostname }}.crt"
 
-    - name: WAI Infrastructure CA .:. Copy WAI Infrastructure CA 
+    - name: WAI Infrastructure CA .:. Copy WAI Infrastructure CA
       copy:
         src: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
         dest: "/usr/local/share/ca-certificates"
@@ -153,7 +153,7 @@
     - glusterfs
     - heketi
     - prometheus_node_exporter
-    
+
 # Install GlusterFS client
 - hosts: kube-node
   tags:

@@ -30,7 +30,7 @@ spec:
   - to:
 {% for es in  groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) %}
     - ipBlock:
-        cidr: {{es}}/32
+        cidr: {{ es }}/32
 {% endfor %}
     ports:
     - protocol: TCP

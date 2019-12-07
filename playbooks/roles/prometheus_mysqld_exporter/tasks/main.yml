@@ -3,19 +3,19 @@
 
 - name: Prometheus MySql Exporter .:. Base directory
   file:
-    path: '{{ prometheus_mysqld_exporter_home }}' 
+    path: '{{ prometheus_mysqld_exporter_home }}'
     state: directory
 
 - name: Prometheus MySql Exporter .:. Add Group
   group:
     name: '{{ prometheus_mysqld_exporter_group }}'
-    state: present 
-    gid: '{{ prometheus_mysqld_exporter_gid}}'
+    state: present
+    gid: '{{ prometheus_mysqld_exporter_gid }}'
 
 - name: Prometheus MySql Exporter .:. Add user
   user:
     name: '{{ prometheus_mysqld_exporter_user }}'
-    create_home: yes 
+    create_home: yes
     home: '{{ prometheus_mysqld_exporter_home }}'
     uid: '{{ prometheus_mysqld_exporter_uid }}'
     group: '{{ prometheus_mysqld_exporter_group }}'
@@ -48,7 +48,7 @@
 
 - name: Prometheus MySql Exporter .:. Enable and start service
   systemd:
-    name: 'mysqld_exporter' 
+    name: 'mysqld_exporter'
     enabled: yes
     daemon_reload: yes
     state: started

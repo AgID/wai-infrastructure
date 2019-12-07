@@ -2,7 +2,7 @@
 ---
 kind: ConfigMap
 apiVersion: v1
-metadata: 
+metadata:
   name: matomo-php-config
   namespace: {{ item }}
 data:
@@ -14,7 +14,7 @@ data:
     dbname = "matomo"
 
     {% if wai_load_balancer[item].rdbms | length > 1 %}
-    
+
     [database_reader]
     host = "{{ wai_load_balancer[item].rdbms[1] }}"
     username = "matomo-user"

@@ -34,7 +34,7 @@
 
 - name: Galera .:. Prepare binlog dir on production master nodes
   file:
-    path: '/opt/data/mysql-binlog' 
+    path: '/opt/data/mysql-binlog'
     state: directory
     group: mysql
     owner: mysql
@@ -44,7 +44,7 @@
   set_fact:
     galera_first_node: true
   with_items: ["galera-prod", "galera-prod-slave", "galera-play"]
-  when: 
+  when:
     - groups[item]|length > 0
     - inventory_hostname == groups[item][0]
 
@@ -78,7 +78,7 @@
     priv: "*.*:REPLICATION SLAVE"
     host: "%"
     login_unix_socket: /var/run/mysqld/mysqld.sock
-  when: 
+  when:
     - inventory_hostname == groups['galera-prod'][0]
 
 - name: Galera .:. Activate replica on production slave primary node
@@ -88,12 +88,12 @@
     master_password: "{{ wai_database_credentials['wai-prod']['replica-user'] }}"
     master_host: "{{ hostvars[groups['galera-prod'][0]]['ansible_default_ipv4']['address'] }}"
     login_unix_socket: /var/run/mysqld/mysqld.sock
-  when: 
+  when:
     - inventory_hostname == groups['galera-prod-slave'][0]
 
 - name: Galera .:. Start slave on slave primary node
   mysql_replication:
     mode: startslave
     login_unix_socket: /var/run/mysqld/mysqld.sock
-  when: 
+  when:
     - inventory_hostname == groups['galera-prod-slave'][0]

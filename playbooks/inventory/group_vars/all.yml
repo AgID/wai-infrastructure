@@ -21,7 +21,7 @@ wai_k8s_namespaces:
   - wai-stag
 
 # Base fqdn domain
-wai_base_domain: 
+wai_base_domain:
   wai-prod: webanalytics.italia.it
   wai-play: play.webanalytics.italia.it
   wai-stag: staging.webanalytics.italia.it
@@ -45,7 +45,7 @@ wai_load_balancer:
       - 10.0.30.101
     rdbms:
       - 10.0.100.101
-  
+
 # Hostnames
 wai_hostname: { ingestion: ingestion, matomo: matomo, portal: www, api: api}
 
@@ -62,11 +62,11 @@ wai_ip_addresses:
     public_ip: 131.1.241.131
     private_ip: 10.0.10.252
 
-# Helm 
+# Helm
 helm:
   cert_manager:
     version: v0.11.0
-    
+
 # Matomo POD size configuration
 wai_matomo_pod_size:
   wai-prod: { wai-portal: 4, wai-reporting: 4, wai-api: 4, matomo-portal: 4, matomo-worker: 8, matomo-ingestion: 8, matomo-api: 4 }
@@ -112,9 +112,9 @@ wai_base_https_port: 30443
 es_version: 7.4.1
 es_major_version: 7.x
 es_apt_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
-es_apt_url: "deb https://artifacts.elastic.co/packages/{{es_major_version}}/apt stable main"
+es_apt_url: "deb https://artifacts.elastic.co/packages/{{ es_major_version }}/apt stable main"
 
-kibana_elastic_hosts: "http://{{ groups['elastic'][0]}}:9200"
+kibana_elastic_hosts: "http://{{ groups['elastic'][0] }}:9200"
 
 # Metricbeat output
 metricbeat_output_elastic: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list | to_json }}'

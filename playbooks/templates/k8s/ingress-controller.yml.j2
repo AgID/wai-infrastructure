@@ -320,7 +320,7 @@ spec:
   - port: 80
     targetPort: 8080
   selector:
-    app: default-http-backend            
+    app: default-http-backend
 ---
 apiVersion: v1
 kind: Service
@@ -348,4 +348,4 @@ spec:
   selector:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
-{% endfor %}              
+{% endfor %}

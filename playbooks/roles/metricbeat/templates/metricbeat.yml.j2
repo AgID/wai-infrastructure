@@ -25,14 +25,14 @@ metricbeat.modules:
       - socket
     enabled: true
     period: 10s
-    processes: ['.*']  
+    processes: ['.*']
 
   {% if metric_configure_mysql_module | default(false) %}
 
   - module: mysql
     metricset:
       - status
-    {% if metric_configure_mysql_module_galera | default(false) %}    
+    {% if metric_configure_mysql_module_galera | default(false) %}
 
       - galera_status
     {% endif %}

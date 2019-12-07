@@ -108,7 +108,7 @@ def main():
 
         if not terraform_workspace_exists(t, args.environment):
             terraform_exec(t, 'workspace new', args.environment)
-        
+
         terraform_exec(t, 'workspace select', args.environment)
 
         tfvars.append(os.path.join(terraform_basedir, 'env-' + args.environment + '.tfvars'))

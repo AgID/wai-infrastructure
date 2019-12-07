@@ -15,7 +15,7 @@
     - name: K8S Helm .:. Install python
       apt:
         update_cache: true
-        name: 
+        name:
           - python3
           - git
           - python3-pip
@@ -24,7 +24,7 @@
     # Install PYHelm
     - name: K8S Helm .:. Install requirements
       pip:
-        name: 
+        name:
           - pygit2
           - pyhelm=2.11.5
           - grpcio
@@ -47,7 +47,7 @@
       helm:
         namespace: cert-manager
         name: cert-manager
-        chart: 
+        chart:
           name: cert-manager
           version: "{{ helm.cert_manager.version }}"
           source:
@@ -62,7 +62,7 @@
       helm:
         namespace: monitoring
         name: prometheus
-        chart: 
+        chart:
           name: prometheus
           source:
             type: git
@@ -70,7 +70,7 @@
             path: stable/prometheus
         host: "{{ clusterIP.stdout }}"
         state: present
-        values: 
+        values:
           server:
             ingress:
               enabled: false
@@ -99,7 +99,7 @@
             path: stable/grafana
         state: present
         host: "{{ clusterIP.stdout }}"
-        values: 
+        values:
           ingress:
             enabled: false
           persistence:
@@ -129,7 +129,7 @@
             path: stable/redis
         state: present
         host: "{{ clusterIP.stdout }}"
-        values: 
+        values:
           image:
             repository: "{{ wai_redis_image }}"
             tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_redis_image_tag }}"
@@ -191,7 +191,7 @@
                 cpu: 250m
                 memory: 512Mi
       with_nested:
-        - "{{ wai_k8s_namespaces }}" 
+        - "{{ wai_k8s_namespaces }}"
         - ["ingestion-redis", "application-redis"]
 
     # Install IPA Redis Search
@@ -207,7 +207,7 @@
             path: stable/redis
         state: present
         host: "{{ clusterIP.stdout }}"
-        values: 
+        values:
           image:
             repository: "{{ wai_ipa_redisearch_image }}"
             tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_ipa_redisearch_image_tag }}"
@@ -265,7 +265,7 @@
                 cpu: 250m
                 memory: 512Mi
       with_items:
-        - "{{ wai_k8s_namespaces }}" 
+        - "{{ wai_k8s_namespaces }}"
 
     # At the end.
     - name: K8S Helm .:. Prepare cluster issuer
