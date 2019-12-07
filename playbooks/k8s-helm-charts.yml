@@ -26,7 +26,7 @@
       pip:
         name: 
           - pygit2
-          - pyhelm
+          - pyhelm=2.11.5
           - grpcio
 
     # Get tiller clusterID
@@ -49,7 +49,7 @@
         name: cert-manager
         chart: 
           name: cert-manager
-          version: {{ helm.cert_manager.version }}
+          version: "{{ helm.cert_manager.version }}"
           source:
             type: repo
             location: https://charts.jetstack.io
@@ -133,8 +133,6 @@
           image:
             repository: "{{ wai_redis_base_image }}"
             tag: "{% if item=='wai-stag' %}latest{% else %}stable{% endif %}"
-          configmap:
-            - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
           cluster:
             enabled: true
             slaveCount: 2
@@ -152,6 +150,8 @@
                 cpu: 100m
                 memory: 128Mi
           master:
+            extraFlags:
+              - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
             persistence:
               enabled: true
               storageClass: storage-heketi
@@ -164,6 +164,8 @@
                 cpu: 250m
                 memory: 4Gi
           slave:
+            extraFlags:
+              - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
             persistence:
               enabled: true
               storageClass: storage-heketi
@@ -176,6 +178,7 @@
                 cpu: 250m
                 memory: 4Gi
           sentinel:
+            usePassword: false
             enabled: true
             masterSet: "{{ item[1] }}-master"
             downAfterMilliseconds: 5000
@@ -251,6 +254,7 @@
                 cpu: 250m
                 memory: 4Gi
           sentinel:
+            usePassword: false
             enabled: true
             masterSet: "ipa-redisearch-master"
             downAfterMilliseconds: 5000
