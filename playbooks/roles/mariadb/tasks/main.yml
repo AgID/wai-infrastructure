@@ -41,7 +41,7 @@
 
 - name: MariaDB .:. Configure bind address
   replace:
-    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    path: /etc/mysql/my.cnf
     regexp: "^bind-address.*"
     replace: "bind-address={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
   when: mariadb_mycnf_result.stat.exists == false
@@ -54,7 +54,7 @@
 
 - name: MariaDB .:. Change mysql data directory
   replace:
-      path: /etc/mysql/mariadb.conf.d/50-server.cnf
+      path: /etc/mysql/my.cnf
       regexp: "^datadir.*"
       replace: "datadir = /opt/data/mysql"
   when: 
