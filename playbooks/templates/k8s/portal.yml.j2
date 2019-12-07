@@ -52,7 +52,7 @@ data:
     APP_NAME="Web Analytics Italia"
     APP_NAME_SHORT="WAI"
     APP_ENV=production
-    APP_KEY=base64:{{ wai_settings[item].log.app_key }}
+    APP_KEY={{ wai_settings[item].log.app_key }}
     APP_SALT={{ wai_settings[item].log.app_salt }}
     APP_DEBUG=false
     APP_URL=https://{{ wai_base_domain[item] }}
@@ -142,8 +142,12 @@ data:
     ELASTICSEARCH_PASSWORD={{ elasticsearch_secrets.portal_user }}
 
     SESSION_ENCRYPT=true
-    SPID_VALIDATOR_URL=https://validator.spid.gov.it/samlsso
     SESSION_SECURE_COOKIE=true
+
+    SPID_VALIDATOR_URL=https://validator.spid.gov.it/samlsso
+    SPID_SP_PRIVATE_KEY={{ wai_settings[item].spid.key }}
+    SPID_SP_CERTIFICATE={{ wai_settings[item].spid.cert }}
+
 ---
 kind: ConfigMap
 apiVersion: v1
