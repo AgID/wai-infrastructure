@@ -3,4 +3,5 @@ server.host: 0.0.0.0
 elasticsearch.hosts: {{ kibana_elastic_hosts }}
 elasticsearch.username: "kibana"
 elasticsearch.password: {{ elasticsearch_secrets.kibana }}
+elasticsearch.ssl.certificateAuthorities: /etc/wai/pki/wai-ca.crt
 xpack.security.encryptionKey: {{ 999999 | random | to_uuid }}
