@@ -277,3 +277,18 @@
         filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/redis-secrets.yml"
         state: "latest"
       with_items: "{{ wai_k8s_namespaces }}"
+
+    - name: K8S .:. Prepare Matomo Cron Job
+      template:
+        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-archive-cronjob.yml."
+        src: k8s/matomo-archive-cronjob.yml.j2
+      with_items: "{{ wai_k8s_namespaces }}" 
+
+    - name: K8S .:. Deploy Matomo Cron Job
+      kube:
+        name: "matomo-worker"
+        kubectl: "{{ wai_kubectl }}"
+        filename: "{{ wai_k8s_deployment_dir }}/{{ item }}/matomo-archive-cronjob.yml"
+        state: "latest"
+      with_items: "{{ wai_k8s_namespaces }}" 
+      

@@ -1,0 +1,376 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod
+  name: portal
+  namespace: {{ item }}
+spec:
+  rules:
+  - host: {{ wai_base_domain[item] }}
+    http:
+      paths:
+      - backend:
+          serviceName: portal-service
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - {{ wai_base_domain[item] }}
+    secretName: portal-ingress-acme-tls
+---
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    kubernetes.io/ingress.class: nginx
+  name: matomo
+  namespace: {{ item }}
+spec:
+  rules:
+  - host: {{ wai_base_domain[item] }}
+    http:
+      paths:
+      - backend:
+          serviceName: matomo-service
+          servicePort: 80
+        path: {{ wai_portal_matomo_sub_path }}/(.*)
+  tls:
+  - hosts:
+    - {{ wai_base_domain[item] }}
+    secretName: portal-ingress-acme-tls
+---  
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: portal-env-configmap
+  namespace: {{ item }}
+data:
+  env: |-
+    HOSTNAME={{ wai_base_domain[item] }}
+    APP_NAME="Web Analytics Italia"
+    APP_NAME_SHORT="WAI"
+    APP_ENV=production
+    APP_KEY=base64:{{ wai_settings[item].log.app_key }}
+    APP_SALT={{ wai_settings[item].log.app_salt }}
+    APP_DEBUG=false
+    APP_URL=https://{{ wai_base_domain[item] }}
+    APP_VERSION=0.1
+
+    LOG_CHANNEL=stack
+    LOG_STACK_CHANNELS={{ wai_settings[item].log.channels }}
+    LOG_SLACK_WEBHOOK_URL={{ wai_settings[item].log.slack_webhook_url }}
+    LOG_SLACK_USERNAME={{ wai_settings[item].log.slack_username }}
+
+    CRON_AUTH_TOKEN={{ wai_settings[item].log.cron_auth_token }}
+
+    PENDING_WEBSITE_WARNING=10
+    PENDING_WEBSITE_REMOVE=15
+
+    ARCHIVING_WEBSITE_WARNING=60
+    ARCHIVING_WEBSITE_ARCHIVE=90
+    ARCHIVING_WEBSITE_NOTIFICATION_WEEK_DAY=1
+    ARCHIVING_WEBSITE_DAILY_NOTIFICATION=3
+
+    DB_CONNECTION=mysql
+    DB_HOST={{ wai_rdbms_load_balancer[item][0] }}
+    DB_PORT=3306
+    DB_DATABASE=wai
+    DB_USERNAME=wai-user
+    DB_PASSWORD={{ wai_database_password[item]['wai-users'] }}
+
+    BROADCAST_DRIVER=log
+    CACHE_DRIVER=redis
+    CACHE_CONNECTION=cache-sentinel
+    SESSION_DRIVER=redis
+    SESSION_LIFETIME=120
+    SESSION_CONNECTION=sessions-sentinel
+    QUEUE_CONNECTION=redis
+    QUEUE_REDIS_CONNECTION=queue-sentinel
+
+    REDIS_HOST=application-redis
+    REDIS_PASSWORD={{ redis_password.application_redis_master[item] }}
+    REDIS_PORT=26379
+    REDIS_QUEUE=default
+    REDIS_SENTINELS=tcp://application-redis:26379
+    REDIS_SENTINEL_SERVICE=application-redis-master
+    REDIS_INDEXES_USE_SENTINELS=true
+
+    REDIS_CACHE_DB=1
+    REDIS_SESSIONS_DB=2
+    REDIS_QUEUE_DB=3
+
+    REDIS_IPA_INDEX_HOST=ipa-redisearch
+    REDIS_IPA_INDEX_PASSWORD={{ redis_password.ipa_redisearch_master[item] }}
+    REDIS_IPA_INDEX_PORT=26379
+    REDIS_IPA_INDEX_USE_SENTINELS=true
+    REDIS_IPA_INDEX_SENTINELS=tcp://ipa-redisearch:26379
+    REDIS_IPA_INDEX_SENTINEL_SET=ipa-redisearch-master
+
+{% if wai_settings[item].mail is defined &&  wai_settings[item].mail.enabled %}    
+    MAIL_DRIVER=smtp
+    MAIL_HOST={{ wai_settings[item].mail.host }}
+    MAIL_PORT={{ wai_settings[item].mail.port }}
+    MAIL_USERNAME={{ wai_settings[item].mail.username }}
+    MAIL_PASSWORD={{ wai_settings[item].mail.password }}
+    MAIL_ENCRYPTION={{ wai_settings[item].mail.encryption }}
+    MAIL_FROM_ADDRESS={{ wai_settings[item].mail.from_address }}
+    MAIL_FROM_NAME="{{ wai_settings[item].mail.from_name }}"
+{% endif %}
+
+{% if wai_settings[item].pec is defined &&  wai_settings[item].pec.enabled %}    
+    PEC_HOST={{ wai_settings[item].pec.host }}
+    PEC_PORT={{ wai_settings[item].pec.port }}
+    PEC_USERNAME={{ wai_settings[item].pec.user }}
+    PEC_PASSWORD={{ wai_settings[item].pec.password }}
+    PEC_ENCRYPTION={{ wai_settings[item].pec.encryption }}
+{% endif %}
+
+    ANALYTICS_ADMIN_TOKEN={{ matomo_vars.super_user.token }}
+    ANALYTICS_API_BASE_URL=http://matomo-service
+    ANALYTICS_API_SSL_VERIFY=false
+    ANALYTICS_PUBLIC_URL=https://{{ wai_base_domain[item] }}{{ wai_portal_matomo_sub_path }}
+
+    ELASTICSEARCH_HOST=elasticsearch
+    ELASTICSEARCH_PORT=9200
+    ELASTICSEARCH_INDEX_PREFIX=wai
+    ELASTICSEARCH_INDEX_NAME=application-log
+    ELASTICSEARCH_IGNORE_EXCEPTIONS=false
+    ELASTICSEARCH_SEARCH_TEMPLATE_NAME=wai-portal-search-template
+    ELASTICSEARCH_USER=portal_user
+    ELASTICSEARCH_PASSWORD={{ elasticsearch_secrets.portal_user }}
+
+    SESSION_ENCRYPT=true
+    SPID_VALIDATOR_URL=https://validator.spid.gov.it/samlsso
+    SESSION_SECURE_COOKIE=true
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: portal-nginx-configmap
+  namespace: {{ item }}
+data:
+  nginx.conf: |-
+    user nginx;
+    worker_processes  1;
+    error_log  /var/log/nginx/error.log warn;
+    pid        /var/run/nginx.pid;
+    events {
+      worker_connections 1024;
+    }
+    http {
+      upstream backend {
+        server localhost:9000;
+      }
+      include /etc/nginx/mime.types;
+      default_type application/octet-stream;
+      gzip on;
+      gzip_disable "msie6";
+      server {
+        listen 80;
+        root /var/www/html/public;
+        index index.php index.html index.htm;
+
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+        add_header Referrer-Policy "no-referrer-when-downgrade";
+
+        location ~* \.(eot|otf|ttf|woff|woff2)$ {
+            add_header Access-Control-Allow-Origin *;
+        }
+
+        location / {
+            try_files $uri $uri/ /index.php$is_args$args;
+        }
+
+        error_page 404 /404.html;
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+          root /usr/share/nginx/html;
+        }
+
+        location = /favicon.ico {
+          log_not_found off;
+          access_log off;
+        }
+
+        location ~ \.php$ {
+          try_files $uri /index.php =404;
+          fastcgi_param  QUERY_STRING       $query_string;
+          fastcgi_param  REQUEST_METHOD     $request_method;
+          fastcgi_param  CONTENT_TYPE       $content_type;
+          fastcgi_param  CONTENT_LENGTH     $content_length;
+          fastcgi_param  SCRIPT_NAME        $fastcgi_script_name;
+          fastcgi_param  REQUEST_URI        $request_uri;
+          fastcgi_param  DOCUMENT_URI       $document_uri;
+          fastcgi_param  DOCUMENT_ROOT      $document_root;
+          fastcgi_param  SERVER_PROTOCOL    $server_protocol;
+          fastcgi_param  REQUEST_SCHEME     $scheme;
+          fastcgi_param  HTTPS              'on';
+          fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
+          fastcgi_param  SERVER_SOFTWARE    nginx/$nginx_version;
+          fastcgi_param  REMOTE_ADDR        $remote_addr;
+          fastcgi_param  REMOTE_PORT        $remote_port;
+          fastcgi_param  SERVER_ADDR        $server_addr;
+          fastcgi_param  SERVER_PORT        $server_port;
+          fastcgi_param  SERVER_NAME        $server_name;
+          fastcgi_param  REDIRECT_STATUS    200;
+          fastcgi_index index.php;
+          fastcgi_buffers 16 16k;
+          fastcgi_buffer_size 32k;
+          fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+          fastcgi_pass backend;
+        }
+
+        location ~* \.(jpg|jpeg|png|gif|svg|ico|css|js|pdf|woff|woff2)(\?id\=.+)?$ {
+            expires max;
+        }
+        
+        location ~ /\.ht {
+            deny all;
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal-service
+  namespace: {{ item }}
+spec:
+  ports:
+  - name: portal
+    protocol: TCP
+    port: 80
+  selector:
+    app: portal
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal
+  namespace: {{ item }}
+spec:
+  replicas: {{ wai_matomo_pod_size[item]['wai-portal']}}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: portal
+  template:
+    metadata:
+      labels:
+        app: portal
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - portal
+            topologyKey: "kubernetes.io/hostname"
+      initContainers:
+      - name: copy
+        image: {{ wai_portal_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
+        command: ["sh", "-c", "cp -R /var/www/html/* /html/ ; chown -R 33:33 /html/"]
+        resources:
+          limits:
+            cpu: 0.1
+            memory: "50Mi"
+        volumeMounts:
+        - mountPath: /html
+          name: html
+      containers:
+      - image: {{ wai_portal_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
+        name: portal
+        resources:
+          limits:
+            cpu: "0.75"
+            memory: "250Mi"
+        ports:
+        - containerPort: 9000
+          name: fpm-port
+        volumeMounts:
+        - name: html
+          mountPath: /var/www/html/
+        - name: portal-env-conf
+          mountPath: /var/www/html/.env
+          subPath: env
+      - image: nginx:1.15.8
+        name: nginx
+        resources:
+          limits:
+            cpu: "0.25"
+            memory: "256Mi"
+        args: ["nginx", "-g", "daemon off;", "-c", "/etc/config/nginx.conf"]
+        ports:
+        - containerPort: 80
+          name: nginx
+        volumeMounts:
+        - name: portal-nginx-conf
+          mountPath: /etc/config
+        - name: html
+          mountPath: /var/www/html
+      volumes:
+        - name: portal-nginx-conf
+          configMap:
+            name: portal-nginx-configmap
+        - name: portal-env-conf
+          configMap:
+            name: portal-env-configmap
+        - name: html
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-queue-worker
+  namespace: {{ item }}
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: portal
+  template:
+    metadata:
+      labels:
+        app: portal
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - portal
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - image: {{ wai_portal_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
+        name: portal
+        command: ["/usr/local/bin/php", "artisan", "queue:work", "--tries=3", "--sleep=10"]
+        resources:
+          limits:
+            cpu: “0.75"
+            memory: “250Mi”
+        volumeMounts:
+        - name: portal-env-conf
+          mountPath: /var/www/html/.env
+          subPath: env
+      volumes:
+        - name: portal-env-conf
+          configMap:
+            name: portal-env-configmap

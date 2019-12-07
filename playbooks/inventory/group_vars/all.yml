@@ -58,12 +58,19 @@ wai_k8s_resource_quota:
   wai-play: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "50", limits.memory: "64Gi" }
   wai-stag: { requests.cpu: "24", requests.memory: "30Gi", limits.cpu: "34", limits.memory: "40Gi" }
 
+# IPA Redisearch  image
+wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
+
+# Portal base image
+wai_portal_base_image: webanalyticsitalia/wai-portal
+wai_portal_matomo_sub_path: /matomo
+
 # RediSearch Image
-wai_redis_base_image: italia/wai-redisearch
-wai_redis_base_image_tag: 5.0.3
+wai_redis_base_image: webanalyticsitalia/wai-redis-search
 
 # Base Matomo Image    
-wai_matomo_base_image: giafar/matomo:dev
+wai_matomo_base_image: webanalyticsitalia/wai-matomo
+
 wai_kube_state_metrics_version: v1.5.0
 wai_kube_state_metrics_output_dir: kube-state-metrics-1.5.0
 wai_kube_state_metrics: 'https://codeload.github.com/kubernetes/kube-state-metrics/zip/{{ wai_kube_state_metrics_version }}'

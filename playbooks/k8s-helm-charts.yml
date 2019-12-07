@@ -116,7 +116,7 @@
               cpu: "0.25"
               memory: "512Mi"
 
-    # Install redis-ingestion
+    # Install Redis
     - name: K8S Helm .:. Install Redis
       helm:
         namespace: "{{ item[0] }}"
@@ -132,7 +132,7 @@
         values: 
           image:
             repository: "{{ wai_redis_base_image }}"
-            tag: "{{ wai_redis_base_image_tag }}"
+            tag: "{% if item=='wai-stag' %}latest{% else %}stable{% endif %}"
           configmap:
             - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
           cluster:
@@ -191,6 +191,80 @@
         - "{{ wai_k8s_namespaces }}" 
         - ["ingestion-redis", "application-redis"]
 
+    # Install IPA Redis Search
+    - name: K8S Helm .:. Install Redis
+      helm:
+        namespace: "{{ item }}"
+        name: "ipa-redisearch"
+        chart:
+          name: redis
+          source:
+            type: git
+            location: https://github.com/helm/charts.git
+            path: stable/redis
+        state: present
+        host: "{{ clusterIP.stdout }}"
+        values: 
+          image:
+            repository: "{{ wai_ipa_redisearch_image }}"
+            tag: "{% if item=='wai-stag' %}latest{% else %}stable{% endif %}"
+          configmap:
+            - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
+          cluster:
+            enabled: true
+            slaveCount: 2
+          usePassword: true
+          existingSecret: redis-master-secret
+          existingSecretPasswordKey: ipa-redisearch-password
+          fullnameOverride: ipa-redisearch
+          metrics:
+            enabled: true
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+          master:
+            persistence:
+              enabled: true
+              storageClass: storage-heketi
+              size: 5Gi
+            resources:
+              limits:
+                cpu: 250m
+                memory: 4Gi
+              requests:
+                cpu: 250m
+                memory: 4Gi
+          slave:
+            persistence:
+              enabled: true
+              storageClass: storage-heketi
+              size: 5Gi
+            resources:
+              limits:
+                cpu: 250m
+                memory: 4Gi
+              requests:
+                cpu: 250m
+                memory: 4Gi
+          sentinel:
+            enabled: true
+            masterSet: "ipa-redisearch-master"
+            downAfterMilliseconds: 5000
+            failoverTimeout: 5000
+            resources:
+              limits:
+                cpu: 250m
+                memory: 512Mi
+              requests:
+                cpu: 250m
+                memory: 512Mi
+      with_items:
+        - "{{ wai_k8s_namespaces }}" 
+
     # At the end.
     - name: K8S Helm .:. Prepare cluster issuer
       template:
@@ -203,4 +277,3 @@
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
         filename: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
-

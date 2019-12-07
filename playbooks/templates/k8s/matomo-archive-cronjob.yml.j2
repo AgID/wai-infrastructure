@@ -1,0 +1,18 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: matomo-core-archive-all
+  namespace: {{ item }}
+spec:
+  schedule: "00 01 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: matomo
+            image: {{ wai_portal_base_image}}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
+            args:
+            - /var/www/html/console 
+            - core:archive
+          restartPolicy: OnFailure

@@ -31,7 +31,7 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       initContainers:
       - name: copy
-        image: {{ wai_matomo_base_image }}
+        image: {{ wai_matomo_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
         command: ["sh", "-c", "cp -R /var/www/html/* /html/"]
         resources:
           limits:
@@ -41,7 +41,7 @@ spec:
         - mountPath: /html
           name: html
       containers:
-      - image: {{ wai_matomo_base_image }}
+      - image: {{ wai_matomo_base_image }}:{% if item=='wai-stag' %}latest{% else %}stable{% endif %}
         name: {{ matomo_name }}
         resources:
           limits:
@@ -164,6 +164,7 @@ data:
           fastcgi_param  SERVER_ADDR        $server_addr;
           fastcgi_param  SERVER_PORT        $server_port;
           fastcgi_param  SERVER_NAME        $server_name;
+          fastcgi_param  HTTP_X_FORWARDED_URI '{{ wai_portal_matomo_sub_path }}';
           fastcgi_intercept_errors on;
           fastcgi_pass backend;
         }
