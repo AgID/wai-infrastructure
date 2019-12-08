@@ -51,7 +51,7 @@
       set_fact:
         pki_hosts: "{{ pki_hosts | default([]) + [ { 'hostname': item, 'ip' : hostvars[item].ansible_default_ipv4.address }  ] }}"
       with_inventory_hostnames:
-        - all
+        - wai
 
     - name: WAI Infrastructure CA .:. Create private key
       openssl_privatekey:
@@ -71,7 +71,6 @@
         common_name: "{{ item.hostname }}"
         subject_alt_name:
           - "IP:{{ item.ip }}"
-          - "{{ item.hostname }}"
         key_usage:
           - digitalSignature
           - keyAgreement
