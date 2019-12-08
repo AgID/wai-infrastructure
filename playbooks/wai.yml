@@ -76,7 +76,7 @@
   vars_files:
     - password.yml
   vars:    
-    es_ssl_key_password: changeme
+    es_ssl_key_password: "{{ elasticsearch_secrets.ssl_key_password }}"
     es_api_host: "{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}"
     es_ssl_key: "{{ wai_infrastructure_ca.root_folder }}/key/{{ inventory_hostname }}.key"
     es_ssl_certificate: "{{ wai_infrastructure_ca.root_folder }}/crt/{{ inventory_hostname }}.crt"
