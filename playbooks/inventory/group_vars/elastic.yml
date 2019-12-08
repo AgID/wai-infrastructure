@@ -23,7 +23,7 @@ es_users:
     fluentd:
       password: "{{ elasticsearch_secrets.fluentd }}"
       roles:
-        - logstash_system
+        - superuser
     kibana:
       password: "{{ elasticsearch_secrets.kibana }}"
     logstash_system:
