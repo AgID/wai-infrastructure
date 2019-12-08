@@ -348,11 +348,11 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      app: portal
+      app: portal-queue-worker
   template:
     metadata:
       labels:
-        app: portal
+        app: portal-queue-worker
     spec:
       affinity:
         podAntiAffinity:
