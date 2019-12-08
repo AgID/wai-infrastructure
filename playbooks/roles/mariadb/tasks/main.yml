@@ -46,6 +46,14 @@
     replace: "bind-address={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
   when: mariadb_mycnf_result.stat.exists == false
 
+- name: MariaDB .:. Stop the service
+  service:
+    name: mysql
+    state: stopped
+    enabled: yes
+  when: 
+    - mariadb_mycnf_result.stat.exists == false
+
 - name: MariaDB .:. Copy mysql data directory to storage device
   raw: 'cp -R -p /var/lib/mysql /opt/data/mysql && rm -fR /var/lib/mysql'
   when: 

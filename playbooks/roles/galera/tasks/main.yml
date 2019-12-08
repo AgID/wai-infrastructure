@@ -24,6 +24,7 @@
   vars:
     production_master_node: "{{ (groups['galera-prod'] | intersect(inventory_hostname) | list | length > 0) }}"
     production_slave_node: "{{ (groups['galera-prod-slave'] | intersect(inventory_hostname) | list | length > 0) }}"
+    public_node: "{{ (groups['galera-play'] | intersect(inventory_hostname) | list | length > 0) }}"
   template:
     src: "galera.yml.j2"
     dest: "/etc/mysql/conf.d/galera.cnf"
