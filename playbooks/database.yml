@@ -108,7 +108,7 @@
       mysql_user:
         login_user: "root"
         name: root
-        password: "{{ wai_database_credentials[wai_environment]['root'] }}"
+        password: "{{ wai_database_credentials.root }}"
         login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - hosts:
@@ -116,14 +116,13 @@
     - galera-prod-slave
     - galera-play
     - mariadb-stag
-
   tasks:
-  
-    - name: Database .:. Set database password
-      set_fact:
-        database_root_password: "{{ wai_database_credentials[wai_environment]['root'] }}"
+    - include_vars:
+        file: password.yml
 
     - name: Database .:. Create root configuration file
+      vars:
+        database_root_password: "{{ wai_database_credentials.root }}"
       template:
         src: "mariadb/root-my.cnf.j2"
         dest: "/root/.my.cnf"
