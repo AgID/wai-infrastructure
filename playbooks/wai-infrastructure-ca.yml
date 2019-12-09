@@ -89,4 +89,3 @@
         ownca_privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
         valid_in: 315360000
       with_items: "{{ pki_hosts }}"
-    
