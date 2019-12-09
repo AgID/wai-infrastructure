@@ -334,6 +334,7 @@ metadata:
     app.kubernetes.io/part-of: ingress-nginx
 spec:
   type: LoadBalancer
+  loadBalancerIP: {{ wai_ip_addresses[ns].private_ip }}
   externalTrafficPolicy: Local
   ports:
     - name: http
