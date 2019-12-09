@@ -52,7 +52,7 @@ data:
     HOSTNAME={{ wai_base_domain[item] }}
     APP_NAME="Web Analytics Italia"
     APP_NAME_SHORT="WAI"
-    APP_ENV=production
+     APP_ENV={{ wai_portal_environments[item] }}
     APP_KEY={{ wai_settings[item].log.app_key }}
     APP_SALT={{ wai_settings[item].log.app_salt }}
     APP_DEBUG=false
