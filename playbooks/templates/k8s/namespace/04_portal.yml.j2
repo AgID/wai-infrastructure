@@ -158,20 +158,31 @@ metadata:
 data:
   nginx.conf: |-
     user nginx;
-    worker_processes  1;
-    error_log  /var/log/nginx/error.log warn;
-    pid        /var/run/nginx.pid;
+    worker_processes 1;
+    error_log /var/log/nginx/error.log warn;
+    pid /var/run/nginx.pid;
+
     events {
-      worker_connections 1024;
+      worker_connections 2048;
     }
+
     http {
+      server_tokens off;
+      sendfile on;
+      tcp_nopush on;
+      tcp_nodelay on;
+      keepalive_timeout 15s;
+      types_hash_max_size 2048;
+
       upstream backend {
         server localhost:9000;
       }
+
       include /etc/nginx/mime.types;
       default_type application/octet-stream;
       gzip on;
       gzip_disable "msie6";
+
       server {
         listen 80;
         root /var/www/html/public;
@@ -182,23 +193,8 @@ data:
         add_header X-XSS-Protection "1; mode=block";
         add_header Referrer-Policy "no-referrer-when-downgrade";
 
-        location ~* \.(eot|otf|ttf|woff|woff2)$ {
-            add_header Access-Control-Allow-Origin *;
-        }
-
         location / {
-            try_files $uri $uri/ /index.php$is_args$args;
-        }
-
-        error_page 404 /404.html;
-        error_page 500 502 503 504 /50x.html;
-        location = /50x.html {
-          root /usr/share/nginx/html;
-        }
-
-        location = /favicon.ico {
-          log_not_found off;
-          access_log off;
+            try_files $uri /index.php$is_args$args;
         }
 
         location ~ \.php$ {
@@ -229,7 +225,7 @@ data:
           fastcgi_pass backend;
         }
 
-        location ~* \.(jpg|jpeg|png|gif|svg|ico|css|js|pdf|woff|woff2)(\?id\=.+)?$ {
+        location ~* \.(jpg|jpeg|png|gif|svg|ico|css|js|pdf|ttf|woff|woff2)(\?id\=.+)?$ {
             expires max;
         }
         
