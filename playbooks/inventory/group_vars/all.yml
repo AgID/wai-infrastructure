@@ -87,7 +87,10 @@ wai_ipa_redisearch_image_tag: 5.0.3-dev-1
 wai_portal_image: webanalyticsitalia/wai-portal
 wai_portal_image_tag: dev-15
 wai_portal_matomo_sub_path: /matomo
-
+wai_portal_environments:
+  wai-prod: production
+  wai-play: public-playground
+  wai-stag: staging
 # RediSearch Image
 wai_redis_image: webanalyticsitalia/wai-redis-search
 wai_redis_image_tag: 5.0.3-dev-1
