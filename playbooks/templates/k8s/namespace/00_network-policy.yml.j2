@@ -37,7 +37,7 @@ spec:
       port: 9200
   # Allow connect to mariadb
   - to:
-{% for host in  wai_rdbms_load_balancer[item] %}
+{% for host in  wai_load_balancer[item].rdbms %}
     - ipBlock:
         cidr: {{ host }}/32
 {% endfor %}

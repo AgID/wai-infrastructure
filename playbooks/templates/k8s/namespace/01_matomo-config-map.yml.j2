@@ -7,17 +7,16 @@ metadata:
   namespace: {{ item }}
 data:
   config.ini.php: |-
-
     [database]
-    host = "{{ wai_rdbms_load_balancer[item][0] }}"
+    host = "{{ wai_load_balancer[item].rdbms[0] }}"
     username = "matomo-admin"
     password = "{{ wai_database_credentials[item]['matomo-admin'] }}"
     dbname = "matomo"
 
-    {% if wai_rdbms_load_balancer[item] | length > 1 %}
+    {% if wai_load_balancer[item].rdbms | length > 1 %}
     
     [database_reader]
-    host = "{{ wai_rdbms_load_balancer[item][1] }}"
+    host = "{{ wai_load_balancer[item].rdbms[1] }}"
     username = "matomo-user"
     password = "{{ wai_database_credentials[item]['matomo-user'] }}"
     dbname = "matomo"
@@ -31,7 +30,7 @@ data:
     {% for attr in wai_hostname %}
 
     trusted_hosts[] = "{{ wai_hostname[attr] }}.{{ wai_base_domain[item] }}"
-    {%endif %}
+    {% endfor %}
     enable_trusted_host_check = 1
     force_ssl = 1
     enable_update_users_email = 0

@@ -26,20 +26,38 @@ wai_base_domain:
   wai-play: play.webanalytics.italia.it
   wai-stag: staging.webanalytics.italia.it
 
-# RDBMS Load Balancer
+# WAI Load Balancer
 # The following IP addresses are just placeholders and must be replaced with the real ones after all the LBs are created.
-wai_rdbms_load_balancer:
-  wai-prod:  
-    - 1.1.1.1
-    - 1.1.1.2
+wai_load_balancer:
+  wai-prod:
+    elastic:
+      - 10.0.30.101
+    rdbms:
+      - 10.0.20.101
+      - 10.0.20.104
   wai-play:
-    - 1.1.1.3
+    elastic:
+      - 10.0.30.101
+    rdbms:
+      - 10.0.200.101
   wai-stag:
-    - 1.1.1.4
+    elastic:
+      - 10.0.30.101
+    rdbms:
+      - 10.0.100.101
   
-
 # Hostnames
 wai_hostname: { ingestion: ingestion, matomo: matomo, portal: www, api: api}
+
+# Mappinng between public ip address and internal load balancer
+# The following IP addresses are just placeholders and must be replaced with the real ones after all the private ip ports are created.
+wai_ip_addresses:
+  wai-prod:
+    private_ip: 10.0.10.250
+  wai-play:
+    private_ip: 10.0.10.251
+  wai-stag:
+    private_ip: 10.0.10.252
 
 # Helm 
 helm:
@@ -58,18 +76,25 @@ wai_k8s_resource_quota:
   wai-play: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "50", limits.memory: "64Gi" }
   wai-stag: { requests.cpu: "24", requests.memory: "30Gi", limits.cpu: "34", limits.memory: "40Gi" }
 
-# IPA Redisearch  image
+# IPA Redisearch image
 wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
+wai_ipa_redisearch_image_tag: 5.0.3-dev-1
 
-# Portal base image
-wai_portal_base_image: webanalyticsitalia/wai-portal
+# Portal image
+wai_portal_image: webanalyticsitalia/wai-portal
+wai_portal_image_tag: dev-15
 wai_portal_matomo_sub_path: /matomo
-
+wai_portal_environments:
+  wai-prod: production
+  wai-play: public-playground
+  wai-stag: staging
 # RediSearch Image
-wai_redis_base_image: webanalyticsitalia/wai-redis-search
+wai_redis_image: webanalyticsitalia/wai-redis-search
+wai_redis_image_tag: 5.0.3-dev-1
 
-# Base Matomo Image    
-wai_matomo_base_image: webanalyticsitalia/wai-matomo
+# Matomo Image
+wai_matomo_image: webanalyticsitalia/wai-matomo
+wai_matomo_image_tag: dev-3
 
 wai_kube_state_metrics_version: v1.5.0
 wai_kube_state_metrics_output_dir: kube-state-metrics-1.5.0
@@ -84,12 +109,12 @@ wai_base_https_port: 30443
 
 # Elastic version used for Elasticsearch, Kibana and Beats.
 # These vars override default settings of role elastic.elasticsearch and are used in wai roles kibana and metricbeat
-es_version: 7.4.1
+es_version: 7.4.2
 es_major_version: 7.x
 es_apt_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
 es_apt_url: "deb https://artifacts.elastic.co/packages/{{es_major_version}}/apt stable main"
 
-kibana_elastic_hosts: "http://{{ groups['elastic'][0]}}:9200"
+kibana_elastic_hosts: "https://{{ hostvars[groups['elastic'][0]].ansible_default_ipv4.address }}:9200"
 
 # Metricbeat output
 metricbeat_output_elastic: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list | to_json }}'
@@ -117,3 +142,5 @@ prometheus_exporter_url:  https://github.com/prometheus/node_exporter/releases/d
 prometheus_mysqld_exporter_url:  https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mysqld_exporter-0.12.1.linux-amd64.tar.gz
 # Heketi role overrides
 heketi_url: https://github.com/heketi/heketi/releases/download/v9.0.0/heketi-v9.0.0.linux.amd64.tar.gz
+heketi_enable_tls: true
+heketi_port: 8443

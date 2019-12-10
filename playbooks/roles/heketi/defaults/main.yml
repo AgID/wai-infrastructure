@@ -4,3 +4,10 @@ heketi_user: heketi
 heketi_uid: 1010
 heketi_group: heketi
 heketi_gid: 1010
+heketi_port: 8080
+heketi_enable_tls: false
+heketi_cert_file: 
+heketi_key_file:
+heketi_secrets:
+    admin: changeme
+    user: changeme

@@ -6,10 +6,10 @@
         {
           "node": { "hostnames": {
               "manage": [
-                "{{ hostvars[node]['ansible_ssh_host'] }}"
+                "{{ hostvars[node]['ansible_default_ipv4']['address'] }}"
               ],
               "storage": [
-                "{{ hostvars[node]['ansible_ssh_host'] }}"
+                "{{ hostvars[node]['ansible_default_ipv4']['address'] }}"
               ]
             },
             "zone": 1

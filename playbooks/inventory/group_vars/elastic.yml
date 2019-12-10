@@ -9,6 +9,11 @@ es_enable_xpack: true
 es_xpack_features:
   - monitoring
   - security
+es_enable_auto_ssl_configuration: true            
+es_enable_http_ssl: true
+es_enable_transport_ssl: true
+es_ssl_verification_mode: none
+es_validate_certs: true
 es_api_basic_auth_username: elastic
 es_api_basic_auth_password: "{{ elasticsearch_secrets.elastic_api }}"
 es_users:
@@ -18,7 +23,7 @@ es_users:
     fluentd:
       password: "{{ elasticsearch_secrets.fluentd }}"
       roles:
-        - logstash_admin
+        - superuser
     kibana:
       password: "{{ elasticsearch_secrets.kibana }}"
     logstash_system:
