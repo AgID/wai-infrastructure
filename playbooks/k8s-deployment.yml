@@ -40,7 +40,7 @@
     # Matomo Ingestion
     - name: K8S .:. Prepare Matomo Ingestion deployment file
       vars:
-        matomo_app_filename: "/piwik.php"
+        matomo_app_filename: "/matomo.php"
         matomo_name: "matomo-ingestion"
         matomo_pod_size_index: "matomo-ingestion"
         matomo_nginx_jailed: true

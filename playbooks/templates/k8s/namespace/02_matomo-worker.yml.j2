@@ -40,14 +40,14 @@ spec:
           exec:
             command:
             - /usr/local/bin/php
-            - /var/www/html/piwik.php
+            - /var/www/html/matomo.php
           initialDelaySeconds: 5
           periodSeconds: 5
         livenessProbe:
           exec:
             command:
             - /usr/local/bin/php
-            - /var/www/html/piwik.php
+            - /var/www/html/matomo.php
           initialDelaySeconds: 5
           periodSeconds: 5
           successThreshold: 1
