@@ -183,10 +183,17 @@ data:
 
         ## serve all other files normally
         location / {
-          try_files $uri =404;
+          try_files $uri $uri/ =404;
         }
 
-        location ~ (.*\.md|LEGALNOTICE|LICENSE|\.ht) {
+        ## disable access to the following directories
+        location ~ /(config|tmp|core|lang) {
+          deny all;
+          return 404;
+        }
+
+        ## disable access to the following files
+        location ~ /(.+\.md|LEGALNOTICE|LICENSE|\.ht) {
           deny all;
           return 404;
         }
@@ -198,6 +205,12 @@ data:
           expires 1h;
           add_header Pragma public;
           add_header Cache-Control "public";
+        }
+
+        ## disable access to the following directories
+        location ~ /(libs|vendor|plugins|misc/user) {
+          deny all;
+          return 404;
         }
         {% endif %}
 
