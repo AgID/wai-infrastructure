@@ -45,7 +45,9 @@ wai_load_balancer:
       - 10.0.30.101
     rdbms:
       - 10.0.100.101
-  
+
+# WAI infrastructure CIDR
+wai_infrastructure_cidr: 10.0.0.0/16
 # Hostnames
 wai_hostname: { ingestion: ingestion, matomo: matomo, portal: www, api: api}
 

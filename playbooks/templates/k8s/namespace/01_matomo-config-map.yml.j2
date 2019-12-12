@@ -110,6 +110,7 @@ data:
     Plugins[] = "QueuedTracking"
     Plugins[] = "ProtectTrackID"
     Plugins[] = "CustomDimensions"
+    Plugins[] = "LoginFilterIp"
 
     [PluginsInstalled]
     PluginsInstalled[] = "Diagnostics"
@@ -178,12 +179,17 @@ data:
     PluginsInstalled[] = "QueuedTracking"
     PluginsInstalled[] = "ProtectTrackID"
     PluginsInstalled[] = "CustomDimensions"
+    PluginsInstalled[] = "LoginFilterIp"
 
     [WAIMatomoTheme]
-    waiUrl = "https://webanalytics.italia.it"
+    waiUrl = "https://{{ wai_base_domain[item] }}"
 
     [QueuedTracking]
     notify_queue_threshold_single_queue = 250000
     {% for email in wai_alert_email_destination | default([]) -%}
     notify_queue_threshold_emails[]={{ email }}
     {% endfor %}
+
+    [LoginFilterIp]
+    allow_login_from[] = "{{ wai_infrastructure_cidr }}"
+    redirect_unallowed_to = "https://{{ wai_base_domain[item] }}"
