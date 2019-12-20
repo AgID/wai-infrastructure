@@ -305,8 +305,6 @@ spec:
         - containerPort: 9000
           name: fpm-port
         volumeMounts:
-        - name: html
-          mountPath: /var/www/html/
         - name: portal-env-conf
           mountPath: /var/www/html/.env
           subPath: env
