@@ -10,6 +10,9 @@ topology subnet
 server 192.168.10.0 255.255.255.0
 ifconfig-pool-persist /var/log/openvpn/ipp.txt
 push "route 10.0.0.0 255.255.0.0"
+{% for env in wai_k8s_namespaces -%}
+push "route {{ wai_ip_addresses[env].public_ip }} 255.255.255.255"
+{% endfor -%}
 keepalive 10 120
 cipher AES-256-CBC
 comp-lzo
