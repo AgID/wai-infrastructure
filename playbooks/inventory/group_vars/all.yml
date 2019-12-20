@@ -49,7 +49,7 @@ wai_load_balancer:
 # WAI infrastructure CIDR
 wai_infrastructure_cidr: 10.0.0.0/16
 # Hostnames
-wai_hostname: { ingestion: ingestion, matomo: matomo, portal: www, api: api}
+wai_hostname: { ingestion: ingestion, portal: www, api: api}
 
 # Mappinng between public ip address and internal load balancer
 # The following IP addresses are just placeholders and must be replaced with the real ones after all the private ip ports are created.
