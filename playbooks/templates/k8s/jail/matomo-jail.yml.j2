@@ -74,13 +74,8 @@ spec:
         - containerPort: 80
           name: nginx
         livenessProbe:
-          httpGet:
-            {% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
-            path: {{ matomo_app_filename }} 
-            {% else %}
-            path: /index.php
-            {% endif %}
-            port: nginx
+          tcpSocket:
+            port: 80
           initialDelaySeconds: 5
           periodSeconds: 5
           successThreshold: 1
