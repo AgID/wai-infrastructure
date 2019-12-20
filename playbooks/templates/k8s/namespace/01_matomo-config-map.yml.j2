@@ -193,4 +193,7 @@ data:
 
     [LoginFilterIp]
     allow_login_from[] = "{{ wai_infrastructure_cidr }}"
+    {%- if openvpn_server_addr is defined %}
+    allow_login_from[] = "{{ openvpn_server_addr }}"
+    {%- endif %}
     redirect_unallowed_to = "https://{{ wai_base_domain[item] }}"
