@@ -366,7 +366,7 @@ spec:
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         name: portal
-        command: ["/usr/local/bin/php", "artisan", "queue:work", "--tries=3", "--sleep=10"]
+        command: ["php", "artisan", "queue:work", "--tries=3", "--sleep=10"]
         resources:
           limits:
             cpu: "0.75"
