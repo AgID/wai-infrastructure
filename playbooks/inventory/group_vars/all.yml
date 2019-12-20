@@ -149,3 +149,6 @@ prometheus_mysqld_exporter_url:  https://github.com/prometheus/mysqld_exporter/r
 heketi_url: https://github.com/heketi/heketi/releases/download/v9.0.0/heketi-v9.0.0.linux.amd64.tar.gz
 heketi_enable_tls: true
 heketi_port: 8443
+
+# OpenVPN
+#openvpn_server_addr: <IP_ADDR>
