@@ -34,8 +34,7 @@ spec:
           limits:
             cpu: "0.50"
             memory: "256Mi"
-        command: ["/bin/sh", "-c"]
-        args: ["/entrypoint.sh; . /var/www/scripts/qt-worker.sh"]
+        command: ["/bin/sh", "/var/www/scripts/qt-worker.sh"]
         readinessProbe:
           exec:
             command: ["php", "/var/www/html/console", "-V"]
