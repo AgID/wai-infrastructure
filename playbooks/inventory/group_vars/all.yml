@@ -80,7 +80,7 @@ wai_k8s_resource_quota:
 
 # IPA Redisearch image
 wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
-wai_ipa_redisearch_image_tag: 5.0.3-dev-1
+wai_ipa_redisearch_image_tag: 5.0.3-dev-3
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
