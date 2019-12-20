@@ -140,6 +140,11 @@ data:
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
         add_header Referrer-Policy origin;
+        add_header Allow "GET, POST, HEAD" always;
+
+        if ($request_method !~ ^(GET|POST|HEAD)$) {
+          return 405;
+        }
 
         location = /favicon.ico {
           log_not_found off;
