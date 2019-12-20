@@ -31,6 +31,7 @@ data:
 
     trusted_hosts[] = "{{ wai_hostname[attr] }}.{{ wai_base_domain[item] }}"
     {% endfor %}
+    proxy_client_headers[] = HTTP_X_FORWARDED_FOR
     enable_trusted_host_check = 1
     force_ssl = 1
     enable_update_users_email = 0
