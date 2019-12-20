@@ -38,16 +38,12 @@ spec:
         args: ["/entrypoint.sh; . /var/www/scripts/qt-worker.sh"]
         readinessProbe:
           exec:
-            command:
-            - /usr/local/bin/php
-            - /var/www/html/matomo.php
+            command: ["php", "/var/www/html/console", "-V"]
           initialDelaySeconds: 5
           periodSeconds: 5
         livenessProbe:
           exec:
-            command:
-            - /usr/local/bin/php
-            - /var/www/html/matomo.php
+            command: ["php", "/var/www/html/console", "-V"]
           initialDelaySeconds: 5
           periodSeconds: 5
           successThreshold: 1
