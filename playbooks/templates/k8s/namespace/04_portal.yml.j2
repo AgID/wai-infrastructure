@@ -286,7 +286,7 @@ spec:
       initContainers:
       - name: copy
         image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
-        command: ["sh", "-c", "cp -R /var/www/html/* /html/ ; chown -R 33:33 /html/"]
+        command: ["sh", "-c", "cp -a /var/www/html/* /html/"]
         resources:
           limits:
             cpu: "0.1"
