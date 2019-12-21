@@ -515,6 +515,34 @@ CREATE TABLE `plugin_setting` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `plugin_setting`
+--
+
+LOCK TABLES `plugin_setting` WRITE;
+/*!40000 ALTER TABLE `plugin_setting` DISABLE KEYS */;
+INSERT INTO `plugin_setting` VALUES
+  ('Tour','view_visits_log_completed','1',0,'admin',8),
+  ('Tour','view_visitor_profile_completed','1',0,'admin',10),
+  ('Tour','browse_marketplace_completed','1',0,'admin',12),
+  ('CoreUpdater','enable_plugin_update_communication','0',0,'',13),
+  ('QueuedTracking','backend','redis',0,'',25),
+  ('QueuedTracking','useSentinelBackend','1',0,'',26),
+  ('QueuedTracking','sentinelMasterName','ingestion-redis-master',0,'',27),
+  ('QueuedTracking','redisHost','ingestion-redis',0,'',28),
+  ('QueuedTracking','redisPort','26379',0,'',29),
+  ('QueuedTracking','redisDatabase','0',0,'',30),
+  ('QueuedTracking','redisPassword','{{ redis_password.ingestion_redis_master[item] }}',0,'',31),
+  ('QueuedTracking','queueEnabled','1',0,'',32),
+  ('QueuedTracking','numQueueWorkers','{{ wai_matomo_pod_size[item]['matomo-worker'] }}',0,'',33),
+  ('QueuedTracking','numRequestsToProcess','25',0,'',34),
+  ('QueuedTracking','processDuringTrackingRequest','0',0,'',35),
+  ('ProtectTrackID','baseSetting','{{ matomo_vars.plugins.protect_track_id[item].base_settings }}',0,'',36),
+  ('ProtectTrackID','saltSetting','{{ matomo_vars.plugins.protect_track_id[item].salt_settings }}',0,'',37),
+  ('ProtectTrackID','lengthSetting','{{ matomo_vars.plugins.protect_track_id[item].length_settings }}',0,'',38);
+/*!40000 ALTER TABLE `plugin_setting` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `privacy_logdata_anonymizations`
 --
 
@@ -810,19 +838,6 @@ CREATE TABLE `user_language` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2019-03-18 16:47:02
-
-
-
 --
 -- Table structure for table `matomo_disable_site_tracking`
 --
@@ -839,7 +854,6 @@ CREATE TABLE `disable_site_tracking` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
 --
 -- Table structure for table `queuedtracking_queue`
 --
@@ -848,35 +862,21 @@ DROP TABLE IF EXISTS `queuedtracking_queue`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `queuedtracking_queue` (
-    `queue_key` varchar(70) NOT NULL,
-    `queue_value` varchar(255) DEFAULT NULL,
-    `expiry_time` bigint(20) unsigned DEFAULT 9999999999,
-    PRIMARY KEY (`queue_key`)
+  `queue_key` varchar(70) NOT NULL,
+  `queue_value` varchar(255) DEFAULT NULL,
+  `expiry_time` bigint(20) unsigned DEFAULT 9999999999,
+  PRIMARY KEY (`queue_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `plugin_setting` VALUES
-  ('Tour','view_visits_log_completed','1',0,'admin',8),
-	('Tour','view_visitor_profile_completed','1',0,'admin',10),
-	('Tour','browse_marketplace_completed','1',0,'admin',12),
-	('CoreUpdater','enable_plugin_update_communication','0',0,'',13),
-	('QueuedTracking','backend','redis',0,'',25),
-	('QueuedTracking','useSentinelBackend','1',0,'',26),
-	('QueuedTracking','sentinelMasterName','ingestion-redis-master',0,'',27),
-	('QueuedTracking','redisHost','ingestion-redis',0,'',28),
-	('QueuedTracking','redisPort','26379',0,'',29),
-	('QueuedTracking','redisDatabase','0',0,'',30),
-	('QueuedTracking','redisPassword','{{ redis_password.ingestion_redis_master[item] }}',0,'',31),
-	('QueuedTracking','queueEnabled','1',0,'',32),
-	('QueuedTracking','numQueueWorkers','{{ wai_matomo_pod_size[item]['matomo-worker'] }}',0,'',33),
-	('QueuedTracking','numRequestsToProcess','25',0,'',34),
-	('QueuedTracking','processDuringTrackingRequest','0',0,'',35),
-	('ProtectTrackID','baseSetting','{{ matomo_vars.plugins.protect_track_id[item].base_settings }}',0,'',36),
-	('ProtectTrackID','saltSetting','{{ matomo_vars.plugins.protect_track_id[item].salt_settings }}',0,'',37),
-	('ProtectTrackID','lengthSetting','{{ matomo_vars.plugins.protect_track_id[item].length_settings }}',0,'',38);
+--
+-- Table structure for table `custom_dimensions`
+--
 
-
-  CREATE TABLE `custom_dimensions` (
+DROP TABLE IF EXISTS `custom_dimensions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `custom_dimensions` (
   `idcustomdimension` bigint(20) unsigned NOT NULL,
   `idsite` bigint(20) unsigned NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -888,25 +888,30 @@ INSERT INTO `plugin_setting` VALUES
   PRIMARY KEY (`idcustomdimension`,`idsite`),
   UNIQUE KEY `uniq_hash` (`idsite`,`scope`,`index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE `abilities` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `entity_id` int(10) unsigned DEFAULT NULL,
-  `entity_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `only_owned` tinyint(1) NOT NULL DEFAULT 0,
-  `options` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`options`)),
-  `scope` int(11) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `abilities_scope_index` (`scope`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+--
+-- Table structure for table `locks`
+--
 
+DROP TABLE IF EXISTS `locks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `locks` (
-    `key` VARCHAR(70) NOT NULL,
-    `value` VARCHAR(255) NULL DEFAULT NULL,
-    `expiry_time` BIGINT UNSIGNED DEFAULT 9999999999,
-    PRIMARY KEY ( `key` )
+  `key` VARCHAR(70) NOT NULL,
+  `value` VARCHAR(255) NULL DEFAULT NULL,
+  `expiry_time` BIGINT UNSIGNED DEFAULT 9999999999,
+  PRIMARY KEY (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed
