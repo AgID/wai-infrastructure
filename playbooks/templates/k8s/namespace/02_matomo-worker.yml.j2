@@ -72,7 +72,7 @@ data:
     cd /var/www/html
     while true;
     do
-      php console queuedtracking:process --queue-id $QUEUE_ID
+      php console queuedtracking:process --queue-id $QUEUE_ID > /dev/null
       sleep 0.5
     done
 
