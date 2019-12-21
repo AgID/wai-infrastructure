@@ -59,6 +59,12 @@ data:
     APP_URL=https://{{ wai_base_domain[item] }}
     APP_VERSION=0.1
 
+    APP_SUPER_ADMIN_NAME={{ portal_vars.super_user.name }}
+    APP_SUPER_ADMIN_FAMILY_NAME={{ portal_vars.super_user.family_name }}
+    APP_SUPER_ADMIN_FISCAL_NUMBER={{ portal_vars.super_user.fiscal_number }}
+    APP_SUPER_ADMIN_EMAIL={{ portal_vars.super_user.email }}
+    APP_SUPER_ADMIN_PASSWORD={{ portal_vars.super_user.password }}
+
     LOG_CHANNEL=stack
     LOG_STACK_CHANNELS={{ wai_settings[item].log.channels }}
     LOG_SLACK_WEBHOOK_URL={{ wai_settings[item].log.slack_webhook_url }}
