@@ -11,7 +11,29 @@ spec:
   - Ingress
   - Egress
 ---
-# Allow egresss to Elastic search
+# Intra namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: intra-namespace
+  namespace: {{ item }}
+spec:
+  policyTypes:
+  - Egress
+  - Ingress
+  podSelector: {}
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          environment: {{ item }}
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          environment: {{ item }}
+---          
+# Ingress and Egress Network policy
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
