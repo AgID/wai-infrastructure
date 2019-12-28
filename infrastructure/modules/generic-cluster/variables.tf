@@ -67,6 +67,13 @@ variable "cluster_instance_groups" {
   description = "Groups in cluster instances metadata"
 }
 
+# Load balanced ports
+variable "load_balancer_ports" {
+  type = list
+  description = "Load balancer ports"
+  default = []
+}
+
 # Cluster security rules
 variable "cluster_sec_rules" {
   type        = list
@@ -82,4 +89,5 @@ locals {
   cluster_subnet_name         = "${var.project_name_prefix}-${var.cluster_slug}-subnet-${var.environment_short}"
   cluster_node_name           = "${var.project_name_prefix}-${var.cluster_slug}-${var.environment_short}"
   cluster_port_name           = "${var.project_name_prefix}-${var.cluster_slug}-port-${var.environment_short}"
+  cluster_lb_name             = "${var.project_name_prefix}-${var.cluster_slug}-lb-${var.environment_short}"
 }

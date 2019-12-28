@@ -123,6 +123,13 @@ variable "galera_instance" {
   default     = {}
 }
 
+# Galera load balanced ports
+variable "galera_load_balancer_ports" {
+  type        = list
+  description = "Galera load balanced ports"
+  default     = [ { port: 3306 } ]
+}
+
 # Galera instance groups added to metadata for ansible dynamic inventory
 # Each item in the list will be added to the corresponding instance number
 # i.e. the first item in the list will be added to the first instance and so on
@@ -197,6 +204,13 @@ variable "elastic_instance" {
   type        = map(string)
   description = "Elastic instance parameters"
   default     = {}
+}
+
+# Elastic load balanced ports
+variable "elastic_load_balancer_ports" {
+  type        = list
+  description = "Elastic load balanced ports"
+  default     = [ { port: 9200 } ]
 }
 
 # Elastic instance groups added to metadata for ansible dynamic inventory

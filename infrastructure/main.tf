@@ -48,6 +48,7 @@ module "elastic" {
   cluster_instance        = var.elastic_instance
   cluster_instance_groups = var.elastic_instance_groups
   cluster_sec_rules       = var.elastic_sec_rules
+  load_balancer_ports    =  var.elastic_load_balancer_ports
 }
 
 # Glusterfs nodes
@@ -116,4 +117,5 @@ module "galera_public-playground" {
   cluster_instance        = var.galera_instance
   cluster_instance_groups = var.galera_instance_groups
   cluster_sec_rules       = var.galera_sec_rules
+  load_balancer_ports    =  var.galera_load_balancer_ports
 }
