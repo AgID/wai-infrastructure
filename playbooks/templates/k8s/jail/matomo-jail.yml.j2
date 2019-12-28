@@ -32,7 +32,7 @@ spec:
       initContainers:
       - name: copy
         image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
-        command: ["sh", "-c", "cp -R /var/www/html/* /html/ ; chown -R 33:33 /html/ "]
+        command: ["sh", "-c", "cp -a /var/www/html/* /html/"]
         resources:
           limits:
             cpu: 0.1
@@ -74,13 +74,8 @@ spec:
         - containerPort: 80
           name: nginx
         livenessProbe:
-          httpGet:
-            {% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
-            path: {{ matomo_app_filename }} 
-            {% else %}
-            path: /index.php
-            {% endif %}
-            port: nginx
+          tcpSocket:
+            port: 80
           initialDelaySeconds: 5
           periodSeconds: 5
           successThreshold: 1
@@ -140,6 +135,13 @@ data:
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
         add_header Referrer-Policy origin;
+        add_header Allow "GET, POST, HEAD" always;
+
+        if ($request_method !~ ^(GET|POST|HEAD)$) {
+          return 405;
+        }
+
+        index index.php;
 
         location = /favicon.ico {
           log_not_found off;

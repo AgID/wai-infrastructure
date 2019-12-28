@@ -52,12 +52,18 @@ data:
     HOSTNAME={{ wai_base_domain[item] }}
     APP_NAME="Web Analytics Italia"
     APP_NAME_SHORT="WAI"
-     APP_ENV={{ wai_portal_environments[item] }}
+    APP_ENV={{ wai_portal_environments[item] }}
     APP_KEY={{ wai_settings[item].log.app_key }}
     APP_SALT={{ wai_settings[item].log.app_salt }}
     APP_DEBUG=false
     APP_URL=https://{{ wai_base_domain[item] }}
     APP_VERSION=0.1
+
+    APP_SUPER_ADMIN_NAME={{ portal_vars.super_user.name }}
+    APP_SUPER_ADMIN_FAMILY_NAME={{ portal_vars.super_user.family_name }}
+    APP_SUPER_ADMIN_FISCAL_NUMBER={{ portal_vars.super_user.fiscal_number }}
+    APP_SUPER_ADMIN_EMAIL={{ portal_vars.super_user.email }}
+    APP_SUPER_ADMIN_PASSWORD={{ portal_vars.super_user.password }}
 
     LOG_CHANNEL=stack
     LOG_STACK_CHANNELS={{ wai_settings[item].log.channels }}
@@ -192,6 +198,11 @@ data:
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
         add_header Referrer-Policy "no-referrer-when-downgrade";
+        add_header Allow "GET, POST, HEAD" always;
+
+        if ($request_method !~ ^(GET|POST|HEAD)$) {
+          return 405;
+        }
 
         location / {
             try_files $uri /index.php$is_args$args;
@@ -281,7 +292,7 @@ spec:
       initContainers:
       - name: copy
         image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
-        command: ["sh", "-c", "cp -R /var/www/html/* /html/ ; chown -R 33:33 /html/"]
+        command: ["sh", "-c", "cp -a /var/www/html/* /html/"]
         resources:
           limits:
             cpu: "0.1"
@@ -300,8 +311,6 @@ spec:
         - containerPort: 9000
           name: fpm-port
         volumeMounts:
-        - name: html
-          mountPath: /var/www/html/
         - name: portal-env-conf
           mountPath: /var/www/html/.env
           subPath: env
@@ -363,7 +372,7 @@ spec:
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         name: portal
-        command: ["/usr/local/bin/php", "artisan", "queue:work", "--tries=3", "--sleep=10"]
+        command: ["php", "artisan", "queue:work", "--tries=3", "--sleep=10"]
         resources:
           limits:
             cpu: "0.75"

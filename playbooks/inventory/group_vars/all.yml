@@ -49,16 +49,19 @@ wai_load_balancer:
 # WAI infrastructure CIDR
 wai_infrastructure_cidr: 10.0.0.0/16
 # Hostnames
-wai_hostname: { ingestion: ingestion, matomo: matomo, portal: www, api: api}
+wai_hostname: { ingestion: ingestion, portal: www, api: api}
 
 # Mappinng between public ip address and internal load balancer
 # The following IP addresses are just placeholders and must be replaced with the real ones after all the private ip ports are created.
 wai_ip_addresses:
   wai-prod:
+    public_ip: 131.1.241.153
     private_ip: 10.0.10.250
   wai-play:
+    public_ip: 131.1.241.135
     private_ip: 10.0.10.251
   wai-stag:
+    public_ip: 131.1.241.131
     private_ip: 10.0.10.252
 
 # Helm 
@@ -80,7 +83,7 @@ wai_k8s_resource_quota:
 
 # IPA Redisearch image
 wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
-wai_ipa_redisearch_image_tag: 5.0.3-dev-1
+wai_ipa_redisearch_image_tag: 5.0.3-dev-3
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
@@ -146,3 +149,6 @@ prometheus_mysqld_exporter_url:  https://github.com/prometheus/mysqld_exporter/r
 heketi_url: https://github.com/heketi/heketi/releases/download/v9.0.0/heketi-v9.0.0.linux.amd64.tar.gz
 heketi_enable_tls: true
 heketi_port: 8443
+
+# OpenVPN
+#openvpn_server_addr: <IP_ADDR>
