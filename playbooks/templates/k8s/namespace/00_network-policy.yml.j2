@@ -11,7 +11,23 @@ spec:
   - Ingress
   - Egress
 ---
-# Intra namespace
+# Allow from monitoring namespace
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-monitoring
+  namespace: {{ item }}
+spec:
+  policyTypes:
+  - Ingress
+  podSelector: {}
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+---
+# Allow myself traffic
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -33,7 +49,7 @@ spec:
         matchLabels:
           environment: {{ item }}
 ---          
-# Ingress and Egress Network policy
+# Allow WAI traffic
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -48,7 +64,6 @@ spec:
   - ports:
     - port: 80
   egress:
-  # Allow connect to elastic
   - to:
 {% for es in  groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) %}
     - ipBlock:
