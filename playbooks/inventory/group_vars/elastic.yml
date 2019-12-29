@@ -23,7 +23,7 @@ es_users:
     fluentd:
       password: "{{ elasticsearch_secrets.fluentd }}"
       roles:
-        - superuser
+        - fluentd
     kibana:
       password: "{{ elasticsearch_secrets.kibana }}"
     logstash_system:
@@ -44,6 +44,13 @@ es_users:
         - portal_user
 es_roles:
   native:
+    fluentd:
+      cluster:
+        - monitor
+      indices:
+        - names: 'logstash-*'
+          privileges:
+            - all
     wai_admin:
       cluster:
         - all
