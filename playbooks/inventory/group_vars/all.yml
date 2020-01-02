@@ -83,11 +83,11 @@ wai_k8s_resource_quota:
 
 # IPA Redisearch image
 wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
-wai_ipa_redisearch_image_tag: 5.0.3-dev-3
+wai_ipa_redisearch_image_tag: 5.0.3-dev-4
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
-wai_portal_image_tag: dev-15
+wai_portal_image_tag: dev-20
 wai_portal_matomo_sub_path: /matomo
 wai_portal_environments:
   wai-prod: production
@@ -99,7 +99,7 @@ wai_redis_image_tag: 5.0.3-dev-1
 
 # Matomo Image
 wai_matomo_image: webanalyticsitalia/wai-matomo
-wai_matomo_image_tag: dev-3
+wai_matomo_image_tag: dev-6
 
 wai_kube_state_metrics_version: v1.5.0
 wai_kube_state_metrics_output_dir: kube-state-metrics-1.5.0
