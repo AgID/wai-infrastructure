@@ -196,7 +196,7 @@ galera_instance = {
 # Each item in the list will be added to the corresponding instance number
 # i.e. the first item in the list will be added to the first instance and so on
 # if there are more instances than items in the list it will restart from the first one
-galera_instance_groups = ["galera-prod-slave", "galera-prod-slave", "galera-prod-slave"]
+galera_instance_groups = ["galera-prod", "galera-prod", "galera-prod", "galera-prod-slave", "galera-prod-slave", "galera-prod-slave"]
 
 # Galera security rules
 # See http://galeracluster.com/documentation-webpages/firewallsettings.html
