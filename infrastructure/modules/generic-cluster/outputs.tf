@@ -10,7 +10,7 @@ output "cluster-instances" {
 
 output "out_subnet_id" {
   description = "Subnet id"
-  value = openstack_networking_subnet_v2.cluster_subnet.0.id
+  value = length(openstack_networking_subnet_v2.cluster_subnet) > 0 ? openstack_networking_subnet_v2.cluster_subnet.0.id : ""
 }
 
 output "out_members_access_ip_v4" {
