@@ -29,6 +29,6 @@ output "out_subnet_id" {
 }
 
 output "out_members_access_ip_v4" {
-  description = "Subnet id"
+  description = "K8S Worker addresses"
   value = openstack_compute_instance_v2.k8s_worker_instance.*.access_ip_v4
 }
