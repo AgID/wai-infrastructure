@@ -32,7 +32,6 @@ module "kubernetes" {
   k8s_worker_instance_groups = var.k8s_worker_instance_groups
   k8s_worker_sec_rules       = var.k8s_worker_sec_rules
   k8s_worker_allowed_address_pairs = var.k8s_worker_allowed_address_pairs
-  load_balancer_ports = var.k8s_worker_load_balancer_ports
 }
 
 # Elastic nodes
@@ -50,7 +49,6 @@ module "elastic" {
   cluster_instance        = var.elastic_instance
   cluster_instance_groups = var.elastic_instance_groups
   cluster_sec_rules       = var.elastic_sec_rules
-  load_balancer_ports    =  var.elastic_load_balancer_ports
 }
 
 # Glusterfs nodes
@@ -85,7 +83,6 @@ module "galera_production" {
   cluster_instance        = var.galera_instance
   cluster_instance_groups = var.galera_instance_groups
   cluster_sec_rules       = var.galera_sec_rules
-  #load_balancer_ports    =  var.galera_load_balancer_ports
 }
 
 # MariaDB staging node
@@ -120,5 +117,54 @@ module "galera_public-playground" {
   cluster_instance        = var.galera_instance
   cluster_instance_groups = var.galera_instance_groups
   cluster_sec_rules       = var.galera_sec_rules
-  load_balancer_ports     = var.galera_load_balancer_ports
+}
+
+module "lb_elastic" {
+  source                  = "./modules/load-balancer"
+  enabled                 = terraform.workspace == "production" && var.environment == "production"
+
+  lb_name             ="wai-prod-elastic-lb"
+  lb_subnet_id    = module.elastic.out_subnet_id
+  lb_ports              = var.elastic_load_balancer_ports
+  lb_members      = module.elastic.out_members_access_ip_v4
+}
+
+module "lb_galera_play" {
+  source                  = "./modules/load-balancer"
+  enabled                 = terraform.workspace == "public-playground" && var.environment == "public-playground"
+
+  lb_name             ="wai-play-galera-lb"
+  lb_subnet_id    = module.galera_public-playground.out_subnet_id
+  lb_ports              = var.galera_load_balancer_ports
+  lb_members      = module.galera_public-playground.out_members_access_ip_v4
+}
+
+module "lb_galera_prod" {
+  source                  = "./modules/load-balancer"
+  enabled                 = terraform.workspace == "production" && var.environment == "production"
+
+  lb_name             ="wai-prod-galera-master-lb"
+  lb_subnet_id    = module.galera_production.out_subnet_id
+  lb_ports              = var.galera_load_balancer_ports
+  lb_members      = slice(module.galera_production.out_members_access_ip_v4, 0, length(module.galera_production.out_members_access_ip_v4)/2)
+}
+
+module "lb_galera_prod_slave" {
+  source                  = "./modules/load-balancer"
+  enabled                 = terraform.workspace == "production" && var.environment == "production"
+
+  lb_name             ="wai-prod-galera-slave-lb"
+  lb_subnet_id    = module.galera_production.out_subnet_id
+  lb_ports              = var.galera_load_balancer_ports
+  lb_members      = slice(module.galera_production.out_members_access_ip_v4, length(module.galera_production.out_members_access_ip_v4)/2, length(module.galera_production.out_members_access_ip_v4))
+}
+
+module "lb_k8s_worker" {
+  source                  = "./modules/load-balancer"
+  enabled                 = terraform.workspace == "production" && var.environment == "production"
+
+  lb_name             ="wai-k8s-worker-lb"
+  lb_subnet_id    = module.kubernetes.out_subnet_id
+  lb_ports              = var.k8s_worker_load_balancer_ports
+  lb_members      = module.kubernetes.out_members_access_ip_v4
 }

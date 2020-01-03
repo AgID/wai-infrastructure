@@ -22,3 +22,13 @@ output "k8s-master-public-ips" {
   description = "Public IPs associated with K8S master/etcd nodes"
   value       = openstack_compute_floatingip_associate_v2.k8s_master_floatingip_association.*.floating_ip
 }
+
+output "out_subnet_id" {
+  description = "Subnet id"
+  value = openstack_networking_subnet_v2.k8s_subnet.0.id
+}
+
+output "out_members_access_ip_v4" {
+  description = "Subnet id"
+  value = openstack_compute_instance_v2.k8s_worker_instance.*.access_ip_v4
+}

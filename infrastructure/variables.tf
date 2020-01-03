@@ -97,7 +97,7 @@ variable "k8s_worker_sec_rules" {
 
 # K8S worker  allowed address pairs
 variable "k8s_worker_allowed_address_pairs" {
-  type        = list(string)
+  type        = list
   description = "Kubernetes worker allowed address pairs"
   default     = []
 }

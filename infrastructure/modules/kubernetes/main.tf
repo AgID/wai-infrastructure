@@ -194,6 +194,29 @@ resource "openstack_compute_instance_v2" "k8s_worker_instance" {
   }
 }
 
+# Kubernetes allowed ports
+resource "openstack_networking_port_v2" "k8s_allowed_ports" {
+  count = var.enabled ? length(var.k8s_worker_allowed_address_pairs) : 0
+  name               = format("k8s-allowed-port-%s", var.k8s_worker_allowed_address_pairs[count.index].ip)
+  network_id         = openstack_networking_network_v2.k8s_network[0].id
+  admin_state_up     = true
+  security_group_ids = [openstack_networking_secgroup_v2.k8s_master_secgroup[0].id]
+  fixed_ip {
+    subnet_id  = openstack_networking_subnet_v2.k8s_subnet[0].id
+    ip_address = var.k8s_worker_allowed_address_pairs[count.index].ip
+  }
+}
+
+# Kubernetes floating IP association for allowed address
+resource "openstack_networking_floatingip_associate_v2" "k8s_worker_allowed_address_floatingip_association" {
+  count       = var.enabled ? min(length(openstack_networking_port_v2.k8s_allowed_ports), length(var.k8s_worker_allowed_address_pairs)) : 0
+  floating_ip = var.k8s_worker_allowed_address_pairs[count.index].floating_ip
+  port_id = element(
+    openstack_networking_port_v2.k8s_allowed_ports.*.id,
+    count.index,
+  )
+}
+
 # Kubernetes worker node networking port
 resource "openstack_networking_port_v2" "k8s_worker_port" {
   count = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
@@ -213,7 +236,7 @@ resource "openstack_networking_port_v2" "k8s_worker_port" {
   dynamic "allowed_address_pairs" {
     for_each = var.k8s_worker_allowed_address_pairs
     content {
-      ip_address = allowed_address_pairs.value
+      ip_address = allowed_address_pairs.value.ip
     }
   }  
 }
