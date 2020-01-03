@@ -160,7 +160,7 @@ k8s_worker_sec_rules = [
     }
 ]
 
-#K8S worker allowed addresses used to map floating ip to allowed ip managed by MetalLB
+# K8S worker allowed addresses used to map floating ip to allowed ip managed by MetalLB
 k8s_worker_allowed_address_pairs = [
     {
         floating_ip = "<FIP 1>"
