@@ -73,7 +73,13 @@
         values: 
           server:
             ingress:
-              enabled: false
+              enabled: true
+              hosts: 
+                - prometheus.wai.local
+              annotations:
+                kubernetes.io/ingress.class: nginx-internal
+                nginx.ingress.kubernetes.io/ssl-redirect: "false"
+                nginx.ingress.kubernetes.io/force-ssl-redirect: "false"                
             persistentVolume:
               enabled: true
               size: 50Gi
@@ -101,7 +107,13 @@
         host: "{{ clusterIP.stdout }}"
         values: 
           ingress:
-            enabled: false
+            enabled: true
+            hosts: 
+              - grafana.wai.local
+            annotations:
+              kubernetes.io/ingress.class: nginx-internal
+              nginx.ingress.kubernetes.io/ssl-redirect: "false"
+              nginx.ingress.kubernetes.io/force-ssl-redirect: "false"                
           persistence:
             enabled: true
             size: 8Gi

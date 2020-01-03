@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod
+    kubernetes.io/ingress.class: nginx-{{ item }}
   name: portal
   namespace: {{ item }}
 spec:
@@ -25,7 +26,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: nginx-{{ item }}
   name: matomo
   namespace: {{ item }}
 spec:

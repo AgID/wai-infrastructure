@@ -1,59 +1,12 @@
 # https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+apiVersion: v1
+kind: Namespace
 metadata:
-  name: nginx-ingress-clusterrole
+  name: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - configmaps
-      - endpoints
-      - nodes
-      - pods
-      - secrets
-    verbs:
-      - list
-      - watch
-  - apiGroups:
-      - ""
-    resources:
-      - nodes
-    verbs:
-      - get
-  - apiGroups:
-      - ""
-    resources:
-      - services
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - "extensions"
-    resources:
-      - ingresses
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - ""
-    resources:
-      - events
-    verbs:
-      - create
-      - patch
-  - apiGroups:
-      - "extensions"
-    resources:
-      - ingresses/status
-    verbs:
-      - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -67,20 +20,16 @@ roleRef:
   kind: ClusterRole
   name: nginx-ingress-clusterrole
 subjects:
-{% for ns in wai_k8s_namespaces %}
   - kind: ServiceAccount
-    name: nginx-ingress-sa-{{ ns }}
-    namespace: {{ ns }}
-{% endfor %}
-# Deploy Ingress controller artifacts to namespaces
-{% for ns in wai_k8s_namespaces %}
-# Deploy to namespace -- {{ ns }}
+    name: nginx-ingress-sa-generic
+    namespace: ingress-nginx
+
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: nginx-configuration
-  namespace: {{ ns }}
+  namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
@@ -95,7 +44,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: tcp-services
-  namespace: {{ ns }}
+  namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
@@ -104,7 +53,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: udp-services
-  namespace: {{ ns }}
+  namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
@@ -113,7 +62,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: nginx-ingress-role
-  namespace: {{ ns }}
+  namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
@@ -136,7 +85,7 @@ rules:
       # Here: "<ingress-controller-leader>-<nginx>"
       # This has to be adapted if you change either parameter
       # when launching the nginx-ingress-controller.
-      - "ingress-controller-leader-{{ ns }}-nginx-{{ ns }}"
+      - "ingress-controller-leader-internal-nginx-internal"
     verbs:
       - get
       - update
@@ -157,7 +106,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: nginx-ingress-role-nisa-binding
-  namespace: {{ ns }}
+  namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
@@ -167,27 +116,28 @@ roleRef:
   name: nginx-ingress-role
 subjects:
   - kind: ServiceAccount
-    name: nginx-ingress-sa-{{ ns }}
-    namespace: {{ ns }}
+    name: nginx-ingress-sa-generic
+    namespace: ingress-nginx
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: nginx-ingress-sa-{{ ns }}
-  namespace: {{ ns }}
+  name: nginx-ingress-sa-generic
+  namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
 ---
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: nginx-ingress-controller
-  namespace: {{ ns }}
+  namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: ingress-nginx
@@ -203,7 +153,7 @@ spec:
     spec:
       nodeSelector:
         role: metallb
-      serviceAccountName: nginx-ingress-sa-{{ ns }}
+      serviceAccountName: nginx-ingress-sa-generic
       containers:
         - name: nginx-ingress-controller
           image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.23.0
@@ -214,13 +164,8 @@ spec:
             - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
             - --publish-service=$(POD_NAMESPACE)/ingress-nginx
             - --annotations-prefix=nginx.ingress.kubernetes.io
-            - --ingress-class=nginx-{{ ns }}
-            - --election-id=ingress-controller-leader-{{ ns }}
-            # Enforce Isolation
-            - --force-namespace-isolation=true
-            # Watch for pod in the ingress namespace
-            - --watch-namespace=$(POD_NAMESPACE)
-            # The backend is in the same pod namespace
+            - --ingress-class=nginx-internal
+            - --election-id=ingress-controller-leader-internal
             - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
           securityContext:
             allowPrivilegeEscalation: true
@@ -275,7 +220,7 @@ metadata:
   name: default-http-backend
   labels:
     app: default-http-backend
-  namespace: {{ ns }}
+  namespace: ingress-nginx
 spec:
   replicas: 1
   selector:
@@ -310,7 +255,7 @@ metadata:
   name: default-http-backend
   labels:
     app: default-http-backend
-  namespace: {{ ns }}
+  namespace: ingress-nginx
 spec:
   ports:
   - port: 80
@@ -322,32 +267,23 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ingress-nginx
-  namespace: {{ ns }}
+  namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
 spec:
-  type: LoadBalancer
-  loadBalancerIP: {{ wai_ip_addresses[ns].private_ip }}
-  externalTrafficPolicy: Local
+  type: NodePort
   ports:
     - name: http
       port: 80
       targetPort: 80
       protocol: TCP
-      {% set http_port = wai_base_http_port + loop.index0 -%}
-      nodePort: {{ http_port }}
+      nodePort: 30083
     - name: https
       port: 443
       targetPort: 443
-      {% set http_port = wai_base_https_port + loop.index0 -%}
-      nodePort: {{ http_port }}
+      nodePort: 30446
       protocol: TCP
   selector:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
-status:
-  loadBalancer:
-    ingress:
-    - ip: {{ wai_ip_addresses[ns].private_ip }}
-{% endfor %}              
