@@ -2,6 +2,7 @@ resource "openstack_lb_loadbalancer_v2" "load_balancer" {
   count = var.enabled ? 1 : 0
   name = var.lb_name
   vip_subnet_id = var.lb_subnet_id
+  security_group_ids = var.lb_security_group_ids
 }
 
 resource "openstack_lb_listener_v2" "load_balancer_listener" {

@@ -32,5 +32,11 @@ variable "lb_members" {
   default = []
 }
 
+variable "lb_security_group_ids" {
+  type = list(string)
+  description = "Security group ids"
+  default = []
+}
+
 locals {
 }

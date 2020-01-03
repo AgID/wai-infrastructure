@@ -127,6 +127,7 @@ module "lb_elastic" {
   lb_subnet_id    = module.elastic.out_subnet_id
   lb_ports              = var.elastic_load_balancer_ports
   lb_members      = module.elastic.out_members_access_ip_v4
+  lb_security_group_ids = module.elastic.out_security_group_ids
 }
 
 module "lb_galera_play" {
@@ -137,6 +138,7 @@ module "lb_galera_play" {
   lb_subnet_id    = module.galera_public-playground.out_subnet_id
   lb_ports              = var.galera_load_balancer_ports
   lb_members      = module.galera_public-playground.out_members_access_ip_v4
+  lb_security_group_ids = module.galera_public-playground.out_security_group_ids
 }
 
 module "lb_galera_prod" {
@@ -147,6 +149,7 @@ module "lb_galera_prod" {
   lb_subnet_id    = module.galera_production.out_subnet_id
   lb_ports              = var.galera_load_balancer_ports
   lb_members      = slice(module.galera_production.out_members_access_ip_v4, 0, length(module.galera_production.out_members_access_ip_v4)/2)
+  lb_security_group_ids = module.galera_production.out_security_group_ids
 }
 
 module "lb_galera_prod_slave" {
@@ -157,6 +160,7 @@ module "lb_galera_prod_slave" {
   lb_subnet_id    = module.galera_production.out_subnet_id
   lb_ports              = var.galera_load_balancer_ports
   lb_members      = slice(module.galera_production.out_members_access_ip_v4, length(module.galera_production.out_members_access_ip_v4)/2, length(module.galera_production.out_members_access_ip_v4))
+  lb_security_group_ids = module.galera_production.out_security_group_ids
 }
 
 module "lb_k8s_worker" {
@@ -167,4 +171,5 @@ module "lb_k8s_worker" {
   lb_subnet_id    = module.kubernetes.out_subnet_id
   lb_ports              = var.k8s_worker_load_balancer_ports
   lb_members      = module.kubernetes.out_members_access_ip_v4
+  lb_security_group_ids = module.kubernetes.out_security_group_ids
 }
