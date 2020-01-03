@@ -85,11 +85,25 @@ variable "k8s_worker_sec_rules" {
   description = "Kubernetes worker security rules"
 }
 
+# K8S worker  allowed address pairs
+variable "k8s_worker_allowed_address_pairs" {
+  type        = list(string)
+  description = "Kubernetes worker allowed address pairs"
+}
+
 # K8S worker assigned floating IPs
 variable "k8s_worker_floatingips" {
   type        = list(string)
   description = "Kubernetes worker assigned floating IP addresses"
 }
+
+# K8S workerr load balanced ports
+variable "load_balancer_ports" {
+  type = list
+  description = "Load balancer ports"
+  default = []
+}
+
 
 locals {
   # Define resource names based on the following convention:

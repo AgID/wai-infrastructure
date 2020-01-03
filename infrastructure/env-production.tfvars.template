@@ -160,6 +160,9 @@ k8s_worker_sec_rules = [
     }
 ]
 
+#K8S worker allowed addresses
+k8s_worker_allowed_address_pairs = ["<IP 1>", "<IP 2>"]
+
 # K8S worker assigned floating IPs  (uncomment if needed)
 #k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
 
@@ -184,7 +187,7 @@ galera_instance = {
 # Each item in the list will be added to the corresponding instance number
 # i.e. the first item in the list will be added to the first instance and so on
 # if there are more instances than items in the list it will restart from the first one
-galera_instance_groups = ["galera-prod", "galera-prod", "galera-prod", "galera-prod-slave", "galera-prod-slave", "galera-prod-slave"]
+galera_instance_groups = ["galera-prod-slave", "galera-prod-slave", "galera-prod-slave"]
 
 # Galera security rules
 # See http://galeracluster.com/documentation-webpages/firewallsettings.html

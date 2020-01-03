@@ -134,23 +134,23 @@ resource "openstack_lb_loadbalancer_v2" "load_balancer" {
 resource "openstack_lb_listener_v2" "load_balancer_listener" {
   count = var.enabled && length(var.load_balancer_ports) > 0 ? length(var.load_balancer_ports) : 0
   protocol        = "TCP"
-  protocol_port   = var.load_balancer_ports[count.index]["port"]
-  name = format("%s-lsnr-%d", local.cluster_lb_name, var.load_balancer_ports[count.index]["port"])
+  protocol_port   = var.load_balancer_ports[count.index]["src"]
+  name = format("%s-lsnr-%d", local.cluster_lb_name, var.load_balancer_ports[count.index]["src"])
   loadbalancer_id = openstack_lb_loadbalancer_v2.load_balancer[0].id
 }
 
 resource "openstack_lb_pool_v2" "load_balancer_pool" {
   count = var.enabled && length(var.load_balancer_ports) > 0 ? length(var.load_balancer_ports) : 0
-  name = format("%s-pool-%d", local.cluster_lb_name, var.load_balancer_ports[count.index]["port"])
+  name = format("%s-pool-%d", local.cluster_lb_name, var.load_balancer_ports[count.index]["src"])
   protocol    = "TCP"
-  lb_method   = "ROUND_ROBIN"
+  lb_method   = "SOURCE_IP"
   listener_id = openstack_lb_listener_v2.load_balancer_listener[count.index].id
   admin_state_up = true
 }
 
 resource "openstack_lb_monitor_v2" "load_balancer_monitor" {
   count = var.enabled && length(var.load_balancer_ports) > 0 ? length(var.load_balancer_ports) : 0
-  name = format("%s-mon-%d", local.cluster_lb_name, var.load_balancer_ports[count.index]["port"])
+  name = format("%s-mon-%d", local.cluster_lb_name, var.load_balancer_ports[count.index]["dst"])
   pool_id = openstack_lb_pool_v2.load_balancer_pool[count.index].id
   type = "TCP"
   delay = 30
@@ -167,6 +167,6 @@ resource "openstack_lb_member_v2" "load_balancer_members" {
     count.index  % lookup(var.cluster_instance, "num_instances", 0),
   )
   subnet_id = openstack_networking_subnet_v2.cluster_subnet[0].id
-  protocol_port = var.load_balancer_ports[ count.index  % length(var.load_balancer_ports) ].port
+  protocol_port = var.load_balancer_ports[ count.index  % length(var.load_balancer_ports) ]["dst"]
   admin_state_up = true
 }

@@ -31,6 +31,8 @@ module "kubernetes" {
   k8s_worker_instance        = var.k8s_worker_instance
   k8s_worker_instance_groups = var.k8s_worker_instance_groups
   k8s_worker_sec_rules       = var.k8s_worker_sec_rules
+  k8s_worker_allowed_address_pairs = var.k8s_worker_allowed_address_pairs
+  load_balancer_ports = var.k8s_worker_load_balancer_ports
 }
 
 # Elastic nodes
@@ -83,6 +85,7 @@ module "galera_production" {
   cluster_instance        = var.galera_instance
   cluster_instance_groups = var.galera_instance_groups
   cluster_sec_rules       = var.galera_sec_rules
+  #load_balancer_ports    =  var.galera_load_balancer_ports
 }
 
 # MariaDB staging node
@@ -117,5 +120,5 @@ module "galera_public-playground" {
   cluster_instance        = var.galera_instance
   cluster_instance_groups = var.galera_instance_groups
   cluster_sec_rules       = var.galera_sec_rules
-  load_balancer_ports    =  var.galera_load_balancer_ports
+  load_balancer_ports     = var.galera_load_balancer_ports
 }

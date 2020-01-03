@@ -95,11 +95,25 @@ variable "k8s_worker_sec_rules" {
   default     = []
 }
 
+# K8S worker  allowed address pairs
+variable "k8s_worker_allowed_address_pairs" {
+  type        = list(string)
+  description = "Kubernetes worker allowed address pairs"
+  default     = []
+}
+
 # K8S worker assigned floating IPs
 variable "k8s_worker_floatingips" {
   type        = list(string)
   description = "Kubernetes worker assigned floating IP addresses"
   default     = []
+}
+
+# K8S load balanced ports
+variable "k8s_worker_load_balancer_ports" {
+  type        = list
+  description = "K8S worker load balancer"
+  default     = [ { src: 80, dst: 30083 }, { src: 443, dst: 30446 } ]
 }
 
 # Galera slug name
@@ -127,7 +141,7 @@ variable "galera_instance" {
 variable "galera_load_balancer_ports" {
   type        = list
   description = "Galera load balanced ports"
-  default     = [ { port: 3306 } ]
+  default     = [ { src: 3306, dst: 3306 } ]
 }
 
 # Galera instance groups added to metadata for ansible dynamic inventory
@@ -210,7 +224,7 @@ variable "elastic_instance" {
 variable "elastic_load_balancer_ports" {
   type        = list
   description = "Elastic load balanced ports"
-  default     = [ { port: 9200 } ]
+  default     = [ { src: 9200, dst: 9200 } ]
 }
 
 # Elastic instance groups added to metadata for ansible dynamic inventory
