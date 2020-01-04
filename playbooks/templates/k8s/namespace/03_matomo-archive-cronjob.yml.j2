@@ -16,3 +16,7 @@ spec:
             - /var/www/html/console 
             - core:archive
           restartPolicy: OnFailure
+          resources:
+            limits:
+              cpu: "0.50"
+              memory: "256Mi"
