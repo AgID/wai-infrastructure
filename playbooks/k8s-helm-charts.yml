@@ -91,6 +91,21 @@
               enabled: true
               size: 2Gi
               storageClass: storage-heketi
+          alertmanagerFiles:
+            alertmanager.yml:
+              global:
+                slack_api_url: '{{ prometheus_alert_slack_web_hook_url }}'
+              receivers:
+                - name: default-receiver
+                  slack_configs:
+                  - channel: '#wai'
+                    title: "{{ '{{' }} range .Alerts {{ '}}' }}{{ '{{' }} .Annotations.summary {{ '}}' }}\n{{ '{{' }} end {{ '}}' }}"
+                    text: "{{ '{{' }} range .Alerts {{ '}}' }}{{ '{{' }} .Annotations.description {{ '}}' }}}}\n{{ '{{' }} end {{ '}}' }}"
+              route:
+                group_wait: 10s
+                group_interval: 5m
+                receiver: default-receiver
+                repeat_interval: 3h
           extraScrapeConfigs: |
             - job_name: wai-infrastructure
               static_configs:
@@ -100,6 +115,63 @@
               static_configs:
               - targets:
             {{ groups['galera-prod'] | union(groups['galera-prod-slave']) | union(groups['galera-play']) | union(groups['mariadb-stag']) | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | map('regex_replace', '^(.*)$','\1:9104') | list | to_nice_yaml | indent(4, true) }}
+          serverFiles:
+            alerting_rules.yml:
+              groups:
+                - name: Redis
+                  rules:
+                    - alert: RedisMemory
+                      expr: redis_memory_used_bytes / redis_config_maxmemory * 100 > 80
+                      for: 1m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "Redis pod {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} of namespace {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} is consuming too much memory. Percentage is {{ '{{' }} $value {{ '}}' }}"
+                        summary: "Redis pod instance {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} memory alert."
+                - name: MariaDBInstance
+                  rules:
+                    - alert: MariaDown
+                      expr: mysql_up == 0
+                      for: 5m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "MariaDB instance {{ '{{' }} $labels.instance {{ '}}' }} of job {{ '{{' }} $labels.job {{ '}}' }} has been down for more than 5 minutes."
+                        summary: "MariaDB Instance {{ '{{' }} $labels.instance {{ '}}' }} is down"
+                - name: IstanceAlert
+                  rules:
+                    - alert: InstanceNoK8sDown
+                      expr: up{job="wai-infrastructure"} == 0
+                      for: 5m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "{{ '{{' }} $labels.instance {{ '}}' }} of job {{ '{{' }} $labels.job {{ '}}' }} has been down for more than 5 minutes."
+                        summary: "Instance {{ '{{' }} $labels.instance {{ '}}' }} down"
+                    - alert: InstanceK8sDown
+                      expr: up{job="kubernetes-nodes"}  == 0
+                      for: 5m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "{{ '{{' }} $labels.instance {{ '}}' }} of job {{ '{{' }} $labels.job {{ '}}' }} has been down for more than 5 minutes."
+                        summary: "Instance {{ '{{' }} $labels.instance {{ '}}' }} down"
+                    - alert: InstanceCPUUsageNoK8S
+                      expr: (100 - (avg(irate(node_cpu_seconds_total{mode="idle", job="wai-infrastructure"}[5m])) BY (instance) * 100)) > 75
+                      for: 2m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "{{ '{{' }} $labels.instance {{ '}}' }}: CPU usage is above 75% (current value is:{{ '{{' }} $value {{ '}}' }})"
+                        summary: "{{ '{{' }} $labels.instance {{ '}}' }}: High CPU usage detect"
+                    - alert: InstanceCPUUsageK8S
+                      expr: (100 - (avg(irate(node_cpu_seconds_total{mode="idle", job="kubernetes-service-endpoints"}[5m])) BY (instance) * 100)) > 75
+                      for: 2m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "{{ '{{' }} $labels.kubernetes_node {{ '}}' }}: CPU usage is above 75% (current value is: {{ '{{' }} $value {{ '}}' }})"
+                        summary: "{{ '{{' }} $labels.kubernetes_node {{ '}}' }}: High CPU usage detect"
 
     # Install Grafana
     - name: K8S Helm .:. Install Grafana
@@ -220,6 +292,8 @@
           master:
             extraFlags:
               - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
+              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '2000' }}mb"
+              - "--maxmemory-policy noeviction"
             persistence:
               enabled: true
               storageClass: storage-heketi
@@ -234,6 +308,8 @@
           slave:
             extraFlags:
               - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
+              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '2000' }}mb"
+              - "--maxmemory-policy noeviction"
             persistence:
               enabled: true
               storageClass: storage-heketi
@@ -309,6 +385,9 @@
               requests:
                 cpu: 250m
                 memory: 1Gi
+            extraFlags:
+              - "--maxmemory 2000mb"
+              - "--maxmemory-policy noeviction"
           slave:
             persistence:
               enabled: true
@@ -321,6 +400,9 @@
               requests:
                 cpu: 250m
                 memory: 1Gi
+            extraFlags:
+              - "--maxmemory 2000mb"
+              - "--maxmemory-policy noeviction"
           sentinel:
             usePassword: false
             enabled: true
