@@ -31,7 +31,7 @@ module "kubernetes" {
   k8s_worker_instance        = var.k8s_worker_instance
   k8s_worker_instance_groups = var.k8s_worker_instance_groups
   k8s_worker_sec_rules       = var.k8s_worker_sec_rules
-  k8s_worker_allowed_address_pairs = var.k8s_worker_allowed_address_pairs
+  k8s_metallb_address_pairs  = var.k8s_metallb_address_pairs
 }
 
 # Elastic nodes

@@ -73,6 +73,25 @@ resource "openstack_networking_secgroup_rule_v2" "k8s_worker_secgroup_rule" {
   security_group_id = openstack_networking_secgroup_v2.k8s_worker_secgroup[0].id
 }
 
+# Kubernetes MetalLB port security group
+resource "openstack_networking_secgroup_v2" "k8s_metallb_ports_secgroup" {
+  count       = var.enabled ? 1 : 0
+  name        = local.k8s_metallb_ports_group_name
+  description = "K8S MetalLB port security group"
+}
+
+# Kubernetes MetalLB port security group rules
+resource "openstack_networking_secgroup_rule_v2" "k8s_metallb_ports_secgroup_rule" {
+  count             = var.enabled ? length(var.k8s_metallb_ports_sec_rules) : 0
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = var.k8s_metallb_port_sec_rules[count.index]["protocol"]
+  port_range_min    = var.k8s_metallb_port_sec_rules[count.index]["from"]
+  port_range_max    = var.k8s_metallb_port_sec_rules[count.index]["to"]
+  remote_ip_prefix  = var.k8s_metallb_port_sec_rules[count.index]["cidr"]
+  security_group_id = openstack_networking_secgroup_v2.k8s_metallb_ports_secgroup[0].id
+}
+
 # Kubernetes master node boot volume
 resource "openstack_blockstorage_volume_v3" "k8s_master_boot_volume" {
   count       = var.enabled ? lookup(var.k8s_master_instance, "num_instances", 0) : 0
@@ -194,25 +213,25 @@ resource "openstack_compute_instance_v2" "k8s_worker_instance" {
   }
 }
 
-# Kubernetes allowed ports
-resource "openstack_networking_port_v2" "k8s_allowed_ports" {
-  count = var.enabled ? length(var.k8s_worker_allowed_address_pairs) : 0
-  name               = format("k8s-allowed-port-%s", var.k8s_worker_allowed_address_pairs[count.index].ip)
+# Kubernetes MetalLB ports
+resource "openstack_networking_port_v2" "k8s_metallb_ports" {
+  count = var.enabled ? length(var.k8s_metallb_address_pairs) : 0
+  name               = format("k8s-metallb-port-%s", var.k8s_metallb_address_pairs[count.index].ip)
   network_id         = openstack_networking_network_v2.k8s_network[0].id
   admin_state_up     = true
-  security_group_ids = [openstack_networking_secgroup_v2.k8s_master_secgroup[0].id]
+  security_group_ids = [openstack_networking_secgroup_v2.k8s_metallb_ports_secgroup[0].id]
   fixed_ip {
     subnet_id  = openstack_networking_subnet_v2.k8s_subnet[0].id
-    ip_address = var.k8s_worker_allowed_address_pairs[count.index].ip
+    ip_address = var.k8s_metallb_address_pairs[count.index].ip
   }
 }
 
-# Kubernetes floating IP association for allowed address
-resource "openstack_networking_floatingip_associate_v2" "k8s_worker_allowed_address_floatingip_association" {
-  count       = var.enabled ? min(length(openstack_networking_port_v2.k8s_allowed_ports), length(var.k8s_worker_allowed_address_pairs)) : 0
-  floating_ip = var.k8s_worker_allowed_address_pairs[count.index].floating_ip
-  port_id = element(
-    openstack_networking_port_v2.k8s_allowed_ports.*.id,
+# Kubernetes floating IP association for MetalLB address
+resource "openstack_networking_floatingip_associate_v2" "k8s_metallb_address_floatingip_association" {
+  count       = var.enabled ? min(length(openstack_networking_port_v2.k8s_metallb_ports), length(var.k8s_metallb_address_pairs)) : 0
+  floating_ip = var.k8s_metallb_address_pairs[count.index].floating_ip
+  port_id     = element(
+    openstack_networking_port_v2.k8s_metallb_ports.*.id,
     count.index,
   )
 }
@@ -234,7 +253,7 @@ resource "openstack_networking_port_v2" "k8s_worker_port" {
     ip_address = cidrhost(var.k8s_network_cidr, count.index + 151)
   }
   dynamic "allowed_address_pairs" {
-    for_each = var.k8s_worker_allowed_address_pairs
+    for_each = var.k8s_metallb_address_pairs
     content {
       ip_address = allowed_address_pairs.value.ip
     }

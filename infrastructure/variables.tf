@@ -95,10 +95,10 @@ variable "k8s_worker_sec_rules" {
   default     = []
 }
 
-# K8S worker  allowed address pairs
-variable "k8s_worker_allowed_address_pairs" {
+# K8S MetalLB address pairs
+variable "k8s_metallb_address_pairs" {
   type        = list
-  description = "Kubernetes worker allowed address pairs"
+  description = "Kubernetes MetalLB address pairs"
   default     = []
 }
 
