@@ -73,7 +73,13 @@
         values: 
           server:
             ingress:
-              enabled: false
+              enabled: true
+              hosts: 
+                - prometheus.wai.local
+              annotations:
+                kubernetes.io/ingress.class: nginx-internal
+                nginx.ingress.kubernetes.io/ssl-redirect: "false"
+                nginx.ingress.kubernetes.io/force-ssl-redirect: "false"                
             persistentVolume:
               enabled: true
               size: 50Gi
@@ -85,6 +91,15 @@
               enabled: true
               size: 2Gi
               storageClass: storage-heketi
+          extraScrapeConfigs: |
+            - job_name: wai-infrastructure
+              static_configs:
+              - targets:
+            {{ groups['all'] | difference(groups['k8s-cluster']) | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | map('regex_replace', '^(.*)$','\1:9100') | list | to_nice_yaml | indent(4, true) }}
+            - job_name: wai-mariadb
+              static_configs:
+              - targets:
+            {{ groups['galera-prod'] | union(groups['galera-prod-slave']) | union(groups['galera-play']) | union(groups['mariadb-stag']) | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | map('regex_replace', '^(.*)$','\1:9104') | list | to_nice_yaml | indent(4, true) }}
 
     # Install Grafana
     - name: K8S Helm .:. Install Grafana
@@ -101,7 +116,13 @@
         host: "{{ clusterIP.stdout }}"
         values: 
           ingress:
-            enabled: false
+            enabled: true
+            hosts: 
+              - grafana.wai.local
+            annotations:
+              kubernetes.io/ingress.class: nginx-internal
+              nginx.ingress.kubernetes.io/ssl-redirect: "false"
+              nginx.ingress.kubernetes.io/force-ssl-redirect: "false"                
           persistence:
             enabled: true
             size: 8Gi
@@ -115,6 +136,53 @@
             requests:
               cpu: "0.25"
               memory: "512Mi"
+          datasources:
+            datasources.yaml:
+              apiVersion: 1
+              datasources:
+              - name: Prometheus
+                access: proxy
+                orgId: 1
+                type: prometheus
+                url: http://prometheus-server
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+              - name: 'default'
+                orgId: 1
+                folder: ''
+                type: file
+                disableDeletion: false
+                editable: true
+                options:
+                  path: /var/lib/grafana/dashboards/default
+          dashboards:
+            default:
+              kubernetes-cluster:
+                gnetId: 7249
+                revision: 1
+                datasource: Prometheus
+              nginx-ingress:
+                gnetId: 9614
+                revision: 51
+                datasource: Prometheus
+              kubernetes-cluster-monitoring-prometheus:
+                gnetId: 8588
+                revision: 1
+                datasource: Prometheus
+              node-exporter-full:
+                gnetId: 1860
+                revision: 15
+                datasource: Prometheus
+              redis-full:
+                gnetId: 763
+                revision: 3
+                datasource: Prometheus
+              mariadb-full:
+                gnetId: 7362
+                revision: 5
+                datasource: Prometheus                
 
     # Install Redis
     - name: K8S Helm .:. Install Redis
