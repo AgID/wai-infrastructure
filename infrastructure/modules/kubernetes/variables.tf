@@ -85,10 +85,10 @@ variable "k8s_worker_sec_rules" {
   description = "Kubernetes worker security rules"
 }
 
-# K8S worker  allowed address pairs
-variable "k8s_worker_allowed_address_pairs" {
+# K8S MetalLB address pairs
+variable "k8s_metallb_address_pairs" {
   type        = list
-  description = "Kubernetes worker allowed address pairs"
+  description = "Kubernetes MetalLB address pairs"
 }
 
 # K8S worker assigned floating IPs
@@ -110,6 +110,7 @@ locals {
   # {project_name_prefix}-RESOURCE_TYPE
   k8s_master_security_group_name = "${var.project_name_prefix}-k8s-master-sg"
   k8s_worker_security_group_name = "${var.project_name_prefix}-k8s-worker-sg"
+  k8s_metallb_ports_group_name   = "${var.project_name_prefix}-k8s-metallb-port-sg"
   k8s_router_name                = "${var.project_name_prefix}-k8s-router"
   k8s_network_name               = "${var.project_name_prefix}-k8s-network"
   k8s_subnet_name                = "${var.project_name_prefix}-k8s-subnet"
