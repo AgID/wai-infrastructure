@@ -99,6 +99,7 @@
                 - name: default-receiver
                   slack_configs:
                   - channel: '#wai'
+                    send_resolved: true
                     title: "{{ '{{' }} range .Alerts {{ '}}' }}{{ '{{' }} .Annotations.summary {{ '}}' }}\n{{ '{{' }} end {{ '}}' }}"
                     text: "{{ '{{' }} range .Alerts {{ '}}' }}{{ '{{' }} .Annotations.description {{ '}}' }}}}\n{{ '{{' }} end {{ '}}' }}"
               route:
