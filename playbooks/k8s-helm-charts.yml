@@ -128,6 +128,14 @@
                       annotations:
                         description: "Redis pod {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} of namespace {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} is consuming too much memory. Percentage is {{ '{{' }} $value {{ '}}' }}"
                         summary: "Redis pod instance {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} memory alert."
+                    - alert: RedisDown
+                      expr: redis_up == 0
+                      for: 5m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "Redis instance {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} in namespace {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} has been down for more than 5 minutes."
+                        summary: "Redis Instance {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} in namespace {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} is down"
                 - name: MariaDBInstance
                   rules:
                     - alert: MariaDown
