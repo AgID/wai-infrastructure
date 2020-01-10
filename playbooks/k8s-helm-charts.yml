@@ -275,7 +275,7 @@
             tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_redis_image_tag }}"
           cluster:
             enabled: true
-            slaveCount: 2
+            slaveCount: "{{ wai_redis_slave_count }}"
           usePassword: true
           existingSecret: redis-master-secret
           existingSecretPasswordKey: "{{ item[1] }}-password"

@@ -96,6 +96,7 @@ wai_portal_environments:
 # RediSearch Image
 wai_redis_image: webanalyticsitalia/wai-redis-search
 wai_redis_image_tag: 5.0.3-dev-1
+wai_redis_slave_count: 2
 
 # Matomo Image
 wai_matomo_image: webanalyticsitalia/wai-matomo
