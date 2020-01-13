@@ -54,13 +54,19 @@ resource "openstack_networking_secgroup_rule_v2" "cluster_secgroup_rule" {
   security_group_id = openstack_networking_secgroup_v2.cluster_secgroup[0].id
 }
 
-# Kubernetes master node boot volume
+# Cluster  node boot volume
 resource "openstack_blockstorage_volume_v3" "cluster_boot_volume" {
   count       = var.enabled ? lookup(var.cluster_instance, "num_instances", 0) : 0
   name        = format("%s-boot-volume-%02d", local.cluster_node_name, count.index + 1)
   image_id    = var.cluster_instance["image_id"]
   size        = var.cluster_instance["boot_volume_size"]
   volume_type = var.cluster_instance["boot_volume_type"]
+}
+
+# Cluster server group
+resource "openstack_compute_servergroup_v2" "server_group" {
+  name = format("%s-server-group", local.cluster_node_name)
+  policies = ["anti-affinity"]
 }
 
 # Cluster node instance
@@ -83,6 +89,7 @@ resource "openstack_compute_instance_v2" "cluster_instance" {
     ansible_user = var.ssh_user
     groups       = join(", ", ["wai", element(var.cluster_instance_groups, count.index)])
   }
+  group = openstack_compute_servergroup_v2.server_group[0].id
 }
 
 # Cluster node networking port

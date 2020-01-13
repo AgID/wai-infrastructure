@@ -188,6 +188,12 @@ resource "openstack_blockstorage_volume_v3" "k8s_worker_boot_volume" {
   volume_type = var.k8s_worker_instance["boot_volume_type"]
 }
 
+# Kubernetes server group
+resource "openstack_compute_servergroup_v2" "k8s_server_group" {
+  name = "kubernetes-server-group"
+  policies = ["anti-affinity"]
+}
+
 # Kubernetes worker node instance
 resource "openstack_compute_instance_v2" "k8s_worker_instance" {
   count     = var.enabled ? lookup(var.k8s_worker_instance, "num_instances", 0) : 0
@@ -211,6 +217,7 @@ resource "openstack_compute_instance_v2" "k8s_worker_instance" {
     ansible_user = var.ssh_user
     groups       = join(", ", ["wai", element(var.k8s_worker_instance_groups, count.index)])
   }
+  group = openstack_compute_servergroup_v2.k8s_server_group[0].id
 }
 
 # Kubernetes MetalLB ports
