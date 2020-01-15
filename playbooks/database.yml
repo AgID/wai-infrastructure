@@ -2,6 +2,7 @@
 # Configure Matomo database
 - hosts:
     - galera-prod[0]
+    - galera-prod-slave[0]
     - galera-play[0]
     - mariadb-stag[0]
   tasks:
@@ -36,37 +37,52 @@
     - name: Database .:. Calculate matomo super user password
       set_fact:
         matomo_database_superuser_password: "{{ matomo_vars.super_user.password | md5 | password_hash('bcrypt') }}"
+        portal_database_superuser_password: "{{ portal_vars.super_user.password  | password_hash('bcrypt') }}"
 
     - name: Database .:. Prepare matomo template sql script
+      vars:
+        item: "{{ wai_environment }}"
       template:
-        src: "mariadb/matomo_3_8_1-data.sql.j2"
-        dest: "/root/matomo_3_8_1-data.sql"
+        src: "mariadb/matomo_3_13_0.sql.j2"
+        dest: "/root/matomo_3_13_0.sql"
+
+    - name: Database .:. Prepare wai template sql script
+      template:
+        src: "mariadb/portal_1_0_0.sql.j2"
+        dest: "/root/portal_1_0_0.sql"
 
     - name: Database .:. Test if matomo database is present
-      shell: mysql -e 'SHOW DATABASES;' | grep matomo
+      shell: mysql -e 'SHOW TABLES;' matomo | grep log_action
       register: matomo_db_status
       failed_when: matomo_db_status.rc == 2
+
+    - name: Database .:. Test if portal database is present
+      shell: mysql -e 'SHOW TABLES;' wai | grep websites
+      register: wai_db_status
+      failed_when: wai_db_status.rc == 2
 
     - name: Database .:. Import Matomo database
       mysql_db:
         name: matomo
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
         state: import
-        target: "/root/matomo_3_8_1-data.sql"
+        target: "/root/matomo_3_13_0.sql"
       when: matomo_db_status.rc != 0
 
     - name: Database .:. Create WAI database
       mysql_db:
         name: wai
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
-        state: present
+        state: import
+        target: "/root/portal_1_0_0.sql"
+      when: wai_db_status.rc != 0
 
     - name: Database .:.  Create Matomo super user
       mysql_user:
         name: matomo-admin
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
         password: "{{ wai_database_credentials[wai_environment]['matomo-admin'] }}"
-        priv: "matomo.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES"
+        priv: "matomo.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES/*.*:FILE"
         host: "%"
         state: present
 
@@ -75,7 +91,7 @@
         name: matomo-user
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
         password: "{{ wai_database_credentials[wai_environment]['matomo-user'] }}"
-        priv: "matomo.*:SELECT"
+        priv: "matomo.*:SELECT,CREATE TEMPORARY TABLES"
         host: "%"
         state: present
 
@@ -92,14 +108,21 @@
       mysql_user:
         login_user: "root"
         name: root
-        password: "{{ wai_database_credentials[wai_environment]['root'] }}"
+        password: "{{ wai_database_credentials.root }}"
         login_unix_socket: /var/run/mysqld/mysqld.sock
 
-    - name: Database .:. Set database password
-      set_fact:
-        database_root_password: "{{ wai_database_credentials[wai_environment]['root'] }}"
+- hosts:
+    - galera-prod
+    - galera-prod-slave
+    - galera-play
+    - mariadb-stag
+  tasks:
+    - include_vars:
+        file: password.yml
 
     - name: Database .:. Create root configuration file
+      vars:
+        database_root_password: "{{ wai_database_credentials.root }}"
       template:
         src: "mariadb/root-my.cnf.j2"
         dest: "/root/.my.cnf"

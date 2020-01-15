@@ -1,13 +1,5 @@
 # https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
 ---
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: ingress-nginx
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -144,7 +136,7 @@ rules:
       # Here: "<ingress-controller-leader>-<nginx>"
       # This has to be adapted if you change either parameter
       # when launching the nginx-ingress-controller.
-      - "ingress-controller-leader-nginx"
+      - "ingress-controller-leader-{{ ns }}-nginx-{{ ns }}"
     verbs:
       - get
       - update
@@ -188,7 +180,7 @@ metadata:
     app.kubernetes.io/part-of: ingress-nginx
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: nginx-ingress-controller
   namespace: {{ ns }}
@@ -196,7 +188,6 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: ingress-nginx
@@ -210,16 +201,8 @@ spec:
         prometheus.io/port: "10254"
         prometheus.io/scrape: "true"
     spec:
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - ingress-nginx
-            topologyKey: "kubernetes.io/hostname"
+      nodeSelector:
+        role: metallb
       serviceAccountName: nginx-ingress-sa-{{ ns }}
       containers:
         - name: nginx-ingress-controller
@@ -231,6 +214,8 @@ spec:
             - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
             - --publish-service=$(POD_NAMESPACE)/ingress-nginx
             - --annotations-prefix=nginx.ingress.kubernetes.io
+            - --ingress-class=nginx-{{ ns }}
+            - --election-id=ingress-controller-leader-{{ ns }}
             # Enforce Isolation
             - --force-namespace-isolation=true
             # Watch for pod in the ingress namespace
@@ -342,7 +327,9 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
 spec:
-  type: NodePort
+  type: LoadBalancer
+  loadBalancerIP: {{ wai_ip_addresses[ns].private_ip }}
+  externalTrafficPolicy: Local
   ports:
     - name: http
       port: 80
@@ -359,4 +346,8 @@ spec:
   selector:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
+status:
+  loadBalancer:
+    ingress:
+    - ip: {{ wai_ip_addresses[ns].private_ip }}
 {% endfor %}              

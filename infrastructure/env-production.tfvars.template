@@ -3,7 +3,7 @@ environment = "production"
 environment_short = "prod"
 
 # K8S network CIDR
-k8s_network_cidr = "<CIDR>"
+k8s_network_cidr = "<K8S_CIDR>"
 
 # K8S master instance parameters
 k8s_master_instance = {
@@ -22,8 +22,63 @@ k8s_master_instance = {
 # if there are more instances than items in the list it will restart from the first one
 k8s_master_instance_groups = ["kube-master, etcd"]
 
-# K8S master assigned floating IPs
-k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
+# K8S master security group rules
+# See https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
+k8s_master_sec_rules = [
+    {
+        protocol = "icmp"
+        from = 0
+        to = 0
+        cidr = "<CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 22
+        to = 22
+        cidr = "<CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 6443
+        to = 6443
+        cidr = "<CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 2379
+        to = 2380
+        cidr = "<K8S_CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 10250
+        to = 10250
+        cidr = "<K8S_CIDR>"
+    },
+    # See https://www.weave.works/docs/net/latest/install/using-weave/#creating-peer-connections-between-hosts
+    {
+        protocol = "tcp"
+        from = 6783
+        to = 6783
+        cidr = "<K8S_CIDR>"
+    },
+    {
+        protocol = "udp"
+        from = 6783
+        to = 6784
+        cidr = "<K8S_CIDR>"
+    },
+    # Prometheus node exporter
+    {
+        protocol = "tcp"
+        from = 9100
+        to = 9100
+        cidr = "<K8S_CIDR>"
+    }
+]
+
+# K8S master assigned floating IPs (uncomment if needed)
+#k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
 
 # K8S worker instance parameters
 k8s_worker_instance = {
@@ -42,14 +97,105 @@ k8s_worker_instance = {
 # if there are more instances than items in the list it will restart from the first one
 k8s_worker_instance_groups = ["kube-node"]
 
-# K8S worker assigned floating IPs
-k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
+# K8S worker security rules
+# See https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
+k8s_worker_sec_rules = [
+    {
+        protocol = "icmp"
+        from = 0
+        to = 0
+        cidr = "<CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 22
+        to = 22
+        cidr = "<CIDR>"
+    },
+    # Allow http/https traffic since nginx ingress controller is publicy exposed via MetalLB
+    {
+        protocol = "tcp"
+        from = 80
+        to = 80
+        cidr = "0.0.0.0/0"
+    },
+    {
+        protocol = "tcp"
+        from = 443
+        to = 443
+        cidr = "0.0.0.0/0"
+    },
+    # change to cidr = "0.0.0.0/0" if you expose services via NodePort publicly
+    {
+        protocol = "tcp"
+        from = 30000
+        to = 32767
+        cidr = "<K8S_CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 10250
+        to = 10250
+        cidr = "<K8S_CIDR>"
+    },
+    # See https://www.weave.works/docs/net/latest/install/using-weave/#creating-peer-connections-between-hosts
+    {
+        protocol = "tcp"
+        from = 6783
+        to = 6783
+        cidr = "<K8S_CIDR>"
+    },
+    {
+        protocol = "udp"
+        from = 6783
+        to = 6784
+        cidr = "<K8S_CIDR>"
+    },
+    # Prometheus node exporter
+    {
+        protocol = "tcp"
+        from = 9100
+        to = 9100
+        cidr = "<K8S_CIDR>"
+    }
+]
+
+# K8S MetalLB ports security rules
+k8s_worker_sec_rules = [
+    {
+        protocol = "tcp"
+        from = 80
+        to = 80
+        cidr = "0.0.0.0/0"
+    },
+    {
+        protocol = "tcp"
+        from = 443
+        to = 443
+        cidr = "0.0.0.0/0"
+    }
+]
+
+# K8S MetalLB owned addresses and corresponding floating IPs
+k8s_metallb_address_pairs = [
+    {
+        floating_ip = "<FIP 1>"
+        ip:"<IP 1>"
+    },
+    {
+        floating_ip= "<FIP 2>"
+        ip:"<IP 1>"
+    }
+]
+
+# K8S worker assigned floating IPs  (uncomment if needed)
+#k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
 
 # Galera slug name
 galera_slug = "galera"
 
 # Galera network CIDR
-galera_network_cidr = "<CIDR>"
+galera_network_cidr = "<GALERA_CIDR>"
 
 # Galera instance parameters
 galera_instance = {
@@ -66,7 +212,7 @@ galera_instance = {
 # Each item in the list will be added to the corresponding instance number
 # i.e. the first item in the list will be added to the first instance and so on
 # if there are more instances than items in the list it will restart from the first one
-galera_instance_groups = ["galera-prod"]
+galera_instance_groups = ["galera-prod", "galera-prod", "galera-prod", "galera-prod-slave", "galera-prod-slave", "galera-prod-slave"]
 
 # Galera security rules
 # See http://galeracluster.com/documentation-webpages/firewallsettings.html
@@ -75,57 +221,57 @@ galera_sec_rules = [
         protocol = "icmp"
         from = 0
         to = 0
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 22
         to = 22
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 3306
         to = 3306
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 4567
         to = 4567
-        cidr = "<CIDR>"
+        cidr = "<GALERA_CIDR>"
     },
     {
         protocol = "udp"
         from = 4567
         to = 4567
-        cidr = "<CIDR>"
+        cidr = "<GALERA_CIDR>"
     },
     {
         protocol = "tcp"
         from = 4568
         to = 4568
-        cidr = "<CIDR>"
+        cidr = "<GALERA_CIDR>"
     },
     {
         protocol = "tcp"
         from = 4444
         to = 4444
-        cidr = "<CIDR>"
+        cidr = "<GALERA_CIDR>"
     },
     # Prometheus Node Exporter
     {
-            protocol = "tcp"
-            from = 9100
-            to = 9100
-            cidr = "0.0.0.0/0"
+        protocol = "tcp"
+        from = 9100
+        to = 9100
+        cidr = "<K8S_CIDR>"
     },
     # Prometheus MYSQLD Exporter
     {
         protocol = "tcp"
         from = 9104
         to = 9104
-        cidr = "0.0.0.0/0"
+        cidr = "<K8S_CIDR>"
     }
 ]
 
@@ -133,7 +279,7 @@ galera_sec_rules = [
 elastic_slug = "elastic"
 
 # Elastic network CIDR
-elastic_network_cidr = "<CIDR>"
+elastic_network_cidr = "<ELASTIC_CIDR>"
 
 # Elastic instance parameters
 elastic_instance = {
@@ -160,13 +306,13 @@ elastic_sec_rules = [
         protocol = "icmp"
         from = 0
         to = 0
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 22
         to = 22
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
@@ -178,7 +324,7 @@ elastic_sec_rules = [
         protocol = "tcp"
         from = 9300
         to = 9300
-        cidr = "<CIDR>"
+        cidr = "<ELASTIC_CIDR>"
     },
     {
         protocol = "tcp"
@@ -188,10 +334,10 @@ elastic_sec_rules = [
     },
     # Prometheus Node Exporter
     {
-            protocol = "tcp"
-            from = 9100
-            to = 9100
-            cidr = "0.0.0.0/0"
+        protocol = "tcp"
+        from = 9100
+        to = 9100
+        cidr = "<K8S_CIDR>"
     }
 ]
 
@@ -199,7 +345,7 @@ elastic_sec_rules = [
 gluster_slug = "gluster"
 
 # Gluster network CIDR
-gluster_network_cidr = "<CIDR>"
+gluster_network_cidr = "<GLUSTER_CIDR>"
 
 # Gluster instance parameters
 gluster_instance = {
@@ -225,37 +371,44 @@ gluster_sec_rules = [
         protocol = "icmp"
         from = 0
         to = 0
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 22
         to = 22
-        cidr = "0.0.0.0/0"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 24007
         to = 24008
-        cidr = "<CIDR>"
+        cidr = "<GLUSTER_CIDR>"
     },
     {
         protocol = "udp"
         from = 24007
         to = 24008
-        cidr = "<CIDR>"
+        cidr = "<GLUSTER_CIDR>"
     },
     {
         protocol = "tcp"
         from = 49152
-        to = 49162
-        cidr = "<CIDR>"
+        to = 49652
+        cidr = "<GLUSTER_CIDR>"
+    },
+    # Heketi
+    {
+        protocol = "tcp"
+        from = 8080
+        to = 8080
+        cidr = "<K8S_CIDR>"
     },
     # Prometheus Node Exporter
     {
-            protocol = "tcp"
-            from = 9100
-            to = 9100
-            cidr = "0.0.0.0/0"
+        protocol = "tcp"
+        from = 9100
+        to = 9100
+        cidr = "<K8S_CIDR>"
     }
 ]

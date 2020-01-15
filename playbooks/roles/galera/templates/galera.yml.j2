@@ -1,3 +1,11 @@
+{%  if production_slave_node is defined and production_slave_node == true %}
+{%    set current_group_name = 'galera-prod-slave' %}
+{%  elif production_master_node is defined and production_master_node == true %}
+{%    set current_group_name = 'galera-prod' %}
+{% else %}
+{%    set current_group_name = 'galera-play' %}
+{% endif %}
+
 [mysqld]
 
 {% if production_slave_node is defined and production_slave_node == true %}
@@ -24,7 +32,7 @@ wsrep_provider=/usr/lib/galera/libgalera_smm.so
 
 # Galera Cluster Configuration
 wsrep_cluster_name="wai-galera_cluster"
-wsrep_cluster_address="gcomm://{{ groups[group_names[0]] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | join(',') }}"
+wsrep_cluster_address="gcomm://{{ groups[current_group_name] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | join(',') }}"
 
 # Galera Synchronization Configuration
 wsrep_sst_method=rsync
@@ -58,6 +66,7 @@ max_heap_table_size=1G
 innodb_thread_concurrency=0
 innodb_read_io_threads=64
 innodb_write_io_threads=64
+max_allowed_packet = 128M
 # Autocomiit to avoid deadlock
 wsrep_retry_autocommit=4
 

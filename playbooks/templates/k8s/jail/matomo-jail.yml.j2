@@ -31,8 +31,8 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       initContainers:
       - name: copy
-        image: {{ wai_matomo_base_image }}
-        command: ["sh", "-c", "cp -R /var/www/html/* /html/"]
+        image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
+        command: ["sh", "-c", "cp -a /var/www/html/* /html/"]
         resources:
           limits:
             cpu: 0.1
@@ -41,7 +41,7 @@ spec:
         - mountPath: /html
           name: html
       containers:
-      - image: {{ wai_matomo_base_image }}
+      - image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
         name: {{ matomo_name }}
         resources:
           limits:
@@ -74,13 +74,8 @@ spec:
         - containerPort: 80
           name: nginx
         livenessProbe:
-          httpGet:
-            {% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
-            path: {{ matomo_app_filename }} 
-            {% else %}
-            path: /
-            {% endif %}
-            port: nginx
+          tcpSocket:
+            port: 80
           initialDelaySeconds: 5
           periodSeconds: 5
           successThreshold: 1
@@ -107,45 +102,57 @@ metadata:
 data:
   nginx.conf: |-
     user nginx;
-    worker_processes  1;
-    error_log  /var/log/nginx/error.log warn;
-    pid        /var/run/nginx.pid;
+    worker_processes 1;
+    error_log /var/log/nginx/error.log warn;
+    pid /var/run/nginx.pid;
+
     events {
-      worker_connections 1024;
+      worker_connections 2048;
     }
+
     http {
+      server_tokens off;
+      sendfile on;
+      tcp_nopush on;
+      tcp_nodelay on;
+      keepalive_timeout 15s;
+      types_hash_max_size 2048;
+
       upstream backend {
         server localhost:9000;
       }
+
       include /etc/nginx/mime.types;
       default_type application/octet-stream;
       gzip on;
-      gzip_disable "msie6";    
+      gzip_disable "msie6";
+
       server {
         listen 80;
         root /var/www/html/;
-        {% if matomo_nginx_jailed is defined and not matomo_nginx_jailed %}
-        
-        location / {
-          try_files $uri $uri/ =404;
+
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+        add_header Referrer-Policy origin;
+        add_header Allow "GET, POST, HEAD" always;
+
+        if ($request_method !~ ^(GET|POST|HEAD)$) {
+          return 405;
         }
-        error_page 404 /404.html;
-        error_page 500 502 503 504 /50x.html;
-        location = /50x.html {
-          root /usr/share/nginx/html;
-        }
+
+        index index.php;
 
         location = /favicon.ico {
           log_not_found off;
           access_log off;
         }
-        {% endif %}
 
         {% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
         location = {{ matomo_app_filename }} {
         {% else %}
-
-        location ~ \.php$ {
+        ## only allow accessing the following php files
+        location ~ ^/(index|plugins/HeatmapSessionRecording/configs)\.php {
         {% endif %}
           fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
           fastcgi_param  SERVER_SOFTWARE    nginx;
@@ -164,17 +171,57 @@ data:
           fastcgi_param  SERVER_ADDR        $server_addr;
           fastcgi_param  SERVER_PORT        $server_port;
           fastcgi_param  SERVER_NAME        $server_name;
+          fastcgi_param  HTTP_X_FORWARDED_URI '{{ wai_portal_matomo_sub_path }}';
           fastcgi_intercept_errors on;
           fastcgi_pass backend;
         }
 
-        {% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
-        
-        location ~* {
+        {% if matomo_nginx_jailed is defined and not matomo_nginx_jailed %}
+        ## deny access to all other .php files
+        location ~* ^.+\.php$ {
           deny all;
+          return 404;
+        }
+
+        ## serve all other files normally
+        location / {
+          try_files $uri $uri/ =404;
+        }
+
+        ## disable access to the following directories
+        location ~ /(config|tmp|core|lang) {
+          deny all;
+          return 404;
+        }
+
+        ## disable access to the following files
+        location ~ /(.+\.md|LEGALNOTICE|LICENSE|\.ht) {
+          deny all;
+          return 404;
+        }
+
+        location ~ \.(gif|ico|jpg|png|svg|js|css|htm|html|mp3|mp4|wav|ogg|avi|ttf|eot|woff|woff2|json)$ {
+          allow all;
+          ## Cache images,CSS,JS and webfonts for an hour
+          ## Increasing the duration may improve the load-time, but may cause old files to show after an Matomo upgrade
+          expires 1h;
+          add_header Pragma public;
+          add_header Cache-Control "public";
+        }
+
+        ## disable access to the following directories
+        location ~ /(libs|vendor|plugins|misc/user) {
+          deny all;
+          return 404;
         }
         {% endif %}
 
+        {% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
+        location ~* / {
+          deny all;
+          return 404;
+        }
+        {% endif %}
       }
     }
 ---
@@ -198,7 +245,7 @@ metadata:
   name: {{ matomo_name }}
   namespace: {{ item }}
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.class: nginx-{{ item }}
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod    
     {% if matomo_enable_session is defined and matomo_enable_session %}
     nginx.ingress.kubernetes.io/affinity: "cookie"

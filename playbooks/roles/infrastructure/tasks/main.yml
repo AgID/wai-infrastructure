@@ -34,4 +34,4 @@
   when: groups['gluster'] | intersect(inventory_hostname) | length == 0
 
 - include: swapfile.yml
-
+  when: groups['gluster'] | intersect(inventory_hostname) | length == 0

@@ -11,7 +11,45 @@ spec:
   - Ingress
   - Egress
 ---
-# Allow egresss to Elastic search
+# Allow from monitoring namespace
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-monitoring
+  namespace: {{ item }}
+spec:
+  policyTypes:
+  - Ingress
+  podSelector: {}
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+---
+# Allow myself traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: intra-namespace
+  namespace: {{ item }}
+spec:
+  policyTypes:
+  - Egress
+  - Ingress
+  podSelector: {}
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          environment: {{ item }}
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          environment: {{ item }}
+---          
+# Allow WAI traffic
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -26,7 +64,6 @@ spec:
   - ports:
     - port: 80
   egress:
-  # Allow connect to elastic
   - to:
 {% for es in  groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) %}
     - ipBlock:
@@ -37,7 +74,7 @@ spec:
       port: 9200
   # Allow connect to mariadb
   - to:
-{% for host in  wai_rdbms_load_balancer[item] %}
+{% for host in  wai_load_balancer[item].rdbms %}
     - ipBlock:
         cidr: {{ host }}/32
 {% endfor %}

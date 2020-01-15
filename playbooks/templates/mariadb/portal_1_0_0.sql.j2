@@ -1,0 +1,359 @@
+-- phpMyAdmin SQL Dump
+-- version 4.9.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: mariadb
+-- Generation Time: Nov 11, 2019 at 02:24 PM
+-- Server version: 10.4.8-MariaDB-1:10.4.8+maria~bionic
+-- PHP Version: 7.2.23
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `abilities`
+--
+
+DROP TABLE IF EXISTS `abilities`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `abilities` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `entity_id` int(10) unsigned DEFAULT NULL,
+  `entity_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `only_owned` tinyint(1) NOT NULL DEFAULT 0,
+  `options` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`options`)),
+  `scope` int(11) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `abilities_scope_index` (`scope`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+--
+-- Dumping data for table `abilities`
+--
+
+INSERT INTO `abilities` (`id`, `name`, `title`, `entity_id`, `entity_type`, `only_owned`, `options`, `scope`, `created_at`, `updated_at`) VALUES
+(1, '*', 'All abilities', NULL, '*', 0, NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42'),
+(2, 'access-admin-area', 'Access admin area', NULL, NULL, 0, NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42'),
+(3, 'manage-users', 'Manage users', NULL, NULL, 0, NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42'),
+(4, 'manage-websites', 'Manage websites', NULL, NULL, 0, NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42'),
+(5, 'view-logs', 'View logs', NULL, NULL, 0, NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42'),
+(6, 'do-nothing', 'Do nothing', NULL, NULL, 0, NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `assigned_roles`
+--
+
+DROP TABLE IF EXISTS `assigned_roles`;
+CREATE TABLE IF NOT EXISTS `assigned_roles` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `role_id` int(10) UNSIGNED NOT NULL,
+  `entity_id` int(10) UNSIGNED NOT NULL,
+  `entity_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `restricted_to_id` int(10) UNSIGNED DEFAULT NULL,
+  `restricted_to_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `scope` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `assigned_roles_entity_index` (`entity_id`,`entity_type`,`scope`),
+  KEY `assigned_roles_role_id_index` (`role_id`),
+  KEY `assigned_roles_scope_index` (`scope`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `assigned_roles`
+--
+
+INSERT INTO `assigned_roles` (`id`, `role_id`, `entity_id`, `entity_type`, `restricted_to_id`, `restricted_to_type`, `scope`) VALUES
+(1, 1, 1, 'App\\Models\\User', NULL, NULL, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `failed_jobs`
+--
+
+DROP TABLE IF EXISTS `failed_jobs`;
+CREATE TABLE IF NOT EXISTS `failed_jobs` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `migrations`
+--
+
+DROP TABLE IF EXISTS `migrations`;
+CREATE TABLE IF NOT EXISTS `migrations` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `migrations`
+--
+
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
+(1, '2018_02_08_012615_create_bouncer_tables', 1),
+(2, '2018_02_10_172832_create_public_administrations_table', 1),
+(3, '2018_02_12_000000_create_users_table', 1),
+(4, '2018_02_14_000000_create_password_reset_tokens_table', 1),
+(5, '2018_02_14_162700_create_websites_table', 1),
+(6, '2018_03_26_123619_create_failed_jobs_table', 1),
+(7, '2019_03_21_090355_create_public_administration_user_table', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_reset_tokens`
+--
+
+DROP TABLE IF EXISTS `password_reset_tokens`;
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  KEY `password_reset_tokens_user_id_index` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `permissions`
+--
+
+DROP TABLE IF EXISTS `permissions`;
+CREATE TABLE IF NOT EXISTS `permissions` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `ability_id` int(10) UNSIGNED NOT NULL,
+  `entity_id` int(10) UNSIGNED DEFAULT NULL,
+  `entity_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `forbidden` tinyint(1) NOT NULL DEFAULT 0,
+  `scope` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `permissions_entity_index` (`entity_id`,`entity_type`,`scope`),
+  KEY `permissions_ability_id_index` (`ability_id`),
+  KEY `permissions_scope_index` (`scope`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `permissions`
+--
+
+INSERT INTO `permissions` (`id`, `ability_id`, `entity_id`, `entity_type`, `forbidden`, `scope`) VALUES
+(1, 1, 1, 'roles', 0, NULL),
+(2, 2, 1, 'roles', 0, NULL),
+(3, 3, 2, 'roles', 0, NULL),
+(4, 4, 2, 'roles', 0, NULL),
+(5, 5, 2, 'roles', 0, NULL),
+(6, 6, 3, 'roles', 0, NULL),
+(7, 6, 4, 'roles', 0, NULL),
+(8, 1, 5, 'roles', 1, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `public_administrations`
+--
+
+DROP TABLE IF EXISTS `public_administrations`;
+CREATE TABLE IF NOT EXISTS `public_administrations` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `ipa_code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `pec` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rtd_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rtd_mail` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rtd_pec` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `city` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `county` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `region` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` tinyint(3) UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `public_administrations_ipa_code_unique` (`ipa_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `public_administration_user`
+--
+
+DROP TABLE IF EXISTS `public_administration_user`;
+CREATE TABLE IF NOT EXISTS `public_administration_user` (
+  `public_administration_id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  KEY `public_administration_user_public_administration_id_index` (`public_administration_id`),
+  KEY `public_administration_user_user_id_index` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `roles`
+--
+
+DROP TABLE IF EXISTS `roles`;
+CREATE TABLE IF NOT EXISTS `roles` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `level` int(10) UNSIGNED DEFAULT NULL,
+  `scope` int(11) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_name_unique` (`name`,`scope`),
+  KEY `roles_scope_index` (`scope`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `roles`
+--
+
+INSERT INTO `roles` (`id`, `name`, `title`, `level`, `scope`, `created_at`, `updated_at`) VALUES
+(1, 'super-admin', 'Super admin', NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42'),
+(2, 'admin', 'Admin', NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42'),
+(3, 'delegated', 'Delegated', NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42'),
+(4, 'registered', 'Registered', NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42'),
+(5, 'deleted', 'Deleted', NULL, NULL, '2019-11-11 15:22:42', '2019-11-11 15:22:42');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `spid_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `family_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `fiscal_number` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `public_administration_id` int(10) UNSIGNED DEFAULT NULL,
+  `status` tinyint(3) UNSIGNED NOT NULL,
+  `partial_analytics_password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password_changed_at` timestamp NULL DEFAULT NULL,
+  `last_access_at` timestamp NULL DEFAULT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_spid_code_unique` (`spid_code`),
+  KEY `users_public_administration_id_foreign` (`public_administration_id`),
+  KEY `users_uuid_index` (`uuid`),
+  KEY `users_email_index` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `spid_code`, `name`, `uuid`, `family_name`, `fiscal_number`, `email`, `password`, `public_administration_id`, `status`, `partial_analytics_password`, `password_changed_at`, `last_access_at`, `email_verified_at`, `remember_token`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, NULL, '{{ portal_vars.super_user.name }}', '{{ 99999999 | random | to_uuid }}', '{{ portal_vars.super_user.family_name }}', '{{ portal_vars.super_user.fiscal_number }}', '{{ portal_vars.super_user.email }}', '{{ portal_database_superuser_password }}', NULL, 3, NULL, '2019-11-11 15:22:43', NULL, '2019-11-11 15:22:43', NULL, '2019-11-11 15:22:43', '2019-11-11 15:22:43', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `websites`
+--
+
+DROP TABLE IF EXISTS `websites`;
+CREATE TABLE IF NOT EXISTS `websites` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` tinyint(3) UNSIGNED NOT NULL,
+  `public_administration_id` int(10) UNSIGNED NOT NULL,
+  `analytics_id` int(11) NOT NULL,
+  `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` tinyint(3) UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `websites_url_unique` (`url`),
+  UNIQUE KEY `websites_slug_unique` (`slug`),
+  KEY `websites_public_administration_id_index` (`public_administration_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `assigned_roles`
+--
+ALTER TABLE `assigned_roles`
+  ADD CONSTRAINT `assigned_roles_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD CONSTRAINT `password_reset_tokens_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `permissions`
+--
+ALTER TABLE `permissions`
+  ADD CONSTRAINT `permissions_ability_id_foreign` FOREIGN KEY (`ability_id`) REFERENCES `abilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `public_administration_user`
+--
+ALTER TABLE `public_administration_user`
+  ADD CONSTRAINT `public_administration_user_public_administration_id_foreign` FOREIGN KEY (`public_administration_id`) REFERENCES `public_administrations` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `public_administration_user_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_public_administration_id_foreign` FOREIGN KEY (`public_administration_id`) REFERENCES `public_administrations` (`id`);
+
+--
+-- Constraints for table `websites`
+--
+ALTER TABLE `websites`
+  ADD CONSTRAINT `websites_public_administration_id_foreign` FOREIGN KEY (`public_administration_id`) REFERENCES `public_administrations` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

@@ -7,17 +7,16 @@ metadata:
   namespace: {{ item }}
 data:
   config.ini.php: |-
-
     [database]
-    host = "{{ wai_rdbms_load_balancer[item][0] }}"
+    host = "{{ wai_load_balancer[item].rdbms[0] }}"
     username = "matomo-admin"
     password = "{{ wai_database_credentials[item]['matomo-admin'] }}"
     dbname = "matomo"
 
-    {% if wai_rdbms_load_balancer[item] | length > 1 %}
+    {% if wai_load_balancer[item].rdbms | length > 1 %}
     
     [database_reader]
-    host = "{{ wai_rdbms_load_balancer[item][1] }}"
+    host = "{{ wai_load_balancer[item].rdbms[1] }}"
     username = "matomo-user"
     password = "{{ wai_database_credentials[item]['matomo-user'] }}"
     dbname = "matomo"
@@ -31,7 +30,8 @@ data:
     {% for attr in wai_hostname %}
 
     trusted_hosts[] = "{{ wai_hostname[attr] }}.{{ wai_base_domain[item] }}"
-    {%endif %}
+    {% endfor %}
+    proxy_client_headers[] = HTTP_X_FORWARDED_FOR
     enable_trusted_host_check = 1
     force_ssl = 1
     enable_update_users_email = 0
@@ -40,6 +40,11 @@ data:
     enable_update_communication = 0
     enable_auto_update = 0
     show_update_notification_to_superusers_only = 1
+    proxy_uri_header = 1
+    enable_general_settings_admin = 0
+    browser_archiving_disabled_enforce = 1
+    enable_browser_archiving_triggering = 0
+    multi_server_environment = 1
 
     [Plugins]
     Plugins[] = "CorePluginsAdmin"
@@ -107,6 +112,7 @@ data:
     Plugins[] = "QueuedTracking"
     Plugins[] = "ProtectTrackID"
     Plugins[] = "CustomDimensions"
+    Plugins[] = "LoginFilterIp"
 
     [PluginsInstalled]
     PluginsInstalled[] = "Diagnostics"
@@ -175,12 +181,20 @@ data:
     PluginsInstalled[] = "QueuedTracking"
     PluginsInstalled[] = "ProtectTrackID"
     PluginsInstalled[] = "CustomDimensions"
+    PluginsInstalled[] = "LoginFilterIp"
 
     [WAIMatomoTheme]
-    waiUrl = "https://webanalytics.italia.it"
+    waiUrl = "https://{{ wai_base_domain[item] }}"
 
     [QueuedTracking]
     notify_queue_threshold_single_queue = 250000
     {% for email in wai_alert_email_destination | default([]) -%}
     notify_queue_threshold_emails[]={{ email }}
     {% endfor %}
+
+    [LoginFilterIp]
+    allow_login_from[] = "{{ wai_infrastructure_cidr }}"
+    {%- if openvpn_server_addr is defined %}
+    allow_login_from[] = "{{ openvpn_server_addr }}"
+    {%- endif %}
+    redirect_unallowed_to = "https://{{ wai_base_domain[item] }}"

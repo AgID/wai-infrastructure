@@ -3,26 +3,20 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: default-role
-  namespace: {{ item }}
+  namespace: wai-prod
 rules:
 - apiGroups: [""]
-  resources: ["*"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["extensions", "apps"]
-  resources: ["*"]
+  resources: ["pods", "configmaps"]
   verbs: ["get", "list", "watch"]
 - apiGroups: [""]
   resources: ["pods", "pods/log"]
   verbs: ["get", "list"]
-- apiGroups: [""]
-  resources: ["pods/exec"]
-  verbs: ["create"]
 --- 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: default-rolebinding
-  namespace: {{ item }}
+  namespace: wai-prod
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -30,4 +24,4 @@ roleRef:
 subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: Group
-  name: {{ item }}-users
+  name: wai-prod-users

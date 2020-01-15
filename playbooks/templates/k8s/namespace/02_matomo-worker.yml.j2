@@ -5,7 +5,7 @@ metadata:
   name: matomo-worker
   namespace: {{ item }}
 spec:
-  replicas: {{ wai_matomo_pod_size[item][matomo_pod_size_index] }}
+  replicas: {{ wai_matomo_pod_size[item]['matomo-worker'] }}
   updateStrategy:
     type: RollingUpdate
   selector:
@@ -28,26 +28,21 @@ spec:
                 - matomo-worker
             topologyKey: "kubernetes.io/hostname"
       containers:
-      - image: {{ wai_matomo_base_image }}
+      - image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
         name: matomo-worker
         resources:
           limits:
             cpu: "0.50"
             memory: "256Mi"
-        command: ["/bin/sh", "-c"]
-        args: ["/entrypoint.sh; . /var/www/scripts/qt-worker.sh"]
+        command: ["/bin/sh", "/var/www/scripts/qt-worker.sh"]
         readinessProbe:
           exec:
-            command:
-            - /usr/local/bin/php
-            - /var/www/html/piwik.php
+            command: ["php", "/var/www/html/console", "-V"]
           initialDelaySeconds: 5
           periodSeconds: 5
         livenessProbe:
           exec:
-            command:
-            - /usr/local/bin/php
-            - /var/www/html/piwik.php
+            command: ["php", "/var/www/html/console", "-V"]
           initialDelaySeconds: 5
           periodSeconds: 5
           successThreshold: 1
@@ -57,16 +52,6 @@ spec:
         - name: matomo-php-config
           mountPath: /var/www/html/config/config.ini.php
           subPath: config.ini.php
-        env:
-        - name: DATABASE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: matomo-secret-{{ matomo_database_user }}
-              key: password
-        - name: DATABASE_USER
-          value: {{ matomo_database_user }}
-        - name: DATABASE_HOST
-          value: {{ matomo_database_host }}
       volumes:
         - name: matomo-worker-conf
           configMap:
@@ -87,7 +72,7 @@ data:
     cd /var/www/html
     while true;
     do
-      ./console queuedtracking:process --queue-id $QUEUE_ID
+      php console queuedtracking:process --queue-id $QUEUE_ID > /dev/null
       sleep 0.5
     done
 

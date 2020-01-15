@@ -26,7 +26,7 @@
       pip:
         name: 
           - pygit2
-          - pyhelm
+          - pyhelm==2.11.5
           - grpcio
 
     # Get tiller clusterID
@@ -38,10 +38,10 @@
     - name: K8S Helm .:. Download Cert-Manager requirements
       get_url:
         url: https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml
-        dest: "{{ wai_k8s_deployment_dir }}/crds.yaml"
+        dest: "{{ wai_k8s_deployment_dir }}/helm/crds.yaml"
 
     - name: K8S Helm .:. Install Cert-Manager requirements
-      raw: "{{ wai_kubectl }} apply --validate=false -f {{ wai_k8s_deployment_dir }}/crds.yaml"
+      raw: "{{ wai_kubectl }} apply --validate=false -f {{ wai_k8s_deployment_dir }}/helm/crds.yaml"
 
     - name: K8S Helm .:. Install Cert-Manager
       helm:
@@ -49,7 +49,7 @@
         name: cert-manager
         chart: 
           name: cert-manager
-          version: {{ helm.cert_manager.version }}
+          version: "{{ helm.cert_manager.version }}"
           source:
             type: repo
             location: https://charts.jetstack.io
@@ -73,7 +73,13 @@
         values: 
           server:
             ingress:
-              enabled: false
+              enabled: true
+              hosts: 
+                - prometheus.wai.local
+              annotations:
+                kubernetes.io/ingress.class: nginx-internal
+                nginx.ingress.kubernetes.io/ssl-redirect: "false"
+                nginx.ingress.kubernetes.io/force-ssl-redirect: "false"                
             persistentVolume:
               enabled: true
               size: 50Gi
@@ -85,6 +91,87 @@
               enabled: true
               size: 2Gi
               storageClass: storage-heketi
+          alertmanagerFiles:
+            alertmanager.yml:
+              global:
+                slack_api_url: '{{ prometheus_alert_slack_web_hook_url }}'
+              receivers:
+                - name: default-receiver
+                  slack_configs:
+                  - channel: '#wai'
+                    title: "{{ '{{' }} range .Alerts {{ '}}' }}{{ '{{' }} .Annotations.summary {{ '}}' }}\n{{ '{{' }} end {{ '}}' }}"
+                    text: "{{ '{{' }} range .Alerts {{ '}}' }}{{ '{{' }} .Annotations.description {{ '}}' }}}}\n{{ '{{' }} end {{ '}}' }}"
+              route:
+                group_wait: 10s
+                group_interval: 5m
+                receiver: default-receiver
+                repeat_interval: 3h
+          extraScrapeConfigs: |
+            - job_name: wai-infrastructure
+              static_configs:
+              - targets:
+            {{ groups['all'] | difference(groups['k8s-cluster']) | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | map('regex_replace', '^(.*)$','\1:9100') | list | to_nice_yaml | indent(4, true) }}
+            - job_name: wai-mariadb
+              static_configs:
+              - targets:
+            {{ groups['galera-prod'] | union(groups['galera-prod-slave']) | union(groups['galera-play']) | union(groups['mariadb-stag']) | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | map('regex_replace', '^(.*)$','\1:9104') | list | to_nice_yaml | indent(4, true) }}
+          serverFiles:
+            alerting_rules.yml:
+              groups:
+                - name: Redis
+                  rules:
+                    - alert: RedisMemory
+                      expr: redis_memory_used_bytes / redis_config_maxmemory * 100 > 80
+                      for: 1m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "Redis pod {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} of namespace {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} is consuming too much memory. Percentage is {{ '{{' }} $value {{ '}}' }}"
+                        summary: "Redis pod instance {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} memory alert."
+                - name: MariaDBInstance
+                  rules:
+                    - alert: MariaDown
+                      expr: mysql_up == 0
+                      for: 5m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "MariaDB instance {{ '{{' }} $labels.instance {{ '}}' }} of job {{ '{{' }} $labels.job {{ '}}' }} has been down for more than 5 minutes."
+                        summary: "MariaDB Instance {{ '{{' }} $labels.instance {{ '}}' }} is down"
+                - name: IstanceAlert
+                  rules:
+                    - alert: InstanceNoK8sDown
+                      expr: up{job="wai-infrastructure"} == 0
+                      for: 5m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "{{ '{{' }} $labels.instance {{ '}}' }} of job {{ '{{' }} $labels.job {{ '}}' }} has been down for more than 5 minutes."
+                        summary: "Instance {{ '{{' }} $labels.instance {{ '}}' }} down"
+                    - alert: InstanceK8sDown
+                      expr: up{job="kubernetes-nodes"}  == 0
+                      for: 5m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "{{ '{{' }} $labels.instance {{ '}}' }} of job {{ '{{' }} $labels.job {{ '}}' }} has been down for more than 5 minutes."
+                        summary: "Instance {{ '{{' }} $labels.instance {{ '}}' }} down"
+                    - alert: InstanceCPUUsageNoK8S
+                      expr: (100 - (avg(irate(node_cpu_seconds_total{mode="idle", job="wai-infrastructure"}[5m])) BY (instance) * 100)) > 75
+                      for: 2m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "{{ '{{' }} $labels.instance {{ '}}' }}: CPU usage is above 75% (current value is:{{ '{{' }} $value {{ '}}' }})"
+                        summary: "{{ '{{' }} $labels.instance {{ '}}' }}: High CPU usage detect"
+                    - alert: InstanceCPUUsageK8S
+                      expr: (100 - (avg(irate(node_cpu_seconds_total{mode="idle", job="kubernetes-service-endpoints"}[5m])) BY (instance) * 100)) > 75
+                      for: 2m
+                      labels:
+                        severity: critical
+                      annotations:
+                        description: "{{ '{{' }} $labels.kubernetes_node {{ '}}' }}: CPU usage is above 75% (current value is: {{ '{{' }} $value {{ '}}' }})"
+                        summary: "{{ '{{' }} $labels.kubernetes_node {{ '}}' }}: High CPU usage detect"
 
     # Install Grafana
     - name: K8S Helm .:. Install Grafana
@@ -101,7 +188,13 @@
         host: "{{ clusterIP.stdout }}"
         values: 
           ingress:
-            enabled: false
+            enabled: true
+            hosts: 
+              - grafana.wai.local
+            annotations:
+              kubernetes.io/ingress.class: nginx-internal
+              nginx.ingress.kubernetes.io/ssl-redirect: "false"
+              nginx.ingress.kubernetes.io/force-ssl-redirect: "false"                
           persistence:
             enabled: true
             size: 8Gi
@@ -112,11 +205,58 @@
             limits:
               cpu: "0.25"
               memory: "1024Mi"
-            requests:    
+            requests:
               cpu: "0.25"
               memory: "512Mi"
+          datasources:
+            datasources.yaml:
+              apiVersion: 1
+              datasources:
+              - name: Prometheus
+                access: proxy
+                orgId: 1
+                type: prometheus
+                url: http://prometheus-server
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+              - name: 'default'
+                orgId: 1
+                folder: ''
+                type: file
+                disableDeletion: false
+                editable: true
+                options:
+                  path: /var/lib/grafana/dashboards/default
+          dashboards:
+            default:
+              kubernetes-cluster:
+                gnetId: 7249
+                revision: 1
+                datasource: Prometheus
+              nginx-ingress:
+                gnetId: 9614
+                revision: 51
+                datasource: Prometheus
+              kubernetes-cluster-monitoring-prometheus:
+                gnetId: 8588
+                revision: 1
+                datasource: Prometheus
+              node-exporter-full:
+                gnetId: 1860
+                revision: 15
+                datasource: Prometheus
+              redis-full:
+                gnetId: 763
+                revision: 3
+                datasource: Prometheus
+              mariadb-full:
+                gnetId: 7362
+                revision: 5
+                datasource: Prometheus                
 
-    # Install redis-ingestion
+    # Install Redis
     - name: K8S Helm .:. Install Redis
       helm:
         namespace: "{{ item[0] }}"
@@ -131,13 +271,11 @@
         host: "{{ clusterIP.stdout }}"
         values: 
           image:
-            repository: "{{ wai_redis_base_image }}"
-            tag: "{{ wai_redis_base_image_tag }}"
-          configmap:
-            - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
+            repository: "{{ wai_redis_image }}"
+            tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_redis_image_tag }}"
           cluster:
             enabled: true
-            slaveCount: 2
+            slaveCount: "{{ wai_redis_slave_count }}"
           usePassword: true
           existingSecret: redis-master-secret
           existingSecretPasswordKey: "{{ item[1] }}-password"
@@ -152,6 +290,10 @@
                 cpu: 100m
                 memory: 128Mi
           master:
+            extraFlags:
+              - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
+              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '2000' }}mb"
+              - "--maxmemory-policy noeviction"
             persistence:
               enabled: true
               storageClass: storage-heketi
@@ -159,11 +301,15 @@
             resources:
               limits:
                 cpu: 250m
-                memory: 4Gi
+                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '2Gi' }}"
               requests:
                 cpu: 250m
-                memory: 4Gi
+                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '1Gi' }}"
           slave:
+            extraFlags:
+              - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
+              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '2000' }}mb"
+              - "--maxmemory-policy noeviction"
             persistence:
               enabled: true
               storageClass: storage-heketi
@@ -171,11 +317,12 @@
             resources:
               limits:
                 cpu: 250m
-                memory: 4Gi
+                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '2Gi' }}"
               requests:
                 cpu: 250m
-                memory: 4Gi
+                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '1Gi' }}"
           sentinel:
+            usePassword: false
             enabled: true
             masterSet: "{{ item[1] }}-master"
             downAfterMilliseconds: 5000
@@ -191,16 +338,101 @@
         - "{{ wai_k8s_namespaces }}" 
         - ["ingestion-redis", "application-redis"]
 
+    # Install IPA Redis Search
+    - name: K8S Helm .:. Install IPA Redisearch
+      helm:
+        namespace: "{{ item }}"
+        name: "ipa-redisearch-{{ item }}"
+        chart:
+          name: redis
+          source:
+            type: git
+            location: https://github.com/helm/charts.git
+            path: stable/redis
+        state: present
+        host: "{{ clusterIP.stdout }}"
+        values: 
+          image:
+            repository: "{{ wai_ipa_redisearch_image }}"
+            tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_ipa_redisearch_image_tag }}"
+          cluster:
+            enabled: true
+            slaveCount: 2
+          usePassword: true
+          existingSecret: redis-master-secret
+          existingSecretPasswordKey: ipa-redisearch-password
+          fullnameOverride: ipa-redisearch
+          securityContext:
+            runAsUser: 0
+          metrics:
+            enabled: true
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+          master:
+            persistence:
+              enabled: true
+              storageClass: storage-heketi
+              size: 2Gi
+            resources:
+              limits:
+                cpu: 250m
+                memory: 2Gi
+              requests:
+                cpu: 250m
+                memory: 1Gi
+            extraFlags:
+              - "--maxmemory 2000mb"
+              - "--maxmemory-policy noeviction"
+          slave:
+            persistence:
+              enabled: true
+              storageClass: storage-heketi
+              size: 2Gi
+            resources:
+              limits:
+                cpu: 250m
+                memory: 2Gi
+              requests:
+                cpu: 250m
+                memory: 1Gi
+            extraFlags:
+              - "--maxmemory 2000mb"
+              - "--maxmemory-policy noeviction"
+          sentinel:
+            usePassword: false
+            enabled: true
+            masterSet: "ipa-redisearch-master"
+            downAfterMilliseconds: 5000
+            failoverTimeout: 5000
+            resources:
+              limits:
+                cpu: 250m
+                memory: 512Mi
+              requests:
+                cpu: 250m
+                memory: 512Mi
+      with_items:
+        - "{{ wai_k8s_namespaces }}" 
+
     # At the end.
     - name: K8S Helm .:. Prepare cluster issuer
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
-        src: k8s/cluster-issuer.yml.j2
+        dest: "{{ wai_k8s_deployment_dir }}/99_cluster-issuer.yml"
+        src: k8s/helm/cluster-issuer.yml.j2
 
     - name: K8S Helm .:. Deploy cluster issuer
       kube:
         name: "k8s-deployment"
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
-        filename: "{{ wai_k8s_deployment_dir }}/cluster-issuer.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/99_cluster-issuer.yml"
 
+    - name: K8S Helm .:. Cleanup
+      file:
+        state: absent
+        path: "{{ wai_k8s_deployment_dir }}/helm/"

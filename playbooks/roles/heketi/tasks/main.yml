@@ -116,7 +116,7 @@
   when: heketi_first_node is defined and heketi_first_node
 
 - name: Heketi .:. Create topology
-  shell: '{{ heketi_home }}/heketi-cli topology load --json={{ heketi_home }}/topology.json --user admin --secret {{ heketi_secrets.admin }}'
+  shell: "{{ heketi_home }}/heketi-cli topology load --json={{ heketi_home }}/topology.json --user admin --secret {{ heketi_secrets.admin }} -s {{ 'https' if heketi_enable_tls == true else 'http' }}://{{ hostvars[ansible_hostname].ansible_default_ipv4.address }}:{{ heketi_port }}"
   no_log: true
   become: yes
   become_user: '{{ heketi_user }}'

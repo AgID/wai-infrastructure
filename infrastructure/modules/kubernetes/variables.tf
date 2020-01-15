@@ -55,6 +55,12 @@ variable "k8s_master_instance_groups" {
   description = "Groups in kubernetes master instances metadata"
 }
 
+# K8S master security rules
+variable "k8s_master_sec_rules" {
+  type        = list
+  description = "Kubernetes master security rules"
+}
+
 # K8S master assigned floating IPs
 variable "k8s_master_floatingips" {
   type        = list(string)
@@ -73,23 +79,38 @@ variable "k8s_worker_instance_groups" {
   description = "Groups in kubernetes worker instances metadata"
 }
 
+# K8S worker security rules
+variable "k8s_worker_sec_rules" {
+  type        = list
+  description = "Kubernetes worker security rules"
+}
+
+# K8S MetalLB address pairs
+variable "k8s_metallb_address_pairs" {
+  type        = list
+  description = "Kubernetes MetalLB address pairs"
+}
+
 # K8S worker assigned floating IPs
 variable "k8s_worker_floatingips" {
   type        = list(string)
   description = "Kubernetes worker assigned floating IP addresses"
 }
 
-# K8S worker assigned floating IPs
-variable "k8s_worker_load_balancers" {
-  type      = list(string)
-  default = ["production", "public-playground", "staging"]
+# K8S workerr load balanced ports
+variable "load_balancer_ports" {
+  type = list
+  description = "Load balancer ports"
+  default = []
 }
+
 
 locals {
   # Define resource names based on the following convention:
   # {project_name_prefix}-RESOURCE_TYPE
   k8s_master_security_group_name = "${var.project_name_prefix}-k8s-master-sg"
   k8s_worker_security_group_name = "${var.project_name_prefix}-k8s-worker-sg"
+  k8s_metallb_ports_group_name   = "${var.project_name_prefix}-k8s-metallb-port-sg"
   k8s_router_name                = "${var.project_name_prefix}-k8s-router"
   k8s_network_name               = "${var.project_name_prefix}-k8s-network"
   k8s_subnet_name                = "${var.project_name_prefix}-k8s-subnet"

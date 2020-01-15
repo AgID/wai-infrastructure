@@ -1,0 +1,170 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+  name: spid-idp
+  namespace: wai-stag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spid-idp
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: spid-idp
+    spec:
+      containers:
+      - image: italia/spid-testenv2:1.0.1
+        imagePullPolicy: IfNotPresent
+        name: spid-idp
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 250m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        volumeMounts:
+        - name: spid-configmap
+          mountPath: /app/conf
+        - name:  spid-config-volume
+          mountPath: /data
+      volumes:
+        - name: spid-configmap
+          configMap:
+            name: spid-configmap
+        - name: spid-config-volume
+          persistentVolumeClaim:
+            claimName: spid-idp-config-pvc
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: spid-configmap
+  namespace: wai-stag
+data:
+  config.yaml: |-
+    base_url: "https://spid.{{ wai_base_domain['wai-stag'] }}"
+    key_file: "conf/idp.key"
+    cert_file: "conf/idp.crt"
+    debug: true
+    host: 0.0.0.0
+    port: 8080
+    https: false
+    users_file: "/data/users.json"
+    can_add_user: true
+    database_admin_interface: false
+    show_response_options: true
+    metadata:
+      local:
+        - conf/sp_staging_idp.xml
+  idp.key: {{ spid_idp.crt }}
+  idp.crt: {{ spid_idp.key }}
+  sp_staging_idp.xml: |-
+    <?xml version="1.0"?>
+    <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+      xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://{{ wai_base_domain['wai-stag'] }}" ID="_681a637-6cd4-434f-92c3-4fed720b2ad8">
+      <md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
+        <md:KeyDescriptor use="signing">
+          <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+          <ds:X509Data>
+            <ds:X509Certificate>{{ wai_settings['wai-stag'].spid.crt }}</ds:X509Certificate>
+          </ds:X509Data>
+          </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:KeyDescriptor use="encryption">
+          <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+            <ds:X509Data>
+            <ds:X509Certificate>{{ wai_settings['wai-stag'].spid.crt }}</ds:X509Certificate>
+            </ds:X509Data>
+          </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://{{ wai_base_domain['wai-stag'] }}/spid/slo" />
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+        <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://{{ wai_base_domain['wai-stag'] }}/spid/acs" index="0" isDefault="true" />
+        <md:AttributeConsumingService index="1">
+          <md:ServiceName xml:lang="it">Nome del servizio</md:ServiceName>
+          <md:ServiceDescription xml:lang="it">Descrizione del servizio</md:ServiceDescription>
+          <md:RequestedAttribute Name="name" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="fiscalNumber" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="familyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="spidCode" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="gender" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="dateOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="countyOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="idCard" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="registeredOffice" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="email" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="digitalAddress" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="ivaCode" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="placeOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="companyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="mobilePhone" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="address" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+          <md:RequestedAttribute Name="expirationDate" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+        </md:AttributeConsumingService>
+      </md:SPSSODescriptor>
+      <md:Organization>
+        <md:OrganizationName xml:lang="it">WAI Staging</md:OrganizationName>
+        <md:OrganizationDisplayName xml:lang="it">AgID - WebAnalytics Italia - Staging</md:OrganizationDisplayName>
+        <md:OrganizationURL xml:lang="it">https://agid.it</md:OrganizationURL>
+      </md:Organization>
+    </md:EntityDescriptor>
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: spid-idp-config-pvc
+  namespace: wai-stag
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: storage-heketi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spid-idp-svc
+  namespace: wai-stag
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8080
+  selector:
+    app: spid-idp
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod
+  name: spid-idp-ingress
+  namespace: wai-stag
+spec:
+  rules:
+  - host: spid.{{ wai_settings['wai-stag'].spid.crt }}
+    http:
+      paths:
+      - backend:
+          serviceName: spid-idp-svc
+          servicePort: 8080
+        path: /
+  tls:
+  - hosts:
+    - spid.{{ wai_settings['wai-stag'].spid.crt }}
+    secretName: spid-idp-tls
