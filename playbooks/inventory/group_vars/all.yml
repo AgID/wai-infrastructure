@@ -64,6 +64,20 @@ wai_ip_addresses:
     public_ip: 131.1.241.131
     private_ip: 10.0.10.252
 
+# Mappinng between public ip address and internal load balancer
+# The following IP addresses are just placeholders and must be replaced with the real ones after all the private ip ports are created.
+wai_ip_addresses:
+  wai-prod:
+    public_ip: 1.1.1.1
+    private_ip: 1.1.1.1
+  wai-play:
+    public_ip: 1.1.1.1
+    private_ip: 1.1.1.1
+  wai-stag:
+    public_ip: 1.1.1.1
+    private_ip: 1.1.1.1
+
+
 # Helm 
 helm:
   cert_manager:
