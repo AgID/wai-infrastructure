@@ -200,15 +200,6 @@
     - kubernetes-deploy-helm
   import_playbook: k8s-helm-charts.yml
 
-  # Install metricbeat on kube-master nodes
-- hosts: kube-master
-  tags:
-    - install
-    - metricbeat-k8s
-    - production
-  roles:
-    - metricbeat
-
 # Enable apt automatic update
 - hosts: wai
   tasks:
