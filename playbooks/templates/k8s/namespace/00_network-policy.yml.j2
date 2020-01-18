@@ -64,8 +64,9 @@ spec:
   - ports:
     - port: 80
   egress:
+  # Allow connect to elastic
   - to:
-{% for es in  groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) %}
+{% for es in  wai_load_balancer[item].elastic %}
     - ipBlock:
         cidr: {{es}}/32
 {% endfor %}

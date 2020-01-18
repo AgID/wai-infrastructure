@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
@@ -136,7 +136,7 @@ metadata:
   namespace: wai-stag
 spec:
   rules:
-  - host: spid.{{ wai_settings['wai-stag'].spid.crt }}
+  - host: spid.{{ wai_base_domain['wai-stag'] }}
     http:
       paths:
       - backend:
@@ -145,5 +145,5 @@ spec:
         path: /
   tls:
   - hosts:
-    - spid.{{ wai_settings['wai-stag'].spid.crt }}
+    - spid.{{ wai_base_domain['wai-stag'] }}
     secretName: spid-idp-tls
