@@ -8,7 +8,7 @@
     # Base objects
     - name: K8S .:. Create destination directory
       file:
-        path: "{{ wai_k8s_deployment_dir }}"
+        path: "{{ wai_k8s_deployment_dir }}/helm"
         state: directory
 
       # Install pyhton3
@@ -43,19 +43,11 @@
     - name: K8S Helm .:. Install Cert-Manager requirements
       raw: "{{ wai_kubectl }} apply --validate=false -f {{ wai_k8s_deployment_dir }}/helm/crds.yaml"
 
+    - name: K8S Helm .:. Add Cert-Manager repo
+      raw: "helm repo add jetstack https://charts.jetstack.io"
+
     - name: K8S Helm .:. Install Cert-Manager
-      helm:
-        namespace: cert-manager
-        name: cert-manager
-        chart: 
-          name: cert-manager
-          version: "{{ helm.cert_manager.version }}"
-          source:
-            type: repo
-            location: https://charts.jetstack.io
-            path: jetstack/cert-manager
-        host: "{{ clusterIP.stdout }}"
-        state: present
+      raw: "helm install --name cert-manager --namespace cert-manager jetstack/cert-manager --version {{ helm.cert_manager.version }}"
 
     # Install Prometheus
     - name: K8S Helm .:. Install Prometheus
@@ -431,15 +423,19 @@
     # At the end.
     - name: K8S Helm .:. Prepare cluster issuer
       template:
-        dest: "{{ wai_k8s_deployment_dir }}/99_cluster-issuer.yml"
-        src: k8s/helm/cluster-issuer.yml.j2
+        dest: "{{ wai_k8s_deployment_dir }}/helm/01_cluster-issuer-{{ item }}.yml"
+        src: k8s/helm/01_cluster-issuer.yml.j2
+      with_items:
+        - "{{ wai_k8s_namespaces }}" 
 
     - name: K8S Helm .:. Deploy cluster issuer
       kube:
         name: "k8s-deployment"
         kubectl: "{{ wai_kubectl }}"
         state: "latest"
-        filename: "{{ wai_k8s_deployment_dir }}/99_cluster-issuer.yml"
+        filename: "{{ wai_k8s_deployment_dir }}/helm/01_cluster-issuer-{{ item }}.yml"
+      with_items:
+        - "{{ wai_k8s_namespaces }}" 
 
     - name: K8S Helm .:. Cleanup
       file:
