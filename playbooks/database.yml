@@ -2,7 +2,6 @@
 # Configure Matomo database
 - hosts:
     - galera-prod[0]
-    - galera-prod-slave[0]
     - galera-play[0]
     - mariadb-stag[0]
   tasks:
