@@ -67,6 +67,13 @@ variable "k8s_master_sec_rules" {
   default     = []
 }
 
+# K8S MetalLB security rules
+variable "k8s_metallb_port_sec_rules" {
+  type        = list
+  description = "Kubernetes MetalLB security rules"
+  default     = []
+}
+
 # K8S master assigned floating IPs
 variable "k8s_master_floatingips" {
   type        = list(string)

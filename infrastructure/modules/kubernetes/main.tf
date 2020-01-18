@@ -82,7 +82,7 @@ resource "openstack_networking_secgroup_v2" "k8s_metallb_ports_secgroup" {
 
 # Kubernetes MetalLB port security group rules
 resource "openstack_networking_secgroup_rule_v2" "k8s_metallb_ports_secgroup_rule" {
-  count             = var.enabled ? length(var.k8s_metallb_ports_sec_rules) : 0
+  count             = var.enabled ? length(var.k8s_metallb_port_sec_rules) : 0
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = var.k8s_metallb_port_sec_rules[count.index]["protocol"]

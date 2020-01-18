@@ -161,7 +161,7 @@ k8s_worker_sec_rules = [
 ]
 
 # K8S MetalLB ports security rules
-k8s_worker_sec_rules = [
+k8s_metallb_port_sec_rules = [
     {
         protocol = "tcp"
         from = 80
@@ -175,6 +175,7 @@ k8s_worker_sec_rules = [
         cidr = "0.0.0.0/0"
     }
 ]
+
 
 # K8S MetalLB owned addresses and corresponding floating IPs
 k8s_metallb_address_pairs = [
