@@ -190,6 +190,7 @@ resource "openstack_blockstorage_volume_v3" "k8s_worker_boot_volume" {
 
 # Kubernetes server group
 resource "openstack_compute_servergroup_v2" "k8s_server_group" {
+  count       = var.enabled ? 1 : 0
   name = "kubernetes-server-group"
   policies = ["anti-affinity"]
 }
@@ -218,7 +219,7 @@ resource "openstack_compute_instance_v2" "k8s_worker_instance" {
     groups       = join(", ", ["wai", element(var.k8s_worker_instance_groups, count.index)])
   }
   scheduler_hints  {
-    group = openstack_compute_servergroup_v2.k8s_server_group.id
+    group = openstack_compute_servergroup_v2.k8s_server_group.0.id
   }
 }
 

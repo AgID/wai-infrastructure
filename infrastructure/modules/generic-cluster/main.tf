@@ -65,6 +65,7 @@ resource "openstack_blockstorage_volume_v3" "cluster_boot_volume" {
 
 # Cluster server group
 resource "openstack_compute_servergroup_v2" "server_group" {
+  count       = var.enabled ? 1 : 0
   name = format("%s-server-group", local.cluster_node_name)
   policies = ["anti-affinity"]
 }
@@ -90,7 +91,7 @@ resource "openstack_compute_instance_v2" "cluster_instance" {
     groups       = join(", ", ["wai", element(var.cluster_instance_groups, count.index)])
   }
   scheduler_hints {
-    group = openstack_compute_servergroup_v2.server_group.id
+    group = openstack_compute_servergroup_v2.server_group.0.id
   }
 }
 
