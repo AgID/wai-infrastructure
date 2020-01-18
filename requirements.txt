@@ -1,5 +1,5 @@
 python-openstackclient==3.17.0
 python-terraform==0.10.0
-ansible==2.7.8
+ansible==2.7.12
 passlib==1.7.1
 termcolor==1.1.0

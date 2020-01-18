@@ -117,7 +117,7 @@ mediante il playbook esterno
 clonato dal suo repository:
 
 ```bash
-$ git clone --branch v2.10.4 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
+$ git clone --branch v2.12.0 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
 ```
 
 ### Ruoli
