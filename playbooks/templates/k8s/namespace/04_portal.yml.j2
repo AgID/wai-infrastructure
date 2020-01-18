@@ -105,6 +105,7 @@ data:
     {%- for i in range(0, wai_redis_slave_count) -%}
       ,tcp://application-redis:26379
     {%- endfor %}
+
     REDIS_SENTINEL_SET=application-redis-master
     REDIS_INDEXES_USE_SENTINELS=true
 
