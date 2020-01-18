@@ -31,18 +31,18 @@ wai_base_domain:
 wai_load_balancer:
   wai-prod:
     elastic:
-      - 10.0.30.101
+      - 10.0.30.7
     rdbms:
-      - 10.0.20.101
-      - 10.0.20.104
+      - 10.0.20.6
+      - 10.0.20.17
   wai-play:
     elastic:
-      - 10.0.30.101
+      - 10.0.30.7
     rdbms:
-      - 10.0.200.101
+      - 10.0.200.15
   wai-stag:
     elastic:
-      - 10.0.30.101
+      - 10.0.30.7
     rdbms:
       - 10.0.100.101
 
@@ -63,20 +63,6 @@ wai_ip_addresses:
   wai-stag:
     public_ip: 131.1.241.131
     private_ip: 10.0.10.252
-
-# Mappinng between public ip address and internal load balancer
-# The following IP addresses are just placeholders and must be replaced with the real ones after all the private ip ports are created.
-wai_ip_addresses:
-  wai-prod:
-    public_ip: 1.1.1.1
-    private_ip: 1.1.1.1
-  wai-play:
-    public_ip: 1.1.1.1
-    private_ip: 1.1.1.1
-  wai-stag:
-    public_ip: 1.1.1.1
-    private_ip: 1.1.1.1
-
 
 # Helm 
 helm:
@@ -101,7 +87,7 @@ wai_ipa_redisearch_image_tag: 5.0.3-dev-4
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
-wai_portal_image_tag: dev-20
+wai_portal_image_tag: dev-25
 wai_portal_matomo_sub_path: /matomo
 wai_portal_environments:
   wai-prod: production
@@ -141,9 +127,6 @@ metricbeat_output_elastic: '{{ groups["elastic"] | map("extract", hostvars, ["an
 
 # Override path used to store Docker data in kubespray all\docker.yml
 docker_daemon_graph: "/opt/data/docker"
-
-# Redis
-redis_image_version: 5.0.3
 
 # GlusterFS
 gluster_apt_repo:  ppa:gluster/glusterfs-5
