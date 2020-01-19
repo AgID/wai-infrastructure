@@ -24,7 +24,7 @@ spec:
         imagePullPolicy: IfNotPresent
         name: spid-idp
         ports:
-        - containerPort: 8080
+        - containerPort: 80
           name: http
           protocol: TCP
         resources:
@@ -59,7 +59,7 @@ data:
     cert_file: "conf/idp.crt"
     debug: true
     host: 0.0.0.0
-    port: 8080
+    port: 80
     https: false
     users_file: "/data/users.json"
     can_add_user: true
@@ -135,7 +135,6 @@ spec:
   - name: http
     protocol: TCP
     port: 80
-    targetPort: 8080
   selector:
     app: spid-idp
 ---
@@ -154,7 +153,7 @@ spec:
       paths:
       - backend:
           serviceName: spid-idp-svc
-          servicePort: 8080
+          servicePort: 80
         path: /
   tls:
   - hosts:
