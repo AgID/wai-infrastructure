@@ -103,7 +103,7 @@
             - job_name: wai-infrastructure
               static_configs:
               - targets:
-            {{ groups['all'] | difference(groups['k8s-cluster']) | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | map('regex_replace', '^(.*)$','\1:9100') | list | to_nice_yaml | indent(4, true) }}
+            {{ groups['wai'] | difference(groups['k8s-cluster']) | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | map('regex_replace', '^(.*)$','\1:9100') | list | to_nice_yaml | indent(4, true) }}
             - job_name: wai-mariadb
               static_configs:
               - targets:
