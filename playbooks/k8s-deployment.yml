@@ -5,6 +5,11 @@
     - include_vars:
         file: password.yml
 
+    - name: K8S .:. Add label to worker nodes
+      raw: "{{ wai_kubectl }} label nodes {{ item }} role=metallb"
+      with_inventory_hostnames:
+      - kube-node
+
     # Base objects
     - name: K8S .:. Create destination directories
       file:
