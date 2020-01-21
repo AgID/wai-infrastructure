@@ -14,6 +14,8 @@ spec:
   serviceName: matomo-worker
   template:
     metadata:
+      annotations:
+        releaseDate: now
       labels:
         app: matomo-worker
     spec:
@@ -29,6 +31,7 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       containers:
       - image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         name: matomo-worker
         resources:
           limits:

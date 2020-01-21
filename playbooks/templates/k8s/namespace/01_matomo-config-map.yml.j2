@@ -6,6 +6,13 @@ metadata:
   name: matomo-php-config
   namespace: {{ item }}
 data:
+  entrypoint.sh: |-
+    #!/bin/sh
+    # Copy matomo content to emptydir
+    cp -a /var/www/html/* /html/
+    # Copy config.ini.php.orig to matomo config folder
+    cp /tmp/config.ini.php.orig /html/config/config.ini.php
+
   config.ini.php: |-
     [database]
     host = "{{ wai_load_balancer[item].rdbms[0] }}"

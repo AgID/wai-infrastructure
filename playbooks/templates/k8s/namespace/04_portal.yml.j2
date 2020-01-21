@@ -293,6 +293,8 @@ spec:
       app: portal
   template:
     metadata:
+      annotations:
+        releaseDate: now
       labels:
         app: portal
     spec:
@@ -309,6 +311,7 @@ spec:
       initContainers:
       - name: copy
         image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         command: ["sh", "-c", "cp -a /var/www/html/* /html/"]
         resources:
           limits:
@@ -319,6 +322,7 @@ spec:
           name: html
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         name: portal
         resources:
           limits:
