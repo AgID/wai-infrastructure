@@ -176,7 +176,6 @@ k8s_metallb_port_sec_rules = [
     }
 ]
 
-
 # K8S MetalLB owned addresses and corresponding floating IPs
 k8s_metallb_address_pairs = [
     {
@@ -190,7 +189,7 @@ k8s_metallb_address_pairs = [
 ]
 
 # K8S worker assigned floating IPs  (uncomment if needed)
-#k8s_master_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
+#k8s_worker_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
 
 # Galera slug name
 galera_slug = "galera"
@@ -239,19 +238,13 @@ galera_sec_rules = [
     {
         protocol = "tcp"
         from = 4567
-        to = 4567
+        to = 4568
         cidr = "<GALERA_CIDR>"
     },
     {
         protocol = "udp"
         from = 4567
         to = 4567
-        cidr = "<GALERA_CIDR>"
-    },
-    {
-        protocol = "tcp"
-        from = 4568
-        to = 4568
         cidr = "<GALERA_CIDR>"
     },
     {
@@ -297,7 +290,7 @@ elastic_instance = {
 # Each item in the list will be added to the corresponding instance number
 # i.e. the first item in the list will be added to the first instance and so on
 # if there are more instances than items in the list it will restart from the first one
-elastic_instance_groups = ["elastic", "elastic", "elastic, kibana"]
+elastic_instance_groups = ["elastic, kibana", "elastic", "elastic"]
 
 # Elastic security rules
 # See https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html
@@ -327,11 +320,19 @@ elastic_sec_rules = [
         to = 9300
         cidr = "<ELASTIC_CIDR>"
     },
+    # Kibana via VPN
     {
         protocol = "tcp"
         from = 5601
         to = 5601
         cidr = "<CIDR>"
+    },
+    # Fluend from k8s hosts
+    {
+        protocol = "tcp"
+        from = 9200
+        to = 9200
+        cidr = "<K8S_CIDR>"
     },
     # Prometheus Node Exporter
     {
@@ -394,15 +395,33 @@ gluster_sec_rules = [
     },
     {
         protocol = "tcp"
+        from = 24007
+        to = 24008
+        cidr = "<K8S_CIDR>"
+    },
+    {
+        protocol = "udp"
+        from = 24007
+        to = 24008
+        cidr = "<K8S_CIDR>"
+    },
+    {
+        protocol = "tcp"
         from = 49152
         to = 49652
         cidr = "<GLUSTER_CIDR>"
     },
-    # Heketi
     {
         protocol = "tcp"
-        from = 8080
-        to = 8080
+        from = 49152
+        to = 49652
+        cidr = "<K8S_CIDR>"
+    },
+    # Heketi from k8s
+    {
+        protocol = "tcp"
+        from = 8443
+        to = 8443
         cidr = "<K8S_CIDR>"
     },
     # Prometheus Node Exporter
