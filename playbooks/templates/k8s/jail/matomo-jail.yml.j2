@@ -35,7 +35,7 @@ spec:
       - name: copy
         image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
         imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
-        command: ["sh", "-c", "/entrypoint.sh"]
+        command: ["sh", "-c", ". /entrypoint.sh"]
         resources:
           limits:
             cpu: 0.1
