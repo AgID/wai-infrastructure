@@ -102,9 +102,6 @@ wai_redis_slave_count: 2
 wai_matomo_image: webanalyticsitalia/wai-matomo
 wai_matomo_image_tag: dev-7
 
-wai_kube_state_metrics_version: v1.5.0
-wai_kube_state_metrics_output_dir: kube-state-metrics-1.5.0
-wai_kube_state_metrics: 'https://codeload.github.com/kubernetes/kube-state-metrics/zip/{{ wai_kube_state_metrics_version }}'
 wai_kubectl: /usr/local/bin/kubectl
 
 # Base K8S Node port for http
