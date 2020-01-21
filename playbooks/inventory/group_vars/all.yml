@@ -127,10 +127,10 @@ gluster_apt_repo:  ppa:gluster/glusterfs-5
 gluster_package_version: 5.*
 
 # MariaDB repo info
-mariadb_repo: "deb [arch=amd64,i386,ppc64el] http://ftp.heanet.ie/mirrors/mariadb/repo/{{ mariadb_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main"
+mariadb_repo:  "deb [arch=amd64,i386,ppc64el] http://mariadb.mirrors.ovh.net/MariaDB/repo/{{ mariadb_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main"
 mariadb_repo_key: '0xF1656F24C74CD1D8'
 mariadb_repo_keyserver: 'keyserver.ubuntu.com'
-mariadb_repo_origin: ftp.heanet.ie
+mariadb_repo_origin: mariadb.mirrors.ovh.net
 mariadb_version: '10.4'
 
 # Prometheus Node Exporter override vars
