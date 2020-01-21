@@ -111,16 +111,13 @@ wai_base_http_port: 30080
 wai_base_https_port: 30443
 
 # Elastic version used for Elasticsearch, Kibana and Beats.
-# These vars override default settings of role elastic.elasticsearch and are used in wai roles kibana and metricbeat
+# These vars override default settings of role elastic.elasticsearch and are used in wai roles kibana 
 es_version: 7.5.1
 es_major_version: 7.x
 es_apt_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
 es_apt_url: "deb https://artifacts.elastic.co/packages/{{es_major_version}}/apt stable main"
 
 kibana_elastic_hosts: "https://{{ hostvars[groups['elastic'][0]].ansible_default_ipv4.address }}:9200"
-
-# Metricbeat output
-metricbeat_output_elastic: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list | to_json }}'
 
 # Override path used to store Docker data in kubespray all\docker.yml
 docker_daemon_graph: "/opt/data/docker"

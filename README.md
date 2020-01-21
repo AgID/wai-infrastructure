@@ -129,8 +129,6 @@ ruoli:
 - *elastic.elasticsearch*: Installazione di Elasticsearch tramite i ruoli
   installati con `ansible-galaxy`;
 - *kibana*: Installazione di [Kibana](https://www.elastic.co/products/kibana);
-- *metricbeat*: Installazione di
-  [Metricbeat](https://www.elastic.co/products/beats/metricbeat);
 - *glusterfs*: Installazione di [GlusterFS](https://www.gluster.org/)
   **DA ULTIMARE CONFIGURAZIONE PEER**
 - *mariadb*: Installazione di [MariaDB](https://mariadb.com/)
