@@ -49,7 +49,7 @@ spec:
         - name: {{ matomo_name }}-config
           mountPath: /entrypoint.sh
           subPath: entrypoint.sh
-        - name: {{ matomo-name }}-extra-content
+        - name: {{ matomo_name }}-extra-content
           mountPath: /opt/extra-content
       containers:
       - image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
@@ -100,7 +100,7 @@ spec:
         - name: {{ matomo_name }}-nginx-conf
           configMap: 
             name: {{ matomo_name }}-nginx-configmap
-        - name: {{ matomo-name }}-extra-content
+        - name: {{ matomo_name }}-extra-content
           persistentVolumeClaim:
             claimName: matomo-extra-content-pvc
         - name: html
