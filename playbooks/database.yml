@@ -42,8 +42,8 @@
       vars:
         item: "{{ wai_environment }}"
       template:
-        src: "mariadb/matomo_3_13_0.sql.j2"
-        dest: "/root/matomo_3_13_0.sql"
+        src: "mariadb/matomo_3_13_1.sql.j2"
+        dest: "/root/matomo_3_13_1.sql"
 
     - name: Database .:. Prepare wai template sql script
       template:
@@ -65,7 +65,7 @@
         name: matomo
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
         state: import
-        target: "/root/matomo_3_13_0.sql"
+        target: "/root/matomo_3_13_1.sql"
       when: matomo_db_status.rc != 0
 
     - name: Database .:. Create WAI database
