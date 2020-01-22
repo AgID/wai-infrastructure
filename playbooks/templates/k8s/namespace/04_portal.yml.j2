@@ -4,6 +4,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
     kubernetes.io/ingress.class: nginx-{{ item }}
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
   name: portal
   namespace: {{ item }}
 spec:
@@ -18,6 +19,7 @@ spec:
   tls:
   - hosts:
     - {{ wai_base_domain[item] }}
+    - www.{{ wai_base_domain[item] }}
     secretName: portal-ingress-acme-tls
 ---
 apiVersion: extensions/v1beta1
@@ -27,6 +29,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     kubernetes.io/ingress.class: nginx-{{ item }}
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
   name: matomo
   namespace: {{ item }}
 spec:
@@ -41,6 +44,7 @@ spec:
   tls:
   - hosts:
     - {{ wai_base_domain[item] }}
+    - www.{{ wai_base_domain[item] }}
     secretName: portal-ingress-acme-tls
 ---  
 kind: ConfigMap
