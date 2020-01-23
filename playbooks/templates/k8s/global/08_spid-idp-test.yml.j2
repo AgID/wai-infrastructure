@@ -143,7 +143,13 @@ kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-wai-stag
-    kubernetes.io/ingress.class: nginx-wai-stag    
+    kubernetes.io/ingress.class: nginx-wai-stag
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header Allow "GET, POST" always;
+
+      if ($request_method !~ ^(GET|POST)$) {
+        return 405;
+      }
   name: spid-idp
   namespace: wai-stag
 spec:
