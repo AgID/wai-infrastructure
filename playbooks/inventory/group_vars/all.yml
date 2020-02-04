@@ -83,7 +83,7 @@ wai_k8s_resource_quota:
 
 # IPA Redisearch image
 wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
-wai_ipa_redisearch_image_tag: 5.0.3-dev-4
+wai_ipa_redisearch_image_tag: 5.0.7-dev-4
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
@@ -94,8 +94,8 @@ wai_portal_environments:
   wai-play: public-playground
   wai-stag: staging
 # RediSearch Image
-wai_redis_image: webanalyticsitalia/wai-redis-search
-wai_redis_image_tag: 5.0.3-dev-1
+wai_redis_image: webanalyticsitalia/wai-redisearch
+wai_redis_image_tag: 5.0.7-dev-1
 wai_redis_slave_count: 2
 
 # Matomo Image
@@ -121,6 +121,9 @@ kibana_elastic_hosts: "https://{{ hostvars[groups['elastic'][0]].ansible_default
 
 # Override path used to store Docker data in kubespray all\docker.yml
 docker_daemon_graph: "/opt/data/docker"
+
+# Redis
+redis_image_version: 5.0.7
 
 # GlusterFS
 gluster_apt_repo:  ppa:gluster/glusterfs-5
