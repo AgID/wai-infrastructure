@@ -91,7 +91,7 @@ spec:
     ports:
     - protocol: TCP
       port: 9200
-  # Allow connect to mariadb
+  # Allow connect to galera/mariadb
   - to:
 {% for host in  wai_load_balancer[item].rdbms %}
     - ipBlock:
