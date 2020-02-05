@@ -87,7 +87,7 @@ wai_ipa_redisearch_image_tag: 5.0.3-dev-4
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
-wai_portal_image_tag: dev-26
+wai_portal_image_tag: dev-27
 wai_portal_matomo_sub_path: /matomo
 wai_portal_environments:
   wai-prod: production
@@ -100,7 +100,7 @@ wai_redis_slave_count: 2
 
 # Matomo Image
 wai_matomo_image: webanalyticsitalia/wai-matomo
-wai_matomo_image_tag: dev-8
+wai_matomo_image_tag: dev-10
 
 wai_kubectl: /usr/local/bin/kubectl
 
