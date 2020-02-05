@@ -29,7 +29,7 @@ data:
     {%- endif %}
 
     [General]
-    salt = "{{ ansible_date_time.iso8601_micro | md5 }}"
+    salt = "{{ matomo_vars.salt[item] }}"
     trusted_hosts[] = "localhost"
     trusted_hosts[] = "127.0.0.1"
     trusted_hosts[] = "{{ wai_base_domain[item] }}"
