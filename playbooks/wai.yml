@@ -30,7 +30,7 @@
         - install
         - infrastructure
         - wai-infrastructure-ca
-      include_tasks: wai-infrastructure-ca.yml
+      import_tasks: wai-infrastructure-ca.yml
 
 # Infrastructure requirements
 - hosts: wai

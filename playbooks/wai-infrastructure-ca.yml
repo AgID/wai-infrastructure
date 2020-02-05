@@ -1,96 +1,98 @@
-- tasks:
-    - include_vars:
-        file: password.yml
+- include_vars:
+    file: password.yml
 
-    - name: WAI Infrastructure CA .:. Ensure folders
-      become: true
-      file:
-        path: '{{ item }}' 
-        state: directory
-      with_items:
-        - "{{ wai_infrastructure_ca.root_folder }}/crt"
-        - "{{ wai_infrastructure_ca.root_folder }}/key"
-        - "{{ wai_infrastructure_ca.root_folder }}/csr"
+- name: WAI Infrastructure CA .:. Ensure folders
+  become: true
+  file:
+    path: '{{ item }}' 
+    state: directory
+  with_items:
+    - "{{ wai_infrastructure_ca.root_folder }}/crt"
+    - "{{ wai_infrastructure_ca.root_folder }}/key"
+    - "{{ wai_infrastructure_ca.root_folder }}/csr"
 
-    - name: WAI Infrastructure CA .:. Create root CA private key
-      become: true
-      openssl_privatekey:
-        path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
-        passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
-        cipher: des3
-        size: 4096
+- name: WAI Infrastructure CA .:. Create root CA private key
+  become: true
+  openssl_privatekey:
+    path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
+    passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
+    cipher: des3
+    size: 4096
 
-    - name: WAI Infrastructure CA .:. Create root CA csr
-      become: true
-      openssl_csr:
-        path: "{{ wai_infrastructure_ca.root_folder }}/csr/wai-ca.csr"
-        privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
-        privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
-        country_name: IT
-        state_or_province_name: Roma
-        organization_name: AGID
-        email_address: protocollo@pec.agid.gov.it
-        common_name: AGID - Web Analytics Italia - Root CA
-        basic_constraints: "CA:true"
-        basic_constraints_critical: true
-        key_usage:
-          - keyCertSign
-          - cRLSign
-          - digitalSignature
+- name: WAI Infrastructure CA .:. Create root CA csr
+  become: true
+  openssl_csr:
+    path: "{{ wai_infrastructure_ca.root_folder }}/csr/wai-ca.csr"
+    privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
+    privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
+    country_name: IT
+    state_or_province_name: Roma
+    organization_name: AGID
+    email_address: protocollo@pec.agid.gov.it
+    common_name: AGID - Web Analytics Italia - Root CA
+    basic_constraints: "CA:true"
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+      - cRLSign
+      - digitalSignature
 
-    - name: WAI Infrastructure CA .:. Create root CA certificate
-      become: true
-      openssl_certificate:
-        path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
-        provider: selfsigned 
-        subject_alt_name_strict: false
-        csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/wai-ca.csr"
-        privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
-        privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
-        valid_in: 315360000
+- name: WAI Infrastructure CA .:. Create root CA certificate
+  become: true
+  openssl_certificate:
+    path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
+    provider: selfsigned 
+    subject_alt_name_strict: false
+    csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/wai-ca.csr"
+    privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
+    privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
+    valid_in: 315360000
 
-    - name: WAI Infrastructure CA .:. Set facts
-      set_fact:
-        pki_hosts: "{{ pki_hosts | default([]) + [ { 'hostname': item, 'ip' : hostvars[item].ansible_default_ipv4.address }  ] }}"
-      with_inventory_hostnames:
-        - wai
+- name: WAI Infrastructure CA .:. Set facts
+  set_fact:
+    pki_hosts: "{{ pki_hosts | default([]) + [ { 'hostname': item, 'ip' : hostvars[item].ansible_default_ipv4.address }  ] }}"
+  with_inventory_hostnames:
+    - wai
 
-    - name: WAI Infrastructure CA .:. Create private key
-      become: true
-      openssl_privatekey:
-        path: "{{ wai_infrastructure_ca.root_folder }}/key/{{ item.hostname }}.key"
-        size: 4096
-        mode: 0644
-      with_items: "{{ pki_hosts }}"
+- name: WAI Infrastructure CA .:. Create private key
+  become: true
+  openssl_privatekey:
+    path: "{{ wai_infrastructure_ca.root_folder }}/key/{{ item.hostname }}.key"
+    size: 4096
+    mode: 0644
+  with_items: "{{ pki_hosts }}"
+  when: pki_hosts is defined
 
-    - name: WAI Infrastructure CA  .:. Create  hosts csr
-      become: true
-      openssl_csr:
-        path: "{{ wai_infrastructure_ca.root_folder }}/csr/{{ item.hostname }}.csr"
-        privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/{{ item.hostname }}.key"
-        country_name: IT
-        state_or_province_name: Roma
-        organization_name: AGID
-        email_address: protocollo@pec.agid.gov.it
-        common_name: "{{ item.hostname }}"
-        subject_alt_name:
-          - "IP:{{ item.ip }}"
-        key_usage:
-          - digitalSignature
-          - keyAgreement
-        extended_key_usage:
-          - serverAuth
-      with_items: "{{ pki_hosts }}"
+- name: WAI Infrastructure CA  .:. Create  hosts csr
+  become: true
+  openssl_csr:
+    path: "{{ wai_infrastructure_ca.root_folder }}/csr/{{ item.hostname }}.csr"
+    privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/{{ item.hostname }}.key"
+    country_name: IT
+    state_or_province_name: Roma
+    organization_name: AGID
+    email_address: protocollo@pec.agid.gov.it
+    common_name: "{{ item.hostname }}"
+    subject_alt_name:
+      - "IP:{{ item.ip }}"
+    key_usage:
+      - digitalSignature
+      - keyAgreement
+    extended_key_usage:
+      - serverAuth
+  with_items: "{{ pki_hosts }}"
+  when: pki_hosts is defined
 
-    - name: WAI Infrastructure CA .:.  Create  hosts certificate
-      become: true
-      openssl_certificate:
-        path: "{{ wai_infrastructure_ca.root_folder }}/crt/{{ item.hostname }}.crt"
-        provider: ownca 
-        subject_alt_name_strict: false
-        csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/{{ item.hostname }}.csr"
-        ownca_path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
-        ownca_privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
-        ownca_privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
-        valid_in: 315360000
-      with_items: "{{ pki_hosts }}"
+- name: WAI Infrastructure CA .:.  Create  hosts certificate
+  become: true
+  openssl_certificate:
+    path: "{{ wai_infrastructure_ca.root_folder }}/crt/{{ item.hostname }}.crt"
+    provider: ownca 
+    subject_alt_name_strict: false
+    csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/{{ item.hostname }}.csr"
+    ownca_path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
+    ownca_privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
+    ownca_privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
+    valid_in: 315360000
+  with_items: "{{ pki_hosts }}"
+  when: pki_hosts is defined
