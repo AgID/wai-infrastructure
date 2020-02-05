@@ -10,86 +10,14 @@
       with_inventory_hostnames:
       - kube-node
 
-    # Base objects
-    - name: K8S .:. Create destination directories
-      file:
-        path: "{{ wai_k8s_deployment_dir }}/{{ item }}"
-        state: directory
-      with_items: "{{ wai_k8s_namespaces }}"
-
-    - name: K8S .:. Prepare cluster object deployment
-      template:
-        src: "{{ item }}"
-        dest : "{{ wai_k8s_deployment_dir }}/{{ item | basename | regex_replace('.j2','') }}"
-      with_fileglob:
-        - templates/k8s/global/*.j2
-
-    - name: K8S .:. Calculate namespace dependant objects
-      set_fact:
-        namespace_file: "{{ namespace_file | default([]) + [ item ] }}"
-      with_fileglob:
-        - templates/k8s/namespace/*.j2
-
-    - name: K8S .:. Prepare namespace dependant deployment
-      vars:
-        item: "{{ filevar[0] }}"
-      template:      
-        src: "{{ filevar[1] }}"
-        dest : "{{ wai_k8s_deployment_dir }}/{{ filevar[0] }}/{{ filevar[1] | basename | regex_replace('.j2','') }}"
-      with_nested:
-        - "{{ wai_k8s_namespaces }}"
-        - "{{ namespace_file }}"
-      loop_control:
-        loop_var: filevar
-
-    # Matomo Ingestion
-    - name: K8S .:. Prepare Matomo Ingestion deployment file
-      vars:
-        matomo_app_filename: "/matomo.php"
-        matomo_name: "matomo-ingestion"
-        matomo_pod_size_index: "matomo-ingestion"
-        matomo_nginx_jailed: true
-        matomo_create_ingress: true
-        matomo_enable_session: false
-        matomo_ingress_fqdn_index: "ingestion"
-      template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-ingestion.yml"
-        src: k8s/jail/matomo-jail.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}" 
-
-    # Matomo API
-    - name: K8S .:. Prepare Matomo API deployment file
-      vars:
-        matomo_app_filename: "/index.php"
-        matomo_name: "matomo-api"
-        matomo_pod_size_index: "matomo-api"
-        matomo_nginx_jailed: true
-        matomo_create_ingress: false
-        matomo_enable_session: false
-      template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-api.yml"
-        src: k8s/jail/matomo-jail.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}" 
-
-    # Matomo Portal
-    - name: K8S .:. Prepare Matomo portal deployment file
-      vars:
-        matomo_app_filename: "/index.php"
-        matomo_name: "matomo"
-        matomo_pod_size_index: "matomo-portal"
-        matomo_nginx_jailed: false
-        matomo_create_ingress: false
-        matomo_enable_session: true
-      template:
-        dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-portal.yml"
-        src: k8s/jail/matomo-jail.yml.j2
-      with_items: "{{ wai_k8s_namespaces }}" 
+    - name: K8S .:. Compile resources templates
+      include_tasks: k8s-templates.yml
 
     - name: K8S .:. Enumerate deployment files
       shell: 'find {{ wai_k8s_deployment_dir }} -type f | sort'
       register: deployment_files
 
-    - name: K8S .:. Deploy WebAnalytics Italia 
+    - name: K8S .:. Deploy Web Analytics Italia
       kube:
         kubectl: "{{ wai_kubectl }}"
         filename: "{{ item }}"
