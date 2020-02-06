@@ -77,7 +77,6 @@ data:
   idp.crt: |-
 {{ test_env_idp.crt | indent( width=4, indentfirst=True) }}
 
-  
 {% for ns in wai_k8s_namespaces %}
   sp_{{ ns }}_meta.xml: |-
     <?xml version="1.0"?>
@@ -93,8 +92,10 @@ data:
         </md:KeyDescriptor>
         <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://{{ wai_base_domain[ns] }}/spid/logout" />
         <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
-        <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://{{ wai_base_domain[ns] }}/spid/acs" index="0" isDefault="true" />
-        <md:AttributeConsumingService index="0">
+        <md:AssertionConsumerService
+          Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://{{ wai_base_domain[ns] }}/spid/acs"
+          index="{{ wai_settings[ns].spid.acsIndex }}" {{ 'isDefault="true" ' if wai_settings[ns].spid.acsIndex == 0 else ' ' }}/>
+        <md:AttributeConsumingService index="{{ wai_settings[ns].spid.attributesIndex }}">
           <md:ServiceName xml:lang="it">Web Analytics Italia</md:ServiceName>
           <md:RequestedAttribute Name="spidCode"/>
           <md:RequestedAttribute Name="name"/>

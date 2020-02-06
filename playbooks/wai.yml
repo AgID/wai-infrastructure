@@ -13,8 +13,6 @@
           - ansible_version.string is version("2.8.0", "<")
       tags:
         - check
-  vars:
-    ansible_connection: local
 
 # Load data from hosts
 - hosts: wai
@@ -24,17 +22,19 @@
         msg: "Just to load data"
 
 # Prepare infrastructure Root CA
-- name: Prepare infrastructure Root CA
-  tags:
-    - install
-    - infrastructure
-    - wai-infrastructure-ca
-  vars:
-    ansible_connection: local
-  import_playbook: wai-infrastructure-ca.yml
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Prepare infrastructure Root CA
+      tags:
+        - install
+        - infrastructure
+        - wai-infrastructure-ca
+      import_tasks: wai-infrastructure-ca.yml
 
 # Infrastructure requirements
 - hosts: wai
+  gather_facts: no
   tags:
     - infrastructure
   roles:
@@ -66,6 +66,7 @@
 
 # Open VPN Server
 - hosts: localhost
+  gather_facts: no
   tags:
     - openvpn
   roles:
@@ -73,6 +74,7 @@
 
 # Install elastic search
 - hosts: elastic
+  gather_facts: no
   vars_files:
     - password.yml
   vars:    
@@ -90,6 +92,7 @@
 
 # Install kibana
 - hosts: kibana
+  gather_facts: no
   vars_files:
     - password.yml
   tags:
@@ -101,6 +104,7 @@
 
 # Install galera prod cluster
 - hosts: galera-prod
+  gather_facts: no
   vars_files:
     - password.yml
   tags:
@@ -114,6 +118,7 @@
 
 # Install galera prod slave cluster
 - hosts: galera-prod-slave
+  gather_facts: no
   vars_files:
     - password.yml
   tags:
@@ -127,6 +132,7 @@
 
 # Install galera public play ground cluster
 - hosts: galera-play
+  gather_facts: no
   tags:
     - install
     - galera
@@ -138,6 +144,7 @@
 
 # Install mariadb stage server
 - hosts: mariadb-stag
+  gather_facts: no
   tags:
     - install
     - mariadb
@@ -149,6 +156,7 @@
 
 # Install GlusterFS server
 - hosts: gluster
+  gather_facts: no
   vars_files: password.yml
   vars:
     heketi_cert_file: "{{ wai_infrastructure_ca.root_folder }}/{{ inventory_hostname }}.crt"
@@ -164,6 +172,7 @@
     
 # Install GlusterFS client
 - hosts: kube-node
+  gather_facts: no
   tags:
     - install
     - gluster
@@ -202,6 +211,7 @@
 
 # Enable apt automatic update
 - hosts: wai
+  gather_facts: no
   tasks:
   - name: Enable APT automatic update
     raw: systemctl enable --now {{ item }}
@@ -214,6 +224,7 @@
 # Because of https://github.com/kubernetes/kubernetes/issues/68607 remove proxy settings if configured
 # Kubectl uses proxy settings for livenessProbe and readinessProbe so remove env proxy settings and restart kubelet
 - hosts:  k8s-cluster
+  gather_facts: no
   tasks:
     - name: Remove http proxy to environment
       lineinfile:
@@ -237,3 +248,15 @@
           state: restarted
       when:
           - https_proxy is defined or http_proxy is defined
+
+- hosts: localhost
+  gather_facts: no
+  vars_files: password.yml
+  tasks:
+    - name: K8S .:. Compile templates locally
+      vars:
+        wai_k8s_deployment_dir: "{{ playbook_dir }}/compiled-templates"
+      tags:
+        - never
+        - templates
+      import_tasks: k8s-templates.yml
