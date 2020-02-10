@@ -117,7 +117,7 @@ mediante il playbook esterno
 clonato dal suo repository:
 
 ```bash
-$ git clone --branch v2.10.4 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
+$ git clone --branch v2.12.0 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
 ```
 
 ### Ruoli
@@ -129,8 +129,6 @@ ruoli:
 - *elastic.elasticsearch*: Installazione di Elasticsearch tramite i ruoli
   installati con `ansible-galaxy`;
 - *kibana*: Installazione di [Kibana](https://www.elastic.co/products/kibana);
-- *metricbeat*: Installazione di
-  [Metricbeat](https://www.elastic.co/products/beats/metricbeat);
 - *glusterfs*: Installazione di [GlusterFS](https://www.gluster.org/)
   **DA ULTIMARE CONFIGURAZIONE PEER**
 - *mariadb*: Installazione di [MariaDB](https://mariadb.com/)

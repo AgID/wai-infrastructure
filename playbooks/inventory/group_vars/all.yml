@@ -31,18 +31,18 @@ wai_base_domain:
 wai_load_balancer:
   wai-prod:
     elastic:
-      - 10.0.30.101
+      - 10.0.30.7
     rdbms:
-      - 10.0.20.101
-      - 10.0.20.104
+      - 10.0.20.6
+      - 10.0.20.17
   wai-play:
     elastic:
-      - 10.0.30.101
+      - 10.0.30.7
     rdbms:
-      - 10.0.200.101
+      - 10.0.200.15
   wai-stag:
     elastic:
-      - 10.0.30.101
+      - 10.0.30.7
     rdbms:
       - 10.0.100.101
 
@@ -64,20 +64,6 @@ wai_ip_addresses:
     public_ip: 131.1.241.131
     private_ip: 10.0.10.252
 
-# Mappinng between public ip address and internal load balancer
-# The following IP addresses are just placeholders and must be replaced with the real ones after all the private ip ports are created.
-wai_ip_addresses:
-  wai-prod:
-    public_ip: 1.1.1.1
-    private_ip: 1.1.1.1
-  wai-play:
-    public_ip: 1.1.1.1
-    private_ip: 1.1.1.1
-  wai-stag:
-    public_ip: 1.1.1.1
-    private_ip: 1.1.1.1
-
-
 # Helm 
 helm:
   cert_manager:
@@ -97,28 +83,25 @@ wai_k8s_resource_quota:
 
 # IPA Redisearch image
 wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
-wai_ipa_redisearch_image_tag: 5.0.3-dev-4
+wai_ipa_redisearch_image_tag: 5.0.7-dev-4
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
-wai_portal_image_tag: dev-20
+wai_portal_image_tag: dev-27
 wai_portal_matomo_sub_path: /matomo
 wai_portal_environments:
   wai-prod: production
   wai-play: public-playground
   wai-stag: staging
 # RediSearch Image
-wai_redis_image: webanalyticsitalia/wai-redis-search
-wai_redis_image_tag: 5.0.3-dev-1
+wai_redis_image: webanalyticsitalia/wai-redisearch
+wai_redis_image_tag: 5.0.7-dev-1
 wai_redis_slave_count: 2
 
 # Matomo Image
 wai_matomo_image: webanalyticsitalia/wai-matomo
-wai_matomo_image_tag: dev-6
+wai_matomo_image_tag: dev-10
 
-wai_kube_state_metrics_version: v1.5.0
-wai_kube_state_metrics_output_dir: kube-state-metrics-1.5.0
-wai_kube_state_metrics: 'https://codeload.github.com/kubernetes/kube-state-metrics/zip/{{ wai_kube_state_metrics_version }}'
 wai_kubectl: /usr/local/bin/kubectl
 
 # Base K8S Node port for http
@@ -128,32 +111,29 @@ wai_base_http_port: 30080
 wai_base_https_port: 30443
 
 # Elastic version used for Elasticsearch, Kibana and Beats.
-# These vars override default settings of role elastic.elasticsearch and are used in wai roles kibana and metricbeat
-es_version: 7.4.2
+# These vars override default settings of role elastic.elasticsearch and are used in wai roles kibana 
+es_version: 7.5.1
 es_major_version: 7.x
 es_apt_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
 es_apt_url: "deb https://artifacts.elastic.co/packages/{{es_major_version}}/apt stable main"
 
 kibana_elastic_hosts: "https://{{ hostvars[groups['elastic'][0]].ansible_default_ipv4.address }}:9200"
 
-# Metricbeat output
-metricbeat_output_elastic: '{{ groups["elastic"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list | to_json }}'
-
 # Override path used to store Docker data in kubespray all\docker.yml
 docker_daemon_graph: "/opt/data/docker"
 
 # Redis
-redis_image_version: 5.0.3
+redis_image_version: 5.0.7
 
 # GlusterFS
 gluster_apt_repo:  ppa:gluster/glusterfs-5
 gluster_package_version: 5.*
 
 # MariaDB repo info
-mariadb_repo: "deb [arch=amd64,i386,ppc64el] http://ftp.heanet.ie/mirrors/mariadb/repo/{{ mariadb_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main"
+mariadb_repo:  "deb [arch=amd64,i386,ppc64el] http://mariadb.mirrors.ovh.net/MariaDB/repo/{{ mariadb_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main"
 mariadb_repo_key: '0xF1656F24C74CD1D8'
 mariadb_repo_keyserver: 'keyserver.ubuntu.com'
-mariadb_repo_origin: ftp.heanet.ie
+mariadb_repo_origin: mariadb.mirrors.ovh.net
 mariadb_version: '10.4'
 
 # Prometheus Node Exporter override vars

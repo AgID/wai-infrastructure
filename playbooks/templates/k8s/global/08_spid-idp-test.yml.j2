@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
@@ -24,7 +24,7 @@ spec:
         imagePullPolicy: IfNotPresent
         name: spid-idp
         ports:
-        - containerPort: 8080
+        - containerPort: 80
           name: http
           protocol: TCP
         resources:
@@ -59,7 +59,7 @@ data:
     cert_file: "conf/idp.crt"
     debug: true
     host: 0.0.0.0
-    port: 8080
+    port: 80
     https: false
     users_file: "/data/users.json"
     can_add_user: true
@@ -67,25 +67,35 @@ data:
     show_response_options: true
     metadata:
       local:
-        - conf/sp_staging_idp.xml
-  idp.key: {{ spid_idp.crt }}
-  idp.crt: {{ spid_idp.key }}
-  sp_staging_idp.xml: |-
+{% for ns in wai_k8s_namespaces %}
+        - conf/sp_{{ ns }}_meta.xml
+{% endfor %}
+
+  idp.key: |-
+{{ test_env_idp.key | indent( width=4, indentfirst=True) }}
+
+  idp.crt: |-
+{{ test_env_idp.crt | indent( width=4, indentfirst=True) }}
+
+{% for ns in wai_k8s_namespaces %}
+  sp_{{ ns }}_meta.xml: |-
     <?xml version="1.0"?>
     <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
-      xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="{{ wai_settings['wai-stag'].spid.entityId }}" ID="_681a637-6cd4-434f-92c3-4fed720b2ad8">
+      xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="{{ wai_settings[ns].spid.entityId }}" >
       <md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
         <md:KeyDescriptor use="signing">
           <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
           <ds:X509Data>
-            <ds:X509Certificate>{{ wai_settings['wai-stag'].spid.crt }}</ds:X509Certificate>
+            <ds:X509Certificate>{{ wai_settings[ns].spid.crt }}</ds:X509Certificate>
           </ds:X509Data>
           </ds:KeyInfo>
         </md:KeyDescriptor>
-        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://{{ wai_base_domain['wai-stag'] }}/spid/logout" />
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://{{ wai_base_domain[ns] }}/spid/logout" />
         <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
-        <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://{{ wai_base_domain['wai-stag'] }}/spid/acs" index="0" isDefault="true" />
-        <md:AttributeConsumingService index="0">
+        <md:AssertionConsumerService
+          Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://{{ wai_base_domain[ns] }}/spid/acs"
+          index="{{ wai_settings[ns].spid.acsIndex }}" {{ 'isDefault="true" ' if wai_settings[ns].spid.acsIndex == 0 else ' ' }}/>
+        <md:AttributeConsumingService index="{{ wai_settings[ns].spid.attributesIndex }}">
           <md:ServiceName xml:lang="it">Web Analytics Italia</md:ServiceName>
           <md:RequestedAttribute Name="spidCode"/>
           <md:RequestedAttribute Name="name"/>
@@ -99,6 +109,8 @@ data:
         <md:OrganizationURL xml:lang="it">https://www.agid.gov.it</md:OrganizationURL>
       </md:Organization>
     </md:EntityDescriptor>
+
+{% endfor %}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -117,13 +129,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: spid-idp-svc
+  name: spid-idp-service
   namespace: wai-stag
 spec:
   ports:
   - name: http
     protocol: TCP
-    port: 8080
+    port: 80
   selector:
     app: spid-idp
 ---
@@ -131,19 +143,26 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod
-  name: spid-idp-ingress
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-wai-stag
+    kubernetes.io/ingress.class: nginx-wai-stag
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header Allow "GET, POST" always;
+
+      if ($request_method !~ ^(GET|POST)$) {
+        return 405;
+      }
+  name: spid-idp
   namespace: wai-stag
 spec:
   rules:
-  - host: spid.{{ wai_settings['wai-stag'].spid.crt }}
+  - host: spid.{{ wai_base_domain['wai-stag'] }}
     http:
       paths:
       - backend:
-          serviceName: spid-idp-svc
-          servicePort: 8080
+          serviceName: spid-idp-service
+          servicePort: 80
         path: /
   tls:
   - hosts:
-    - spid.{{ wai_settings['wai-stag'].spid.crt }}
+    - spid.{{ wai_base_domain['wai-stag'] }}
     secretName: spid-idp-tls

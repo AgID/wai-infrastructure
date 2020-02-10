@@ -82,7 +82,7 @@ resource "openstack_networking_secgroup_v2" "k8s_metallb_ports_secgroup" {
 
 # Kubernetes MetalLB port security group rules
 resource "openstack_networking_secgroup_rule_v2" "k8s_metallb_ports_secgroup_rule" {
-  count             = var.enabled ? length(var.k8s_metallb_ports_sec_rules) : 0
+  count             = var.enabled ? length(var.k8s_metallb_port_sec_rules) : 0
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = var.k8s_metallb_port_sec_rules[count.index]["protocol"]
@@ -189,10 +189,11 @@ resource "openstack_blockstorage_volume_v3" "k8s_worker_boot_volume" {
 }
 
 # Kubernetes server group
-resource "openstack_compute_servergroup_v2" "k8s_server_group" {
-  name = "kubernetes-server-group"
-  policies = ["anti-affinity"]
-}
+# resource "openstack_compute_servergroup_v2" "k8s_server_group" {
+#   count       = var.enabled ? 1 : 0
+#   name = "kubernetes-server-group"
+#   policies = ["anti-affinity"]
+# }
 
 # Kubernetes worker node instance
 resource "openstack_compute_instance_v2" "k8s_worker_instance" {
@@ -217,7 +218,9 @@ resource "openstack_compute_instance_v2" "k8s_worker_instance" {
     ansible_user = var.ssh_user
     groups       = join(", ", ["wai", element(var.k8s_worker_instance_groups, count.index)])
   }
-  group = openstack_compute_servergroup_v2.k8s_server_group[0].id
+  # scheduler_hints  {
+  #   group = openstack_compute_servergroup_v2.k8s_server_group.0.id
+  # }
 }
 
 # Kubernetes MetalLB ports

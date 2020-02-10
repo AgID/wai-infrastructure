@@ -2,8 +2,15 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
     kubernetes.io/ingress.class: nginx-{{ item }}
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header Allow "GET, POST" always;
+
+      if ($request_method !~ ^(GET|POST)$) {
+        return 405;
+      }
   name: portal
   namespace: {{ item }}
 spec:
@@ -18,15 +25,17 @@ spec:
   tls:
   - hosts:
     - {{ wai_base_domain[item] }}
+    - www.{{ wai_base_domain[item] }}
     secretName: portal-ingress-acme-tls
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     kubernetes.io/ingress.class: nginx-{{ item }}
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
   name: matomo
   namespace: {{ item }}
 spec:
@@ -41,6 +50,7 @@ spec:
   tls:
   - hosts:
     - {{ wai_base_domain[item] }}
+    - www.{{ wai_base_domain[item] }}
     secretName: portal-ingress-acme-tls
 ---  
 kind: ConfigMap
@@ -60,11 +70,11 @@ data:
     APP_URL=https://{{ wai_base_domain[item] }}
     APP_VERSION=0.1
 
-    APP_SUPER_ADMIN_NAME={{ portal_vars.super_user.name }}
-    APP_SUPER_ADMIN_FAMILY_NAME={{ portal_vars.super_user.family_name }}
-    APP_SUPER_ADMIN_FISCAL_NUMBER={{ portal_vars.super_user.fiscal_number }}
-    APP_SUPER_ADMIN_EMAIL={{ portal_vars.super_user.email }}
-    APP_SUPER_ADMIN_PASSWORD={{ portal_vars.super_user.password }}
+    APP_SUPER_ADMIN_NAME={{ wai_settings.super_user.name }}
+    APP_SUPER_ADMIN_FAMILY_NAME={{ wai_settings.super_user.family_name }}
+    APP_SUPER_ADMIN_FISCAL_NUMBER={{ wai_settings.super_user.fiscal_number }}
+    APP_SUPER_ADMIN_EMAIL={{ wai_settings.super_user.email }}
+    APP_SUPER_ADMIN_PASSWORD={{ wai_settings.super_user.password }}
 
     LOG_CHANNEL=stack
     LOG_STACK_CHANNELS={{ wai_settings[item].log.channels }}
@@ -105,6 +115,7 @@ data:
     {%- for i in range(0, wai_redis_slave_count) -%}
       ,tcp://application-redis:26379
     {%- endfor %}
+
     REDIS_SENTINEL_SET=application-redis-master
     REDIS_INDEXES_USE_SENTINELS=true
 
@@ -119,7 +130,7 @@ data:
     REDIS_IPA_INDEX_SENTINELS=tcp://ipa-redisearch:26379
     REDIS_IPA_INDEX_SENTINEL_SET=ipa-redisearch-master
 
-{% if wai_settings[item].mail is defined and  wai_settings[item].mail.enabled %}    
+    {% if wai_settings[item].mail is defined and  wai_settings[item].mail.enabled -%}
     MAIL_DRIVER=smtp
     MAIL_HOST={{ wai_settings[item].mail.host }}
     MAIL_PORT={{ wai_settings[item].mail.port }}
@@ -128,15 +139,15 @@ data:
     MAIL_ENCRYPTION={{ wai_settings[item].mail.encryption }}
     MAIL_FROM_ADDRESS={{ wai_settings[item].mail.from_address }}
     MAIL_FROM_NAME="{{ wai_settings[item].mail.from_name }}"
-{% endif %}
+    {%- endif %}
 
-{% if wai_settings[item].pec is defined and  wai_settings[item].pec.enabled %}    
+    {% if wai_settings[item].pec is defined and  wai_settings[item].pec.enabled -%}
     PEC_HOST={{ wai_settings[item].pec.host }}
     PEC_PORT={{ wai_settings[item].pec.port }}
     PEC_USERNAME={{ wai_settings[item].pec.user }}
     PEC_PASSWORD={{ wai_settings[item].pec.password }}
     PEC_ENCRYPTION={{ wai_settings[item].pec.encryption }}
-{% endif %}
+    {%- endif %}
 
     ANALYTICS_ADMIN_TOKEN={{ matomo_vars.super_user.token }}
     ANALYTICS_API_BASE_URL=http://matomo-service
@@ -156,8 +167,22 @@ data:
     SESSION_SECURE_COOKIE=true
 
     SPID_SP_ENTITY_ID={{ wai_settings[item].spid.entityId }}
+    SPID_SP_ACS_INDEX={{ wai_settings[item].spid.acsIndex }}
+    SPID_SP_ATTRIBUTES_INDEX={{ wai_settings[item].spid.attributesIndex }}
     SPID_SP_PRIVATE_KEY={{ wai_settings[item].spid.key }}
-    SPID_SP_CERTIFICATE={{ wai_settings[item].spid.cert }}
+    SPID_SP_CERTIFICATE={{ wai_settings[item].spid.crt }}
+
+    SPID_TESTENV_ENABLED = {{ wai_settings[item].spid.testenv.enabled | default('false') }}
+    SPID_TESTENV_ENTITY_ID = {{ wai_settings[item].spid.testenv.idpEntityId }}
+    SPID_TESTENV_SSO = {{ wai_settings[item].spid.testenv.ssoUrl }}
+    SPID_TESTENV_SLO = {{ wai_settings[item].spid.testenv.sloUrl }}
+    SPID_TESTENV_CERT = {{ wai_settings[item].spid.testenv.crt }}
+
+    SPID_VALIDATOR_IDP_ENABLED = {{ wai_settings[item].spid.validator.enabled | default('false') }}
+    SPID_VALIDATOR_IDP_ENTITY_ID = {{ wai_settings[item].spid.validator.idpEntityId }}
+    SPID_VALIDATOR_IDP_SSO = {{ wai_settings[item].spid.validator.ssoUrl }}
+    SPID_VALIDATOR_IDP_SLO = {{ wai_settings[item].spid.validator.sloUrl }}
+    SPID_VALIDATOR_IDP_CERT = {{ wai_settings[item].spid.validator.crt }}
 
     SPID_TESTENV_ENABLED = {{ wai_settings[item].spid.testenv.enabled || default('false') }}
     SPID_TESTENV_ENTITY_ID = {{ wai_settings[item].spid.testenv.idpEntityId }}
@@ -214,14 +239,14 @@ data:
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
         add_header Referrer-Policy "no-referrer-when-downgrade";
-        add_header Allow "GET, POST, HEAD" always;
+        add_header Allow "GET, POST" always;
 
-        if ($request_method !~ ^(GET|POST|HEAD)$) {
+        if ($request_method !~ ^(GET|POST)$) {
           return 405;
         }
 
         location / {
-            try_files $uri /index.php$is_args$args;
+          try_files $uri /index.php$is_args$args;
         }
 
         location = /index.php {
@@ -252,12 +277,12 @@ data:
         }
 
         location ~* \.(jpg|jpeg|png|gif|svg|ico|css|js|pdf|ttf|woff|woff2)(\?id\=.+)?$ {
-            expires max;
+          expires max;
         }
         
         location ~ /\.ht {
           deny all;
-          return 404;  
+          return 404;
         }
       }
     }
@@ -292,6 +317,8 @@ spec:
       app: portal
   template:
     metadata:
+      annotations:
+        releaseDate: now
       labels:
         app: portal
     spec:
@@ -308,6 +335,7 @@ spec:
       initContainers:
       - name: copy
         image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         command: ["sh", "-c", "cp -a /var/www/html/* /html/"]
         resources:
           limits:
@@ -318,6 +346,7 @@ spec:
           name: html
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         name: portal
         resources:
           limits:

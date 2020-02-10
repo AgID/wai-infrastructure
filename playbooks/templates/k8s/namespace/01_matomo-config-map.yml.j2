@@ -6,6 +6,13 @@ metadata:
   name: matomo-php-config
   namespace: {{ item }}
 data:
+  entrypoint.sh: |-
+    #!/bin/sh
+    # Copy matomo content to emptydir
+    cp -a /var/www/html/* /html/
+    # Copy config.ini.php.orig to matomo config folder
+    cp /tmp/config.ini.php.orig /html/config/config.ini.php
+
   config.ini.php: |-
     [database]
     host = "{{ wai_load_balancer[item].rdbms[0] }}"
@@ -13,24 +20,22 @@ data:
     password = "{{ wai_database_credentials[item]['matomo-admin'] }}"
     dbname = "matomo"
 
-    {% if wai_load_balancer[item].rdbms | length > 1 %}
-    
+    {% if wai_load_balancer[item].rdbms | length > 1 -%}
     [database_reader]
     host = "{{ wai_load_balancer[item].rdbms[1] }}"
     username = "matomo-user"
     password = "{{ wai_database_credentials[item]['matomo-user'] }}"
     dbname = "matomo"
-    {% endif %}
+    {%- endif %}
 
     [General]
-    salt = "{{ ansible_date_time.iso8601_micro | md5 }}"
+    salt = "{{ matomo_vars.salt[item] }}"
     trusted_hosts[] = "localhost"
     trusted_hosts[] = "127.0.0.1"
     trusted_hosts[] = "{{ wai_base_domain[item] }}"
-    {% for attr in wai_hostname %}
-
+    {% for attr in wai_hostname -%}
     trusted_hosts[] = "{{ wai_hostname[attr] }}.{{ wai_base_domain[item] }}"
-    {% endfor %}
+    {% endfor -%}
     proxy_client_headers[] = HTTP_X_FORWARDED_FOR
     enable_trusted_host_check = 1
     force_ssl = 1
@@ -113,6 +118,7 @@ data:
     Plugins[] = "ProtectTrackID"
     Plugins[] = "CustomDimensions"
     Plugins[] = "LoginFilterIp"
+    Plugins[] = "TrackerHostname"
 
     [PluginsInstalled]
     PluginsInstalled[] = "Diagnostics"
@@ -182,6 +188,7 @@ data:
     PluginsInstalled[] = "ProtectTrackID"
     PluginsInstalled[] = "CustomDimensions"
     PluginsInstalled[] = "LoginFilterIp"
+    PluginsInstalled[] = "TrackerHostname"
 
     [WAIMatomoTheme]
     waiUrl = "https://{{ wai_base_domain[item] }}"
@@ -194,7 +201,10 @@ data:
 
     [LoginFilterIp]
     allow_login_from[] = "{{ wai_infrastructure_cidr }}"
-    {%- if openvpn_server_addr is defined %}
+    {% if openvpn_server_addr is defined -%}
     allow_login_from[] = "{{ openvpn_server_addr }}"
-    {%- endif %}
+    {% endif -%}
     redirect_unallowed_to = "https://{{ wai_base_domain[item] }}"
+
+    [TrackerHostname]
+    hostname = "{{ wai_hostname['ingestion'] }}.{{ wai_base_domain[item] }}"

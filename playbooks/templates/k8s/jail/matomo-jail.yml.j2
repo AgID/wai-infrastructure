@@ -16,6 +16,8 @@ spec:
       app: {{ matomo_name }}
   template:
     metadata:
+      annotations:
+        releaseDate: now
       labels:
         app: {{ matomo_name }}
     spec:
@@ -32,7 +34,8 @@ spec:
       initContainers:
       - name: copy
         image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
-        command: ["sh", "-c", "cp -a /var/www/html/* /html/"]
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+        command: ["sh", "-c", ". /entrypoint.sh"]
         resources:
           limits:
             cpu: 0.1
@@ -40,8 +43,17 @@ spec:
         volumeMounts:
         - mountPath: /html
           name: html
+        - name: {{ matomo_name }}-config
+          mountPath: /tmp/config.ini.php.orig
+          subPath: config.ini.php
+        - name: {{ matomo_name }}-config
+          mountPath: /entrypoint.sh
+          subPath: entrypoint.sh
+        - name: {{ matomo_name }}-extra-content
+          mountPath: /opt/extra-content
       containers:
       - image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         name: {{ matomo_name }}
         resources:
           limits:
@@ -60,9 +72,6 @@ spec:
         volumeMounts:
         - name: html
           mountPath: /var/www/html/
-        - name: {{ matomo_name }}-config
-          mountPath: /var/www/html/config/config.ini.php
-          subPath: config.ini.php
       - image: nginx:1.15.8
         name: nginx
         resources:
@@ -91,6 +100,9 @@ spec:
         - name: {{ matomo_name }}-nginx-conf
           configMap: 
             name: {{ matomo_name }}-nginx-configmap
+        - name: {{ matomo_name }}-extra-content
+          persistentVolumeClaim:
+            claimName: matomo-extra-content-pvc
         - name: html
           emptyDir: {}
 ---
@@ -135,9 +147,9 @@ data:
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
         add_header Referrer-Policy origin;
-        add_header Allow "GET, POST, HEAD" always;
+        add_header Allow "GET, POST" always;
 
-        if ($request_method !~ ^(GET|POST|HEAD)$) {
+        if ($request_method !~ ^(GET|POST)$) {
           return 405;
         }
 
@@ -148,12 +160,12 @@ data:
           access_log off;
         }
 
-        {% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
+{% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
         location = {{ matomo_app_filename }} {
-        {% else %}
+{% else %}
         ## only allow accessing the following php files
         location ~ ^/(index|plugins/HeatmapSessionRecording/configs)\.php {
-        {% endif %}
+{% endif %}
           fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
           fastcgi_param  SERVER_SOFTWARE    nginx;
           fastcgi_param  QUERY_STRING       $query_string;
@@ -176,7 +188,7 @@ data:
           fastcgi_pass backend;
         }
 
-        {% if matomo_nginx_jailed is defined and not matomo_nginx_jailed %}
+{% if matomo_nginx_jailed is defined and not matomo_nginx_jailed %}
         ## deny access to all other .php files
         location ~* ^.+\.php$ {
           deny all;
@@ -214,14 +226,14 @@ data:
           deny all;
           return 404;
         }
-        {% endif %}
+{% endif %}
 
-        {% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
+{% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
         location ~* / {
           deny all;
           return 404;
         }
-        {% endif %}
+{% endif %}
       }
     }
 ---
@@ -237,7 +249,7 @@ spec:
     port: 80
   selector:
     app: {{ matomo_name }}
-{% if matomo_create_ingress is defined and matomo_create_ingress %}    
+{% if matomo_create_ingress is defined and matomo_create_ingress %}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -246,12 +258,19 @@ metadata:
   namespace: {{ item }}
   annotations:
     kubernetes.io/ingress.class: nginx-{{ item }}
-    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-prod    
-    {% if matomo_enable_session is defined and matomo_enable_session %}
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header Allow "GET, POST" always;
+
+      if ($request_method !~ ^(GET|POST)$) {
+        return 405;
+      }
+
+    {% if matomo_enable_session is defined and matomo_enable_session -%}
     nginx.ingress.kubernetes.io/affinity: "cookie"
     nginx.ingress.kubernetes.io/session-cookie-name: "route"
     nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
-    {% endif %}
+    {%- endif %}
 
 spec:
   tls:
@@ -266,4 +285,4 @@ spec:
             backend:
               serviceName: {{ matomo_name }}-service
               servicePort: 80
-{% endif %}                  
+{% endif %}

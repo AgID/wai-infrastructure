@@ -37,6 +37,9 @@ backend-config
 # Ignore kubernetes credentials
 playbooks/inventory/artifacts
 
+# Ignore local generated templates
+playbooks/compiled-templates
+
 # Ignore ssh keys
 ssh*
 

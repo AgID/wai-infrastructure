@@ -2,7 +2,6 @@
 # Configure Matomo database
 - hosts:
     - galera-prod[0]
-    - galera-prod-slave[0]
     - galera-play[0]
     - mariadb-stag[0]
   tasks:
@@ -37,14 +36,14 @@
     - name: Database .:. Calculate matomo super user password
       set_fact:
         matomo_database_superuser_password: "{{ matomo_vars.super_user.password | md5 | password_hash('bcrypt') }}"
-        portal_database_superuser_password: "{{ portal_vars.super_user.password  | password_hash('bcrypt') }}"
+        portal_database_superuser_password: "{{ wai_settings.super_user.password  | password_hash('bcrypt') }}"
 
     - name: Database .:. Prepare matomo template sql script
       vars:
         item: "{{ wai_environment }}"
       template:
-        src: "mariadb/matomo_3_13_0.sql.j2"
-        dest: "/root/matomo_3_13_0.sql"
+        src: "mariadb/matomo_3_13_1.sql.j2"
+        dest: "/root/matomo_3_13_1.sql"
 
     - name: Database .:. Prepare wai template sql script
       template:
@@ -66,7 +65,7 @@
         name: matomo
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
         state: import
-        target: "/root/matomo_3_13_0.sql"
+        target: "/root/matomo_3_13_1.sql"
       when: matomo_db_status.rc != 0
 
     - name: Database .:. Create WAI database

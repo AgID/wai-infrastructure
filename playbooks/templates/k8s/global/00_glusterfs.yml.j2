@@ -4,6 +4,6 @@ metadata:
   name: storage-heketi
 provisioner: kubernetes.io/glusterfs
 parameters:
-  resturl: "{{ 'https' if heketi_enable_tls == true else 'http' }}://{{ hostvars[groups['gluster'][0]]['ansible_default_ipv4']['address'] }}:{{ heketi_port }}"
+  resturl: "{{ 'https' if heketi_enable_tls == true else 'http' }}://{{ hostvars[groups['gluster'][0]]['ansible_default_ipv4']['address'] if 'gluster' in groups else 'gluster_not_available' }}:{{ heketi_port }}"
   restuser: "admin"
   restuserkey: "{{ heketi_secrets.admin }}"

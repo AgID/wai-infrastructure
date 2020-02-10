@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker build -t italia/wai-redisearch:5.0.3 --build-arg REDIS_VERSION=5.0.3 --build-arg REDISEARCH_GITHUB_BRANCH=1.6 .
+docker build -t webanalyticsitalia/wai-redisearch:5.0.7 --build-arg REDIS_VERSION=5.0.7 --build-arg REDISEARCH_GITHUB_BRANCH=v1.6.7 .

@@ -44,24 +44,18 @@ galera_sec_rules = [
         protocol = "tcp"
         from = 3306
         to = 3306
-        cidr = "<K8S_CIDR>"
+        cidr = "<CIDR>"
     },
     {
         protocol = "tcp"
         from = 4567
-        to = 4567
+        to = 4568
         cidr = "<GALERA_CIDR>"
     },
     {
         protocol = "udp"
         from = 4567
         to = 4567
-        cidr = "<GALERA_CIDR>"
-    },
-    {
-        protocol = "tcp"
-        from = 4568
-        to = 4568
         cidr = "<GALERA_CIDR>"
     },
     {

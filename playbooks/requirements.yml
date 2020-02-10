@@ -1,6 +1,6 @@
 # Elasticsearch
 - src: elastic.elasticsearch
-  version: master
+  version: 7.5.1
 
 # Swap
 - src: geerlingguy.swap
