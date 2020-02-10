@@ -50,6 +50,13 @@
         src: "mariadb/portal_1_0_0.sql.j2"
         dest: "/root/portal_1_0_0.sql"
 
+    - name: Database .:. Prepare matomo extra sql script
+      template:
+        src: "{{ item }}"
+        dest : "/root/{{ item | basename }}"
+      with_fileglob:
+        - templates/mariadb/plugins/*.sql
+
     - name: Database .:. Test if matomo database is present
       shell: mysql -e 'SHOW TABLES;' matomo | grep log_action
       register: matomo_db_status
@@ -67,6 +74,16 @@
         state: import
         target: "/root/matomo_3_13_1.sql"
       when: matomo_db_status.rc != 0
+
+    - name: Database .:. Execute Matomo extra sql scripts
+      mysql_db:
+        name: matomo
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        state: import
+        target: "/root/{{ item | basename }}"
+      when: matomo_db_status.rc != 0
+      with_fileglob:
+        - templates/mariadb/plugins/*.sql
 
     - name: Database .:. Create WAI database
       mysql_db:
