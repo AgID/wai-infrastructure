@@ -29,6 +29,26 @@ spec:
                 values:
                 - matomo-worker
             topologyKey: "kubernetes.io/hostname"
+      initContainers:
+      - name: copy
+        image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+        command: ["sh", "-c", ". /entrypoint.sh"]
+        resources:
+          limits:
+            cpu: 0.1
+            memory: "50Mi"
+        volumeMounts:
+        - mountPath: /html
+          name: html
+        - name: matomo-php-config
+          mountPath: /tmp/config.ini.php.orig
+          subPath: config.ini.php
+        - name: matomo-initc-config
+          mountPath: /entrypoint.sh
+          subPath: entrypoint.sh
+        - name: matomo-extra-content
+          mountPath: /opt/extra-content
       containers:
       - image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
         imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
@@ -50,23 +70,30 @@ spec:
           periodSeconds: 5
           successThreshold: 1
         volumeMounts:
-        - name: matomo-worker-conf
+        - name: matomo-worker-config
           mountPath: /var/www/scripts
-        - name: matomo-php-config
-          mountPath: /var/www/html/config/config.ini.php
-          subPath: config.ini.php
+        - name: html
+          mountPath: /var/www/html/
       volumes:
-        - name: matomo-worker-conf
+        - name: matomo-worker-config
           configMap:
-            name: matomo-worker-conf
+            name: matomo-worker-config
         - name: matomo-php-config
           configMap: 
             name: matomo-php-config
+        - name: matomo-extra-content
+          persistentVolumeClaim:
+            claimName: matomo-extra-content-pvc
+        - name: matomo-initc-config
+          configMap: 
+            name: matomo-initc-config
+        - name: html
+          emptyDir: {}
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: matomo-worker-conf
+  name: matomo-worker-config
   namespace: {{ item }}
 data:
   qt-worker.sh: |-
