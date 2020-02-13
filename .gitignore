@@ -43,5 +43,8 @@ playbooks/compiled-templates
 # Ignore ssh keys
 ssh*
 
+# Ignore secrets
+secrets
+
 # Ignore ansible retry files
 *.retry
