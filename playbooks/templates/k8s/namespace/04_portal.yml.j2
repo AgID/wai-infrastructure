@@ -25,7 +25,7 @@ spec:
   tls:
   - hosts:
     - {{ wai_base_domain[item] }}
-    - www.{{ wai_base_domain[item] }}
+    - {{ wai_hostname['portal'] }}.{{ wai_base_domain[item] }}
     secretName: portal-ingress-acme-tls
 ---
 apiVersion: extensions/v1beta1
@@ -50,7 +50,7 @@ spec:
   tls:
   - hosts:
     - {{ wai_base_domain[item] }}
-    - www.{{ wai_base_domain[item] }}
+    - {{ wai_hostname['portal'] }}.{{ wai_base_domain[item] }}
     secretName: portal-ingress-acme-tls
 ---  
 kind: ConfigMap
