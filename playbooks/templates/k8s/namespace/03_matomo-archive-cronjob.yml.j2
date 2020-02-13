@@ -27,19 +27,23 @@ spec:
             - name: matomo-initc-config
               mountPath: /entrypoint.sh
               subPath: entrypoint.sh
-            - name: matomo-extra-content
-              mountPath: /opt/extra-content
           containers:
           - name: matomo
             image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
-            args:
-            - /var/www/html/console 
-            - core:archive
+            command: ["sh", "-c", ". /entrypoint.sh"]
             resources:
               limits:
                 cpu: "0.50"
                 memory: "256Mi"
+            volumeMounts:
+            - mountPath: /var/www/html/
+              name: html
+            - name: matomo-cron-config
+              mountPath: /entrypoint.sh
+              subPath: entrypoint.sh
+            - name: matomo-extra-content
+              mountPath: /opt/extra-content
           restartPolicy: OnFailure
           volumes:
             - name: matomo-php-config
@@ -51,5 +55,8 @@ spec:
             - name: matomo-initc-config
               configMap: 
                 name: matomo-initc-config
+            - name: matomo-cron-config
+              configMap: 
+                name: matomo-cron-config
             - name: html
               emptyDir: {}
