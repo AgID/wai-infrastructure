@@ -184,13 +184,13 @@ data:
     SPID_VALIDATOR_IDP_SLO = {{ wai_settings[item].spid.validator.sloUrl }}
     SPID_VALIDATOR_IDP_CERT = {{ wai_settings[item].spid.validator.crt }}
 
-    SPID_TESTENV_ENABLED = {{ wai_settings[item].spid.testenv.enabled || default('false') }}
+    SPID_TESTENV_ENABLED = {{ wai_settings[item].spid.testenv.enabled | default('false') }}
     SPID_TESTENV_ENTITY_ID = {{ wai_settings[item].spid.testenv.idpEntityId }}
     SPID_TESTENV_SSO = {{ wai_settings[item].spid.testenv.ssoUrl }}
     SPID_TESTENV_SLO = {{ wai_settings[item].spid.testenv.sloUrl }}
     SPID_TESTENV_CERT = {{ wai_settings[item].spid.testenv.crt }}
 
-    SPID_VALIDATOR_IDP_ENABLED = {{ wai_settings[item].spid.validator.enabled || default('false') }}
+    SPID_VALIDATOR_IDP_ENABLED = {{ wai_settings[item].spid.validator.enabled | default('false') }}
     SPID_VALIDATOR_IDP_ENTITY_ID = {{ wai_settings[item].spid.validator.idpEntityId }}
     SPID_VALIDATOR_IDP_SSO = {{ wai_settings[item].spid.validator.ssoUrl }}
     SPID_VALIDATOR_IDP_SLO = {{ wai_settings[item].spid.validator.sloUrl }}
