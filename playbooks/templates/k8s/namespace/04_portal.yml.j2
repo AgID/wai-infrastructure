@@ -239,11 +239,6 @@ data:
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
         add_header Referrer-Policy "no-referrer-when-downgrade";
-        add_header Allow "GET, POST" always;
-
-        if ($request_method !~ ^(GET|POST)$) {
-          return 405;
-        }
 
         location / {
           try_files $uri /index.php$is_args$args;
