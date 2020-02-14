@@ -5,9 +5,6 @@
 # Ignore downloaded playbook
 playbooks/kubespray*
 
-# Ignore pyenv
-.python-version
-
 # Local .terraform directories
 **/.terraform/*
 
