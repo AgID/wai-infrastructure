@@ -39,7 +39,6 @@
     matomo_pod_size_index: "matomo-ingestion"
     matomo_nginx_jailed: true
     matomo_create_ingress: true
-    matomo_enable_session: false
     matomo_ingress_fqdn_index: "ingestion"
   template:
     dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-ingestion.yml"
@@ -54,7 +53,6 @@
     matomo_pod_size_index: "matomo-api"
     matomo_nginx_jailed: true
     matomo_create_ingress: false
-    matomo_enable_session: false
   template:
     dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-api.yml"
     src: k8s/jail/matomo-jail.yml.j2
@@ -68,7 +66,6 @@
     matomo_pod_size_index: "matomo-portal"
     matomo_nginx_jailed: false
     matomo_create_ingress: false
-    matomo_enable_session: true
   template:
     dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-portal.yml"
     src: k8s/jail/matomo-jail.yml.j2
