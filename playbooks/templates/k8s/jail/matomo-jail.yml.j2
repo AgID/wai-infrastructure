@@ -268,13 +268,11 @@ metadata:
       if ($request_method !~ ^(GET|POST)$) {
         return 405;
       }
-
-    {% if matomo_enable_session is defined and matomo_enable_session -%}
+{% if matomo_enable_session is defined and matomo_enable_session %}
     nginx.ingress.kubernetes.io/affinity: "cookie"
     nginx.ingress.kubernetes.io/session-cookie-name: "route"
     nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
-    {%- endif %}
-
+{% endif %}
 spec:
   tls:
   - hosts:
