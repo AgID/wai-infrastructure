@@ -155,6 +155,13 @@ Il playbook contiene anche i seguenti tag:
 - *matomo*: relativo al deploy del solo database *Matomo*;
 - *kubernetes-deploy*: relativo al deploy di tutte le risorse *Kubernetes*;
 
+Per generare in ambiente locale tutti i file relativi alle risorse K8S si può
+usare il tag *templates*:
+
+```bash
+$ ansible-playbook playbooks/wai.yml -i playbooks/inventory/30-localhost -t templates
+```
+
 ### Parametri
 
 TODO: Indicare i parametri da modificare
