@@ -6,13 +6,6 @@ metadata:
   name: matomo-php-config
   namespace: {{ item }}
 data:
-  entrypoint.sh: |-
-    #!/bin/sh
-    # Copy matomo content to emptydir
-    cp -a /var/www/html/* /html/
-    # Copy config.ini.php.orig to matomo config folder
-    cp /tmp/config.ini.php.orig /html/config/config.ini.php
-
   config.ini.php: |-
     [database]
     host = "{{ wai_load_balancer[item].rdbms[0] }}"
@@ -208,3 +201,62 @@ data:
 
     [TrackerHostname]
     hostname = "{{ wai_hostname['ingestion'] }}.{{ wai_base_domain[item] }}"
+---
+kind: ConfigMap
+apiVersion: v1
+metadata: 
+  name: matomo-initc-config
+  namespace: {{ item }}
+data:
+  entrypoint.sh: |-
+    #!/bin/sh
+    
+    # Copy matomo content to emptydir
+    cp -a /var/www/html/* /html/
+
+    # Copy config.ini.php.orig to matomo config folder
+    cp /tmp/config.ini.php.orig /html/config/config.ini.php
+
+    # Create a soft link to geoip file even if it does not exist because of it is not in the image. The cron archive job will create this file.
+    MATOMO_GEOIP_PATH=/html/misc/DBIP-City.mmdb
+    MATOMO_GEOIP_EXTERNAL_PATH=/opt/extra-content/geoip/DBIP-City.mmdb
+    rm -f $MATOMO_GEOIP_PATH
+    ln -s $MATOMO_GEOIP_EXTERNAL_PATH $MATOMO_GEOIP_PATH
+
+    # Copy premium plugins
+    MATOMO_INI=/html/config/config.ini.php
+    find -P /opt/extra-content/premium_plugins/* -prune -type d -printf "%f\n" | while IFS= read -r directory; do
+        # Extract plugin code
+        unzip -u "/opt/extra-content/premium_plugins/$directory/*.zip" -d /html/plugins
+
+        if ! grep -q "$directory" $MATOMO_INI; then
+            # Add plugin into "installed" list
+            sed -i -E -e "/^PluginsInstalled\[\] = .*$/!b;:a;n;//ba;i\PluginsInstalled\[\] = \"$directory\"" $MATOMO_INI
+
+            # Add plugin into "activated" list
+            sed -i -E -e "/^Plugins\[\] = .*$/!b;:a;n;//ba;i\Plugins\[\] = \"$directory\"" $MATOMO_INI
+
+            # Add plugin specific configuration
+            if [ -f "/opt/extra-content/premium_plugins/$directory/config.ini.php" ]; then
+                echo "[$directory]"  >> $MATOMO_INI
+                cat "/opt/extra-content/premium_plugins/$directory/config.ini.php"  >> $MATOMO_INI
+                echo ""  >> $MATOMO_INI
+            fi
+        fi
+    done
+---
+kind: ConfigMap
+apiVersion: v1
+metadata: 
+  name: matomo-cron-config
+  namespace: {{ item }}
+data:
+  entrypoint.sh: |-
+    #!/bin/sh
+    MATOMO_GEOIP_PATH=/var/www/html/misc/DBIP-City.mmdb
+    MATOMO_GEOIP_EXTERNAL_PATH=/opt/extra-content/geoip/DBIP-City.mmdb
+    chmod +x /var/www/html/console ; cd /var/www/html/
+    ./console core:archive
+    if [ -f "$MATOMO_GEOIP_PATH" ]; then
+      cp -f $MATOMO_GEOIP_PATH $MATOMO_GEOIP_EXTERNAL_PATH
+    fi

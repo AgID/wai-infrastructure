@@ -46,7 +46,7 @@ spec:
         - name: {{ matomo_name }}-config
           mountPath: /tmp/config.ini.php.orig
           subPath: config.ini.php
-        - name: {{ matomo_name }}-config
+        - name: {{ matomo_name }}-initc-config
           mountPath: /entrypoint.sh
           subPath: entrypoint.sh
         - name: {{ matomo_name }}-extra-content
@@ -97,6 +97,9 @@ spec:
         - name: {{ matomo_name }}-config
           configMap: 
             name: matomo-php-config
+        - name: {{ matomo_name }}-initc-config
+          configMap: 
+            name: matomo-initc-config
         - name: {{ matomo_name }}-nginx-conf
           configMap: 
             name: {{ matomo_name }}-nginx-configmap
@@ -260,13 +263,11 @@ metadata:
       if ($request_method !~ ^(GET|POST)$) {
         return 405;
       }
-
-    {% if matomo_enable_session is defined and matomo_enable_session -%}
+{% if matomo_enable_session is defined and matomo_enable_session %}
     nginx.ingress.kubernetes.io/affinity: "cookie"
     nginx.ingress.kubernetes.io/session-cookie-name: "route"
     nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
-    {%- endif %}
-
+{% endif %}
 spec:
   tls:
   - hosts:
