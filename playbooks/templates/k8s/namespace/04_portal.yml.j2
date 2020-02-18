@@ -176,6 +176,7 @@ data:
     ANALYTICS_API_BASE_URL=http://matomo-service
     ANALYTICS_API_SSL_VERIFY=false
     ANALYTICS_PUBLIC_URL=https://{{ wai_base_domain[item] }}{{ wai_portal_matomo_sub_path }}
+    ANALYTICS_PUBLIC_DASHBOARD_ID={{ wai_settings[item].analytics_public_dashboard_id }}
 
     ELASTICSEARCH_HOST={{ wai_load_balancer[item].elastic[0] }}
     ELASTICSEARCH_PORT=9200
