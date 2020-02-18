@@ -94,9 +94,9 @@ wai_portal_environments:
   wai-play: public-playground
   wai-stag: staging
 # RediSearch Image
-wai_redis_image: webanalyticsitalia/wai-redisearch
-wai_redis_image_tag: 5.0.7-dev-1
-wai_redis_slave_count: 2
+wai_redisearch_image: webanalyticsitalia/wai-redisearch
+wai_redisearch_image_tag: 5.0.7-dev-1
+wai_redisearch_slave_count: 2
 
 # Matomo Image
 wai_matomo_image: webanalyticsitalia/wai-matomo
