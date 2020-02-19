@@ -20,6 +20,9 @@ wai_k8s_namespaces:
   - wai-play
   - wai-stag
 
+# Database
+db_dump_dir: /root
+
 # Base fqdn domain
 wai_base_domain: 
   wai-prod: webanalytics.italia.it
