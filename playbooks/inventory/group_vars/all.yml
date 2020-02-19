@@ -51,10 +51,11 @@ wai_load_balancer:
 
 # WAI infrastructure CIDR
 wai_infrastructure_cidr: 10.0.0.0/16
+
 # Hostnames
 wai_hostname: { ingestion: ingestion, portal: www, api: api}
 
-# Mappinng between public ip address and internal load balancer
+# Mapping between public ip address and internal load balancer
 # The following IP addresses are just placeholders and must be replaced with the real ones after all the private ip ports are created.
 wai_ip_addresses:
   wai-prod:
@@ -71,7 +72,7 @@ wai_ip_addresses:
 helm:
   cert_manager:
     version: v0.11.0
-    
+
 # Matomo POD size configuration
 wai_matomo_pod_size:
   wai-prod: { wai-portal: 4, wai-reporting: 4, wai-api: 4, matomo-portal: 4, matomo-worker: 8, matomo-ingestion: 8, matomo-api: 4 }
@@ -96,15 +97,20 @@ wai_portal_environments:
   wai-prod: production
   wai-play: public-playground
   wai-stag: staging
+
 # RediSearch Image
 wai_redis_image: webanalyticsitalia/wai-redisearch
 wai_redis_image_tag: 5.0.7-dev-1
 wai_redis_slave_count: 2
 
+# Redis
+redis_image_version: 5.0.7
+
 # Matomo Image
 wai_matomo_image: webanalyticsitalia/wai-matomo
 wai_matomo_image_tag: dev-10
 
+# Kubectl executable
 wai_kubectl: /usr/local/bin/kubectl
 
 # Base K8S Node port for http
@@ -125,9 +131,6 @@ kibana_elastic_hosts: "https://{{ hostvars[groups['elastic'][0]].ansible_default
 # Override path used to store Docker data in kubespray all\docker.yml
 docker_daemon_graph: "/opt/data/docker"
 
-# Redis
-redis_image_version: 5.0.7
-
 # GlusterFS
 gluster_apt_repo:  ppa:gluster/glusterfs-5
 gluster_package_version: 5.*
@@ -143,10 +146,12 @@ mariadb_version: '10.4'
 prometheus_exporter_url:  https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz
 # Prometheus MySQL exporter override vars
 prometheus_mysqld_exporter_url:  https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mysqld_exporter-0.12.1.linux-amd64.tar.gz
+
 # Heketi role overrides
 heketi_url: https://github.com/heketi/heketi/releases/download/v9.0.0/heketi-v9.0.0.linux.amd64.tar.gz
 heketi_enable_tls: true
 heketi_port: 8443
 
 # OpenVPN
-#openvpn_server_addr: <IP_ADDR>
+# This is needed to set IP filtered login to Matomo
+openvpn_server_addr: 1.2.3.4
