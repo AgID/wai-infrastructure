@@ -3,8 +3,11 @@ python:
   - "2.7"
   - "3.7"
 
+addons:
+  mariadb: '10.4'
+
 before_install:
-  - sudo apt-get update -qq
+  - sudo mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
 
 install:
   - curl -sLo terraform.zip https://releases.hashicorp.com/terraform/0.12.20/terraform_0.12.20_linux_amd64.zip
@@ -27,5 +30,7 @@ script:
   - cd ..
   - ansible-playbook playbooks/wai.yml -i playbooks/inventory/30-localhost --syntax-check
   - ansible-playbook playbooks/wai.yml -i playbooks/inventory/30-localhost -t templates
-  - kubeval playbooks/compiled-templates/*.yml
-  - kubeval playbooks/compiled-templates/**/*.yml
+  - kubeval playbooks/compiled-templates/k8s/*.yml
+  - kubeval playbooks/compiled-templates/k8s/**/*.yml
+  - cat playbooks/compiled-templates/db/*.sql | sudo mysql test -v
+  - cat playbooks/compiled-templates/db/**/*.sql | sudo mysql test -v
