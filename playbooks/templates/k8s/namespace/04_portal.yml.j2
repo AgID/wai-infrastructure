@@ -95,8 +95,8 @@ data:
     DB_HOST={{ wai_load_balancer[item].rdbms[0] }}
     DB_PORT=3306
     DB_DATABASE=wai
-    DB_USERNAME=wai-admin
-    DB_PASSWORD={{ wai_database_credentials[item]['wai-admin'] }}
+    DB_USERNAME={{ wai_database_credentials[item]['wai-admin-username'] }}
+    DB_PASSWORD={{ wai_database_credentials[item]['wai-admin-password'] }}
 
     BROADCAST_DRIVER=log
     CACHE_DRIVER=redis
