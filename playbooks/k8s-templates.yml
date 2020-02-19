@@ -1,5 +1,5 @@
 ---
-# Base objects
+# Compile K8S resources templates
 - name: K8S .:. Create destination directories
   file:
     path: "{{ wai_k8s_deployment_dir }}/{{ item }}"

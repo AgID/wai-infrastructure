@@ -33,29 +33,8 @@
         msg: "Password for the current environment not found"
       when: "wai_environment is not defined or wai_database_credentials[wai_environment] is not defined"
 
-    - name: Database .:. Calculate matomo super user password
-      set_fact:
-        matomo_database_superuser_password: "{{ matomo_vars.super_user.password | md5 | password_hash('bcrypt') }}"
-        portal_database_superuser_password: "{{ wai_settings.super_user.password  | password_hash('bcrypt') }}"
-
-    - name: Database .:. Prepare matomo template sql script
-      vars:
-        item: "{{ wai_environment }}"
-      template:
-        src: "mariadb/matomo_3_13_1.sql.j2"
-        dest: "/root/matomo_3_13_1.sql"
-
-    - name: Database .:. Prepare wai template sql script
-      template:
-        src: "mariadb/portal_1_0_0.sql.j2"
-        dest: "/root/portal_1_0_0.sql"
-
-    - name: Database .:. Prepare matomo extra sql script
-      template:
-        src: "{{ item }}"
-        dest : "/root/{{ item | basename }}"
-      with_fileglob:
-        - templates/mariadb/plugins/*.sql
+    - name: Database .:. Compile dumps templates
+      include_tasks: db-templates.yml
 
     - name: Database .:. Test if matomo database is present
       shell: mysql -e 'SHOW TABLES;' matomo | grep log_action

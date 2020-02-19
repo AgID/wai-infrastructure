@@ -255,8 +255,21 @@
   tasks:
     - name: K8S .:. Compile templates locally
       vars:
-        wai_k8s_deployment_dir: "{{ playbook_dir }}/compiled-templates"
+        wai_k8s_deployment_dir: "{{ playbook_dir }}/compiled-templates/k8s"
       tags:
         - never
         - templates
       import_tasks: k8s-templates.yml
+
+- hosts: localhost
+  gather_facts: no
+  vars_files: secrets.yml
+  tasks:
+    - name: Database .:. Compile templates locally
+      vars:
+        db_dump_dir: "{{ playbook_dir }}/compiled-templates/db"
+        wai_environment: "{{ item }}"
+      tags:
+        - never
+        - templates
+      import_tasks: db-templates.yml
