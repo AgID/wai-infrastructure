@@ -1,5 +1,5 @@
 - include_vars:
-    file: password.yml
+    file: secrets.yml
 
 - name: Prometheus MySql Exporter .:. Base directory
   file:

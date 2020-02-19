@@ -1,5 +1,5 @@
 - include_vars:
-    file: password.yml
+    file: secrets.yml
 
 - name: OpenVPN Server .:. Installing server
   apt:

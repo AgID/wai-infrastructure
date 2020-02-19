@@ -6,7 +6,7 @@
     - mariadb-stag[0]
   tasks:
     - include_vars:
-        file: password.yml
+        file: secrets.yml
 
     - name: Database .:. Install required software
       apt:
@@ -134,7 +134,7 @@
     - mariadb-stag
   tasks:
     - include_vars:
-        file: password.yml
+        file: secrets.yml
 
     - name: Database .:. Test if prod password
       set_fact:

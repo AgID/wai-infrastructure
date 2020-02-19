@@ -3,7 +3,7 @@
 - hosts: kube-master[0]
   tasks:
     - include_vars:
-        file: password.yml
+        file: secrets.yml
 
     # Base objects
     - name: K8S .:. Create destination directory
