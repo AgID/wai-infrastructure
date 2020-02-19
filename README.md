@@ -168,26 +168,24 @@ TODO: Indicare i parametri da modificare
 
 #### Password
 
-Il playpook per il deploy dell'infrastruttura e la configurazione del software
-di base utilizza`ansible-vault` per l'archiviazione delle password . Il file
-`password.yml` contiene le credenziali relative a:
+Il playbook per il deploy dell'infrastruttura e la configurazione del software
+di base utilizza il file `secrets.yml` per leggere tutti i parametri che vanno
+tenuti segreti per motivi di sicurezza.
 
-- utenti di *Matomo*;
-- database;
-- *Redis*;
+Per condividere il file `secrets.yml`, è possibile utilizzare `ansible-vault`.
 
-Decriptare il file `password.yml`, utilizzando la password *changeme* con il
+Dopo aver impostato i parametri all'interno del file, si può criptare con il
 comando:
 
 ```bash
-$ ansible-vault decrypt playbooks/password.yml
+$ ansible-vault encrypt playbooks/secrets.yml
 ```
 
-Impostare le password all'interno del file e crittografare nuovamente il file
-con il comando:
+Decriptare il file `secrets.yml`, utilizzando la password impostata con il
+comando:
 
 ```bash
-$ ansible-vault encrypt playbooks/password.yml
+$ ansible-vault decrypt playbooks/secrets.yml
 ```
 
 ### Esecuzione Playbook
