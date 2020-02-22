@@ -74,7 +74,7 @@
                 nginx.ingress.kubernetes.io/force-ssl-redirect: "false"                
             persistentVolume:
               enabled: true
-              size: 50Gi
+              size: 150Gi
               storageClass: storage-heketi
           networkPolicy:
             enabled: false
