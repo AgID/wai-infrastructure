@@ -6,32 +6,30 @@
     - include_vars:
         file: password.yml
 
-    - name: Elasticsearch .:. Create destination directory
-      file:
-        path: "/root/elastic"
-        state: directory
-
-    - name: Elasticsearch .:. Copy files
-      template:
-        src: "{{ item }}"
-        dest : "/root/elastic/{{ item | basename }}"
-      with_fileglob:
-        - templates/elastic/*.json
-
     - name: Elasticsearch .:. Setup policy
       uri:
         url: 'https://localhost:9200/_ilm/policy/wai-logstash-retention'
-        body: "{{ lookup('file',  '/root/elastic/01_policy.json' }}"
+        body: "{{ item }}"
+        user: elastic
+        password: '{{ elasticsearch_secrets.elastic }}'
+        force_basic_auth: yes
         method: PUT
         status_code: 200
         body_format: json
         validate_certs: no
+      with_file:
+        - templates/elastic/01_policy.json
 
     - name: Elasticsearch .:. Setup policy
       uri:
         url: 'https://localhost:9200/_template/wai-logstash'
-        body: "{{ lookup('file',  '/root/elastic/02_template.json' }}"
+        user: elastic
+        password: '{{ elasticsearch_secrets.elastic }}'
+        force_basic_auth: yes
+        body: "{{ item }}"
         method: PUT
         status_code: 200
         body_format: json
         validate_certs: no
+      with_file:
+        - templates/elastic/02_template.json
