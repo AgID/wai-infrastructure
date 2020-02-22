@@ -436,6 +436,10 @@
         filename: "{{ wai_k8s_deployment_dir }}/helm/01_cluster-issuer-{{ item }}.yml"
       with_items:
         - "{{ wai_k8s_namespaces }}"
+      register: result
+      until: result == 0
+      retries: 6
+      delay: 20
 
     - name: K8S Helm .:. Cleanup
       file:
