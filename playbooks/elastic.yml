@@ -1,0 +1,37 @@
+---
+# Configure Matomo database
+- hosts:
+    - elastic[0]
+  tasks:
+    - include_vars:
+        file: password.yml
+
+    - name: Elasticsearch .:. Create destination directory
+      file:
+        path: "/root/elastic"
+        state: directory
+
+    - name: Elasticsearch .:. Copy files
+      template:
+        src: "{{ item }}"
+        dest : "/root/elastic/{{ item | basename }}"
+      with_fileglob:
+        - templates/elastic/*.json
+
+    - name: Elasticsearch .:. Setup policy
+      uri:
+        url: 'https://localhost:9200/_ilm/policy/wai-logstash-retention'
+        body: "{{ lookup('file',  '/root/elastic/01_policy.json' }}"
+        method: PUT
+        status_code: 200
+        body_format: json
+        validate_certs: no
+
+    - name: Elasticsearch .:. Setup policy
+      uri:
+        url: 'https://localhost:9200/_template/wai-logstash'
+        body: "{{ lookup('file',  '/root/elastic/02_template.json' }}"
+        method: PUT
+        status_code: 200
+        body_format: json
+        validate_certs: no
