@@ -52,7 +52,7 @@ spec:
     - {{ wai_base_domain[item] }}
     - {{ wai_hostname['portal'] }}.{{ wai_base_domain[item] }}
     secretName: portal-ingress-acme-tls
----  
+---
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -135,7 +135,7 @@ data:
     REDIS_SESSIONS_DB=2
     REDIS_QUEUE_DB=3
 
-    {% if wai_settings[item].mail is defined and  wai_settings[item].mail.enabled -%}
+{% if wai_settings[item].mail is defined and  wai_settings[item].mail.enabled -%}
     MAIL_DRIVER=smtp
     MAIL_HOST={{ wai_settings[item].mail.host }}
     MAIL_PORT={{ wai_settings[item].mail.port }}
@@ -144,15 +144,15 @@ data:
     MAIL_ENCRYPTION={{ wai_settings[item].mail.encryption }}
     MAIL_FROM_ADDRESS={{ wai_settings[item].mail.from_address }}
     MAIL_FROM_NAME="{{ wai_settings[item].mail.from_name }}"
-    {%- endif %}
+{%- endif %}
 
-    {% if wai_settings[item].pec is defined and  wai_settings[item].pec.enabled -%}
+{% if wai_settings[item].pec is defined and  wai_settings[item].pec.enabled -%}
     PEC_HOST={{ wai_settings[item].pec.host }}
     PEC_PORT={{ wai_settings[item].pec.port }}
     PEC_USERNAME={{ wai_settings[item].pec.user }}
     PEC_PASSWORD={{ wai_settings[item].pec.password }}
     PEC_ENCRYPTION={{ wai_settings[item].pec.encryption }}
-    {%- endif %}
+{%- endif %}
 
     SPID_SP_ENTITY_ID={{ wai_settings[item].spid.entityId }}
     SPID_SP_ACS_INDEX={{ wai_settings[item].spid.acsIndex }}
@@ -160,17 +160,17 @@ data:
     SPID_SP_PRIVATE_KEY={{ wai_settings[item].spid.key }}
     SPID_SP_CERTIFICATE={{ wai_settings[item].spid.crt }}
 
-    SPID_TESTENV_ENABLED = {{ wai_settings[item].spid.testenv.enabled | default('false') }}
-    SPID_TESTENV_ENTITY_ID = {{ wai_settings[item].spid.testenv.idpEntityId }}
-    SPID_TESTENV_SSO = {{ wai_settings[item].spid.testenv.ssoUrl }}
-    SPID_TESTENV_SLO = {{ wai_settings[item].spid.testenv.sloUrl }}
-    SPID_TESTENV_CERT = {{ wai_settings[item].spid.testenv.crt }}
+    SPID_TESTENV_ENABLED={{ wai_settings[item].spid.testenv.enabled | default('false') }}
+    SPID_TESTENV_ENTITY_ID={{ wai_settings[item].spid.testenv.idpEntityId }}
+    SPID_TESTENV_SSO={{ wai_settings[item].spid.testenv.ssoUrl }}
+    SPID_TESTENV_SLO={{ wai_settings[item].spid.testenv.sloUrl }}
+    SPID_TESTENV_CERT={{ wai_settings[item].spid.testenv.crt }}
 
-    SPID_VALIDATOR_IDP_ENABLED = {{ wai_settings[item].spid.validator.enabled | default('false') }}
-    SPID_VALIDATOR_IDP_ENTITY_ID = {{ wai_settings[item].spid.validator.idpEntityId }}
-    SPID_VALIDATOR_IDP_SSO = {{ wai_settings[item].spid.validator.ssoUrl }}
-    SPID_VALIDATOR_IDP_SLO = {{ wai_settings[item].spid.validator.sloUrl }}
-    SPID_VALIDATOR_IDP_CERT = {{ wai_settings[item].spid.validator.crt }}
+    SPID_VALIDATOR_IDP_ENABLED={{ wai_settings[item].spid.validator.enabled | default('false') }}
+    SPID_VALIDATOR_IDP_ENTITY_ID={{ wai_settings[item].spid.validator.idpEntityId }}
+    SPID_VALIDATOR_IDP_SSO={{ wai_settings[item].spid.validator.ssoUrl }}
+    SPID_VALIDATOR_IDP_SLO={{ wai_settings[item].spid.validator.sloUrl }}
+    SPID_VALIDATOR_IDP_CERT={{ wai_settings[item].spid.validator.crt }}
 
     ANALYTICS_ADMIN_TOKEN={{ matomo_vars.super_user.token }}
     ANALYTICS_API_BASE_URL=http://matomo-service
@@ -268,7 +268,7 @@ data:
         location ~* \.(jpg|jpeg|png|gif|svg|ico|css|js|pdf|ttf|woff|woff2)(\?id\=.+)?$ {
           expires max;
         }
-        
+
         location ~ /\.ht {
           deny all;
           return 404;
