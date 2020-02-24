@@ -4,14 +4,14 @@
     - elastic[0]
   tasks:
     - include_vars:
-        file: password.yml
+        file: secrets.yml
 
     - name: Elasticsearch .:. Setup policy
       uri:
-        url: 'https://localhost:9200/_ilm/policy/wai-logstash-retention'
+        url: "https://localhost:9200/_ilm/policy/wai-logstash-retention"
         body: "{{ item }}"
         user: elastic
-        password: '{{ elasticsearch_secrets.elastic }}'
+        password: "{{ elasticsearch_secrets.elastic }}"
         force_basic_auth: yes
         method: PUT
         status_code: 200
@@ -22,9 +22,9 @@
 
     - name: Elasticsearch .:. Setup policy
       uri:
-        url: 'https://localhost:9200/_template/wai-logstash'
+        url: "https://localhost:9200/_template/wai-logstash"
         user: elastic
-        password: '{{ elasticsearch_secrets.elastic }}'
+        password: "{{ elasticsearch_secrets.elastic }}"
         force_basic_auth: yes
         body: "{{ item }}"
         method: PUT
