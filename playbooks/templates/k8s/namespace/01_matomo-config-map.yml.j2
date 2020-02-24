@@ -238,9 +238,10 @@ data:
 
             # Add plugin specific configuration
             if [ -f "/opt/extra-content/premium_plugins/$directory/config.ini.php" ]; then
-                echo "[$directory]"  >> $MATOMO_INI
-                cat "/opt/extra-content/premium_plugins/$directory/config.ini.php"  >> $MATOMO_INI
-                echo ""  >> $MATOMO_INI
+                echo "" >> $MATOMO_INI
+                echo "[$directory]" >> $MATOMO_INI
+                cat "/opt/extra-content/premium_plugins/$directory/config.ini.php" >> $MATOMO_INI
+                echo "" >> $MATOMO_INI
             fi
         fi
     done
