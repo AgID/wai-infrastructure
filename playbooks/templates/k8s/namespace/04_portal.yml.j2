@@ -135,7 +135,7 @@ data:
     REDIS_SESSIONS_DB=2
     REDIS_QUEUE_DB=3
 
-{% if wai_settings[item].mail is defined and  wai_settings[item].mail.enabled -%}
+{% if wai_settings[item].mail is defined and  wai_settings[item].mail.enabled %}
     MAIL_DRIVER=smtp
     MAIL_HOST={{ wai_settings[item].mail.host }}
     MAIL_PORT={{ wai_settings[item].mail.port }}
@@ -144,15 +144,15 @@ data:
     MAIL_ENCRYPTION={{ wai_settings[item].mail.encryption }}
     MAIL_FROM_ADDRESS={{ wai_settings[item].mail.from_address }}
     MAIL_FROM_NAME="{{ wai_settings[item].mail.from_name }}"
-{%- endif %}
+{% endif %}
 
-{% if wai_settings[item].pec is defined and  wai_settings[item].pec.enabled -%}
+{% if wai_settings[item].pec is defined and  wai_settings[item].pec.enabled %}
     PEC_HOST={{ wai_settings[item].pec.host }}
     PEC_PORT={{ wai_settings[item].pec.port }}
     PEC_USERNAME={{ wai_settings[item].pec.user }}
     PEC_PASSWORD={{ wai_settings[item].pec.password }}
     PEC_ENCRYPTION={{ wai_settings[item].pec.encryption }}
-{%- endif %}
+{% endif %}
 
     SPID_SP_ENTITY_ID={{ wai_settings[item].spid.entityId }}
     SPID_SP_ACS_INDEX={{ wai_settings[item].spid.acsIndex }}
