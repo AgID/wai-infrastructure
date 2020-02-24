@@ -73,8 +73,8 @@
 - name: Galera .:. Create replication user on production master primary node
   mysql_user:
     login_user: "root"
-    name: replica-user
-    password: "{{ wai_database_credentials['wai-prod']['replica-user'] }}"
+    name: "{{ wai_database_credentials['wai-prod']['replica-user-username'] }}"
+    password: "{{ wai_database_credentials['wai-prod']['replica-user-password'] }}"
     priv: "*.*:REPLICATION SLAVE"
     host: "%"
     login_unix_socket: /var/run/mysqld/mysqld.sock
@@ -84,8 +84,8 @@
 - name: Galera .:. Activate replica on production slave primary node
   mysql_replication:
     mode: changemaster
-    master_user: replica-user
-    master_password: "{{ wai_database_credentials['wai-prod']['replica-user'] }}"
+    master_user: "{{ wai_database_credentials['wai-prod']['replica-user-username'] }}"
+    master_password: "{{ wai_database_credentials['wai-prod']['replica-user-password'] }}"
     master_host: "{{ hostvars[groups['galera-prod'][0]]['ansible_default_ipv4']['address'] }}"
     login_unix_socket: /var/run/mysqld/mysqld.sock
   when: 

@@ -39,7 +39,7 @@
     - infrastructure
   roles:
     - infrastructure
-  vars_files: password.yml
+  vars_files: secrets.yml
   post_tasks:
     - name: WAI Infrastructure CA .:. Copy SSL artifacts
       copy:
@@ -76,7 +76,7 @@
 - hosts: elastic
   gather_facts: no
   vars_files:
-    - password.yml
+    - secrets.yml
   vars:    
     es_ssl_key_password: "{{ elasticsearch_secrets.ssl_key_password }}"
     es_api_host: "{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}"
@@ -94,7 +94,7 @@
 - hosts: kibana
   gather_facts: no
   vars_files:
-    - password.yml
+    - secrets.yml
   tags:
     - install
     - kibana
@@ -106,7 +106,7 @@
 - hosts: galera-prod
   gather_facts: no
   vars_files:
-    - password.yml
+    - secrets.yml
   tags:
     - install
     - galera
@@ -120,7 +120,7 @@
 - hosts: galera-prod-slave
   gather_facts: no
   vars_files:
-    - password.yml
+    - secrets.yml
   tags:
     - install
     - galera
@@ -157,7 +157,7 @@
 # Install GlusterFS server
 - hosts: gluster
   gather_facts: no
-  vars_files: password.yml
+  vars_files: secrets.yml
   vars:
     heketi_cert_file: "{{ wai_infrastructure_ca.root_folder }}/{{ inventory_hostname }}.crt"
     heketi_key_file: "{{ wai_infrastructure_ca.root_folder }}/{{ inventory_hostname }}.key"
@@ -251,12 +251,25 @@
 
 - hosts: localhost
   gather_facts: no
-  vars_files: password.yml
+  vars_files: secrets.yml
   tasks:
     - name: K8S .:. Compile templates locally
       vars:
-        wai_k8s_deployment_dir: "{{ playbook_dir }}/compiled-templates"
+        wai_k8s_deployment_dir: "{{ playbook_dir }}/compiled-templates/k8s"
       tags:
         - never
         - templates
       import_tasks: k8s-templates.yml
+
+- hosts: localhost
+  gather_facts: no
+  vars_files: secrets.yml
+  tasks:
+    - name: Database .:. Compile templates locally
+      vars:
+        db_dump_dir: "{{ playbook_dir }}/compiled-templates/db"
+        wai_environment: "{{ item }}"
+      tags:
+        - never
+        - templates
+      import_tasks: db-templates.yml

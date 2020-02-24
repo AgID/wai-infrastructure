@@ -9,15 +9,15 @@ data:
   config.ini.php: |-
     [database]
     host = "{{ wai_load_balancer[item].rdbms[0] }}"
-    username = "matomo-admin"
-    password = "{{ wai_database_credentials[item]['matomo-admin'] }}"
+    username = "{{ wai_database_credentials[item]['matomo-admin-username'] }}"
+    password = "{{ wai_database_credentials[item]['matomo-admin-password'] }}"
     dbname = "matomo"
 
     {% if wai_load_balancer[item].rdbms | length > 1 -%}
     [database_reader]
     host = "{{ wai_load_balancer[item].rdbms[1] }}"
-    username = "matomo-user"
-    password = "{{ wai_database_credentials[item]['matomo-user'] }}"
+    username = "{{ wai_database_credentials[item]['matomo-user-username'] }}"
+    password = "{{ wai_database_credentials[item]['matomo-user-password'] }}"
     dbname = "matomo"
     {%- endif %}
 

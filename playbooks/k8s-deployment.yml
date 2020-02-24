@@ -3,7 +3,7 @@
 - hosts: kube-master[0]
   tasks:
     - include_vars:
-        file: password.yml
+        file: secrets.yml
 
     - name: K8S .:. Add label to worker nodes
       raw: "{{ wai_kubectl }} label nodes {{ item }} role=metallb"
