@@ -48,15 +48,17 @@
 
     - name: K8S Helm .:. Test if Cert-Manager is installed
       shell: "helm list | grep cert-manager -c"
+      failed_when: helm_status.rc != 0 and helm_status.rc != 1
       register: helm_status
 
     - name: K8S Helm .:. Install Cert-Manager
       shell: "helm install --name cert-manager --namespace cert-manager jetstack/cert-manager --version {{ helm.cert_manager.version }}"
-      when: helm_status.stdout == 0
+      when: helm_status.stdout == "0"
 
     # Prometheus
     - name: K8S Helm .:. Test if Prometheus is installed
       shell: "helm list | grep prometheus -c"
+      failed_when: helm_status.rc != 0 and helm_status.rc != 1
       register: helm_status
 
     - name: K8S Helm .:. Install Prometheus
@@ -182,11 +184,12 @@
                       annotations:
                         description: "{{ '{{' }} $labels.kubernetes_node {{ '}}' }}: CPU usage is above 75% (current value is: {{ '{{' }} $value {{ '}}' }})"
                         summary: "{{ '{{' }} $labels.kubernetes_node {{ '}}' }}: High CPU usage detect"
-      when: helm_status.stdout == 0
+      when: helm_status.stdout == "0"
 
     # Install Grafana
     - name: K8S Helm .:. Test if Prometheus is installed
       shell: "helm list | grep grafana -c"
+      failed_when: helm_status.rc != 0 and helm_status.rc != 1
       register: helm_status
 
     - name: K8S Helm .:. Install Grafana
@@ -270,7 +273,7 @@
                 gnetId: 7362
                 revision: 5
                 datasource: Prometheus
-      when: helm_status.stdout == 0
+      when: helm_status.stdout == "0"
 
     # Install Redis
     - name: K8S Helm .:. Install Redis
@@ -310,6 +313,7 @@
               - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
               - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '2000' }}mb"
               - "--maxmemory-policy noeviction"
+            disableCommands: "{{ ['FLUSHDB', 'FLUSHALL'] if item[0] == 'wai-prod' else []}}"
             persistence:
               enabled: true
               storageClass: storage-heketi
