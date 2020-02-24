@@ -272,11 +272,11 @@
         host: "{{ clusterIP.stdout }}"
         values: 
           image:
-            repository: "{{ wai_redis_image }}"
-            tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_redis_image_tag }}"
+            repository: "{{ wai_redisearch_image }}"
+            tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_redisearch_image_tag }}"
           cluster:
             enabled: true
-            slaveCount: "{{ wai_redis_slave_count }}"
+            slaveCount: "{{ wai_redisearch_slave_count }}"
           usePassword: true
           existingSecret: redis-master-secret
           existingSecretPasswordKey: "{{ item[1] }}-password"

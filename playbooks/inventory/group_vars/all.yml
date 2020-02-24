@@ -87,7 +87,7 @@ wai_k8s_resource_quota:
 
 # IPA Redisearch image
 wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
-wai_ipa_redisearch_image_tag: 5.0.7-dev-4
+wai_ipa_redisearch_image_tag: 5.0.7-dev-5
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
@@ -99,9 +99,9 @@ wai_portal_environments:
   wai-stag: staging
 
 # RediSearch Image
-wai_redis_image: webanalyticsitalia/wai-redisearch
-wai_redis_image_tag: 5.0.7-dev-1
-wai_redis_slave_count: 2
+wai_redisearch_image: webanalyticsitalia/wai-redisearch
+wai_redisearch_image_tag: 5.0.7-dev-2
+wai_redisearch_slave_count: 2
 
 # Redis
 redis_image_version: 5.0.7
