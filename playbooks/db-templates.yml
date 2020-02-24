@@ -10,7 +10,6 @@
 - name: Database .:. Calculate matomo super user password
   set_fact:
     matomo_database_superuser_password: "{{ matomo_vars.super_user.password | md5 | password_hash('bcrypt') }}"
-    portal_database_superuser_password: "{{ wai_settings.super_user.password | password_hash('bcrypt') }}"
 
 - name: Database .:. Prepare matomo template sql script
   vars:
@@ -29,14 +28,9 @@
   with_items: "{{ wai_k8s_namespaces }}"
   when: inventory_hostname == 'localhost'
 
-- name: Database .:. Prepare wai template sql script
-  template:
-    src: "mariadb/portal_1_0_0.sql.j2"
-    dest: "{{ db_dump_dir }}/portal_1_0_0.sql"
-
 - name: Database .:. Prepare matomo extra sql script
   template:
     src: "{{ item }}"
-    dest : "{{ db_dump_dir }}/{{ item | basename }}"
+    dest: "{{ db_dump_dir }}/{{ item | basename }}"
   with_fileglob:
     - templates/mariadb/plugins/*.sql

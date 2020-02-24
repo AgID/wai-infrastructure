@@ -68,8 +68,6 @@
       mysql_db:
         name: wai
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
-        state: import
-        target: "/root/portal_1_0_0.sql"
       when: wai_db_status.rc != 0
 
     - name: Database .:.  Create Matomo super user
