@@ -534,14 +534,14 @@ INSERT INTO `plugin_setting` VALUES
   ('QueuedTracking','redisHost','ingestion-redis',0,'',28),
   ('QueuedTracking','redisPort','26379',0,'',29),
   ('QueuedTracking','redisDatabase','0',0,'',30),
-  ('QueuedTracking','redisPassword','{{ redis_password.ingestion_redis_master[item] }}',0,'',31),
+  ('QueuedTracking','redisPassword','{{ redis_password.ingestion_redis_master[env] }}',0,'',31),
   ('QueuedTracking','queueEnabled','1',0,'',32),
-  ('QueuedTracking','numQueueWorkers','{{ wai_matomo_pod_size[item]['matomo-worker'] }}',0,'',33),
+  ('QueuedTracking','numQueueWorkers','{{ wai_matomo_pod_size[env]['matomo-worker'] }}',0,'',33),
   ('QueuedTracking','numRequestsToProcess','25',0,'',34),
   ('QueuedTracking','processDuringTrackingRequest','0',0,'',35),
-  ('ProtectTrackID','baseSetting','{{ matomo_vars.plugins.protect_track_id[item].base_settings }}',0,'',36),
-  ('ProtectTrackID','saltSetting','{{ matomo_vars.plugins.protect_track_id[item].salt_settings }}',0,'',37),
-  ('ProtectTrackID','lengthSetting','{{ matomo_vars.plugins.protect_track_id[item].length_settings }}',0,'',38);
+  ('ProtectTrackID','baseSetting','{{ matomo_vars.plugins.protect_track_id[env].base_settings }}',0,'',36),
+  ('ProtectTrackID','saltSetting','{{ matomo_vars.plugins.protect_track_id[env].salt_settings }}',0,'',37),
+  ('ProtectTrackID','lengthSetting','{{ matomo_vars.plugins.protect_track_id[env].length_settings }}',0,'',38);
 /*!40000 ALTER TABLE `plugin_setting` ENABLE KEYS */;
 UNLOCK TABLES;
 

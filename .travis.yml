@@ -4,7 +4,7 @@ python:
   - "3.7"
 
 addons:
-  mariadb: '10.4'
+  mariadb: "10.4"
 
 before_install:
   - sudo mysql -e 'CREATE DATABASE IF NOT EXISTS test;'

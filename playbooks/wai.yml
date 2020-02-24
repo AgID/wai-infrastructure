@@ -184,7 +184,7 @@
 - name: Deploy Elasticsearch data
   tags:
     - deploy
-    - elastic
+    - elastic-deploy
   import_playbook: elastic.yml
 
 # Deploy Matomo database
