@@ -180,6 +180,13 @@
   roles:
     - glusterfs.client
 
+# Deploy Elatic extra data
+- name: Deploy Elasticsearch data
+  tags:
+    - deploy
+    - elastic
+  import_playbook: elastic.yml
+
 # Deploy Matomo database
 - name: Deploy Matomo database
   tags:
