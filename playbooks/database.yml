@@ -81,9 +81,9 @@
 
     - name: Database .:.  Create Matomo readonly user
       mysql_user:
-        name: matomo-user
+        name: "{{ wai_database_credentials[wai_environment]['matomo-user-username'] }}"
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
-        password: "{{ wai_database_credentials[wai_environment]['matomo-user'] }}"
+        password: "{{ wai_database_credentials[wai_environment]['matomo-user-password'] }}"
         priv: "matomo.*:SELECT,CREATE TEMPORARY TABLES"
         host: "%"
         state: present
