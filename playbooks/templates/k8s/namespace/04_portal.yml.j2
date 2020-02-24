@@ -60,7 +60,6 @@ metadata:
   namespace: {{ item }}
 data:
   env: |-
-    HOSTNAME={{ wai_base_domain[item] }}
     APP_NAME="Web Analytics Italia"
     APP_NAME_SHORT="WAI"
     APP_ENV={{ wai_portal_environments[item] }}
@@ -68,7 +67,12 @@ data:
     APP_SALT={{ wai_settings[item].log.app_salt }}
     APP_DEBUG=false
     APP_URL=https://{{ wai_base_domain[item] }}
-    APP_VERSION=0.1
+
+    APP_CLOSED_BETA_ENABLED={{ wai_settings[item].closed_beta.enabled }}
+    CLOSED_BETA_WHITELIST_WEBHOOK_CLIENT_SECRET={{ wai_settings[item].closed_beta.secret }}
+    CLOSED_BETA_WHITELIST_REPOSITORY_FULL_NAME={{ wai_settings[item].closed_beta.repository.name }}
+    CLOSED_BETA_WHITELIST_REPOSITORY_BRANCH={{ wai_settings[item].closed_beta.repository.branch }}
+    CLOSED_BETA_WHITELIST_REPOSITORY_FILE_NAME={{ wai_settings[item].closed_beta.repository.file }}
 
     APP_SUPER_ADMIN_NAME={{ wai_settings.super_user.name }}
     APP_SUPER_ADMIN_FAMILY_NAME={{ wai_settings.super_user.family_name }}
@@ -86,9 +90,10 @@ data:
     PENDING_WEBSITE_WARNING=10
     PENDING_WEBSITE_REMOVE=15
 
-    ARCHIVING_WEBSITE_WARNING=60
-    ARCHIVING_WEBSITE_ARCHIVE=90
-    ARCHIVING_WEBSITE_NOTIFICATION_WEEK_DAY=1
+    ARCHIVING_WEBSITE_WARNING=10
+    ARCHIVING_WEBSITE_ARCHIVE=20
+    ARCHIVING_WEBSITE_NOTIFICATION_INTERVAL=5
+    PRIMARY_WEBSITE_NOT_TRACKING_NOTIFICATION_WEEK_DAY=1
     ARCHIVING_WEBSITE_DAILY_NOTIFICATION=3
 
     DB_CONNECTION=mysql
@@ -104,6 +109,8 @@ data:
     SESSION_DRIVER=redis
     SESSION_LIFETIME=120
     SESSION_CONNECTION=sessions-sentinel
+    SESSION_ENCRYPT=true
+    SESSION_SECURE_COOKIE=true
     QUEUE_CONNECTION=redis
     QUEUE_REDIS_CONNECTION=queue-sentinel
 
@@ -118,17 +125,15 @@ data:
 
     REDIS_SENTINEL_SET=application-redis-master
     REDIS_INDEXES_USE_SENTINELS=true
-
-    REDIS_CACHE_DB=1
-    REDIS_SESSIONS_DB=2
-    REDIS_QUEUE_DB=3
-
     REDIS_IPA_INDEX_HOST=ipa-redisearch
     REDIS_IPA_INDEX_PASSWORD={{ redis_password.ipa_redisearch_master[item] }}
     REDIS_IPA_INDEX_PORT=26379
     REDIS_IPA_INDEX_USE_SENTINELS=true
     REDIS_IPA_INDEX_SENTINELS=tcp://ipa-redisearch:26379
     REDIS_IPA_INDEX_SENTINEL_SET=ipa-redisearch-master
+    REDIS_CACHE_DB=1
+    REDIS_SESSIONS_DB=2
+    REDIS_QUEUE_DB=3
 
     {% if wai_settings[item].mail is defined and  wai_settings[item].mail.enabled -%}
     MAIL_DRIVER=smtp
@@ -149,23 +154,6 @@ data:
     PEC_ENCRYPTION={{ wai_settings[item].pec.encryption }}
     {%- endif %}
 
-    ANALYTICS_ADMIN_TOKEN={{ matomo_vars.super_user.token }}
-    ANALYTICS_API_BASE_URL=http://matomo-service
-    ANALYTICS_API_SSL_VERIFY=false
-    ANALYTICS_PUBLIC_URL=https://{{ wai_base_domain[item] }}{{ wai_portal_matomo_sub_path }}
-
-    ELASTICSEARCH_HOST={{ wai_load_balancer[item].elastic[0] }}
-    ELASTICSEARCH_PORT=9200
-    ELASTICSEARCH_INDEX_PREFIX=wai
-    ELASTICSEARCH_INDEX_NAME=application-log
-    ELASTICSEARCH_IGNORE_EXCEPTIONS=false
-    ELASTICSEARCH_SEARCH_TEMPLATE_NAME=wai-portal-search-template
-    ELASTICSEARCH_USER=portal_user
-    ELASTICSEARCH_PASSWORD={{ elasticsearch_secrets.portal_user }}
-
-    SESSION_ENCRYPT=true
-    SESSION_SECURE_COOKIE=true
-
     SPID_SP_ENTITY_ID={{ wai_settings[item].spid.entityId }}
     SPID_SP_ACS_INDEX={{ wai_settings[item].spid.acsIndex }}
     SPID_SP_ATTRIBUTES_INDEX={{ wai_settings[item].spid.attributesIndex }}
@@ -184,18 +172,24 @@ data:
     SPID_VALIDATOR_IDP_SLO = {{ wai_settings[item].spid.validator.sloUrl }}
     SPID_VALIDATOR_IDP_CERT = {{ wai_settings[item].spid.validator.crt }}
 
-    SPID_TESTENV_ENABLED = {{ wai_settings[item].spid.testenv.enabled | default('false') }}
-    SPID_TESTENV_ENTITY_ID = {{ wai_settings[item].spid.testenv.idpEntityId }}
-    SPID_TESTENV_SSO = {{ wai_settings[item].spid.testenv.ssoUrl }}
-    SPID_TESTENV_SLO = {{ wai_settings[item].spid.testenv.sloUrl }}
-    SPID_TESTENV_CERT = {{ wai_settings[item].spid.testenv.crt }}
+    ANALYTICS_ADMIN_TOKEN={{ matomo_vars.super_user.token }}
+    ANALYTICS_API_BASE_URL=http://matomo-service
+    ANALYTICS_API_SSL_VERIFY=false
+    ANALYTICS_PUBLIC_URL=https://{{ wai_base_domain[item] }}{{ wai_portal_matomo_sub_path }}
+    ANALYTICS_PUBLIC_DASHBOARD_ID={{ wai_settings[item].analytics_public_dashboard_id }}
 
-    SPID_VALIDATOR_IDP_ENABLED = {{ wai_settings[item].spid.validator.enabled | default('false') }}
-    SPID_VALIDATOR_IDP_ENTITY_ID = {{ wai_settings[item].spid.validator.idpEntityId }}
-    SPID_VALIDATOR_IDP_SSO = {{ wai_settings[item].spid.validator.ssoUrl }}
-    SPID_VALIDATOR_IDP_SLO = {{ wai_settings[item].spid.validator.sloUrl }}
-    SPID_VALIDATOR_IDP_CERT = {{ wai_settings[item].spid.validator.crt }}
+    ELASTICSEARCH_HOST={{ wai_load_balancer[item].elastic[0] }}
+    ELASTICSEARCH_PORT=9200
+    ELASTICSEARCH_INDEX_PREFIX=wai
+    ELASTICSEARCH_INDEX_NAME=application-log
+    ELASTICSEARCH_IGNORE_EXCEPTIONS=false
+    ELASTICSEARCH_SEARCH_TEMPLATE_NAME=wai-portal-search-template
+    ELASTICSEARCH_USER=portal_user
+    ELASTICSEARCH_PASSWORD={{ elasticsearch_secrets.portal_user }}
 
+    TRACKING_MATOMO_ID={{ wai_settings[item].tracking.matomo }}
+    TRACKING_GA_ID={{ wai_settings[item].tracking.ga }}
+    TRACKING_HOTJAR_ID={{ wai_settings[item].tracking.hotjar }}
 ---
 kind: ConfigMap
 apiVersion: v1
