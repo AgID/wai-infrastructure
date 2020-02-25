@@ -34,9 +34,9 @@
       with_file:
         - templates/elastic/02_template.json
 
-    - name: Elasticsearch .:. Setup WAI portal index
+    - name: Elasticsearch .:. Setup WAI portal index template
       uri:
-        url: 'https://localhost:9200/wai-application-log'
+        url: 'https://localhost:9200/_template/wai-application-log'
         user: elastic
         password: '{{ elasticsearch_secrets.elastic }}'
         force_basic_auth: yes
