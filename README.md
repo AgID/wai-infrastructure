@@ -1,25 +1,14 @@
-# WAI - Kubernetes
+# Web Analytics Italia - Infrastructure
 
 [![Build Status](https://travis-ci.com/AgID/wai-infrastructure.svg?branch=develop)](https://travis-ci.com/AgID/wai-infrastructure)
 
 Il repository contiene gli script di installazione e configurazione di tutte le
-componenti infrastrutturali e del software di base della soluzione Web Analitycs
-Italia, WAI:
-
-1. Installazione pacchetti software
-2. Kubernetes
-3. MariaDB con Galera
-4. GlusterFS
-5. Elasticsearch
-6. Immagini docker
-7. Script di deployment di Kubernetes
+componenti infrastrutturali e del software di base della piattaforma
+[Web Analitycs Italia](https://webanalytics.italia.it/).
 
 Di seguito l'infrastruttura applicativa e la dislocazione delle componenti.
 
-![Architettura](doc-images/architettura.jpg)
-
-Per la descrizione della infrastruttura fare riferimento alla documentazione
-consultabile a questo [link]() ed al capacity plan presente a questo [link]().
+![Architettura](doc-images/architettura-wai.png)
 
 ## Requisiti
 
@@ -40,7 +29,7 @@ $ ssh-keygen -t rsa -b 4096 -N '' -f ssh_wai_key
 Il comando creerà una copia di chiavi (pubblica e privata) che saranno
 utilizzate per l'accesso agli host dell'infrastruttura.
 
-## Provisioning
+## Provisioning a livello IaaS
 
 Per il provisioning dell'infrastruttura presso il servizio SPC Cloud - Lotto 1,
 è disponibile lo script `infrastructure/wai-provisioner.py` che automatizza la
@@ -82,7 +71,7 @@ $ infrastructure/wai-provisioner.py <environment> destroy
 Il parametro `<environment>` può assumere uno dei tre valori: `production`,
 `staging` o `public-playground`.
 
-## Ansible
+## Installazione
 
 Per l'installazione e configurazione del software di base e delle componenti
 infrastrutturali è stato realizzato il playbook
@@ -128,52 +117,35 @@ $ git clone --branch v2.12.0 https://github.com/kubernetes-sigs/kubespray.git pl
 Il playbook per l'installazione di Web Analytics Italia contiene i seguenti
 ruoli:
 
-- _infrastructure_: Utilizzato per alcuni task di preparazione degli host;
-- _elastic.elasticsearch_: Installazione di Elasticsearch tramite i ruoli
+- *infrastructure*: utilizzato per alcuni task di preparazione degli host;
+- *elastic.elasticsearch*: installazione di Elasticsearch tramite i ruoli
   installati con `ansible-galaxy`;
-- _kibana_: Installazione di [Kibana](https://www.elastic.co/products/kibana);
-- _glusterfs_: Installazione di [GlusterFS](https://www.gluster.org/)
-  **DA ULTIMARE CONFIGURAZIONE PEER**
-- _mariadb_: Installazione di [MariaDB](https://mariadb.com/)
-  **DA ULTIMARE PARAMETRI DI STARTUP**
-- _galera_: Configurazione dei due cluster [Galera](https://galeracluster.com/)
-  per produzione e public-playground **DA FARE**
-- _kubernetes_: Installazione del cluster di
+- *kibana*: installazione di [Kibana](https://www.elastic.co/products/kibana);
+- *glusterfs*: installazione di [GlusterFS](https://www.gluster.org/);
+- *mariadb*: installazione di [MariaDB](https://mariadb.com/);
+- *galera*: configurazione dei cluster [Galera](https://galeracluster.com/)
+- *kubernetes*: installazione del cluster
   [Kubernetes](https://kubernetes.io/) con il playbook esterno
-  [kubespray](https://github.com/kubernetes-sigs/kubespray)
+  [kubespray](https://github.com/kubernetes-sigs/kubespray);
+- *openvpn_server*: installazione di un server [OpenVPN](https://openvpn.net/);
+- *prometheus_mysqld_exporter* e *prometheus_node_exporter*: installazione di
+  exporters per la raccolta di metriche con [Prometheus](https://prometheus.io/);
 
 ### Tags
 
-Il playbook contiene anche i seguenti tag:
-
-- _check_: per i controlli iniziali sui requisiti;
-- _install_: relativo all'installazione di tutto il software in tutti e tre gli
-  ambienti;
-- _production_: relativo all'installazione nel solo ambiente _production_;
-- _staging_: relativo all'installazione nel solo ambiente _staging_;
-- _public-playground_: relativo all'installazione nel solo ambiente
-  _public-playground_;
-- _deploy_: relativo al deploy del database _Matomo_ e di tutte le risorse
-  _Kubernetes_;
-- _matomo_: relativo al deploy del solo database _Matomo_;
-- _kubernetes-deploy_: relativo al deploy di tutte le risorse _Kubernetes_;
-
-Per generare in ambiente locale tutti i file relativi alle risorse K8S si può
-usare il tag _templates_:
-
-```bash
-$ ansible-playbook playbooks/wai.yml -i playbooks/inventory/30-localhost -t templates
-```
+Il playbook contiene diversi tag che è possibile consultare dal playbook
+[`wai.yml`](playbooks/wai.yml).
 
 ### Parametri
 
-TODO: Indicare i parametri da modificare
+Tutti i parametri generali modificabili sono disponibili nel file
+[`all.yml`](playbooks/inventory/group_vars/all.yml).
 
-#### Password
+#### Parametri sensibili
 
 Il playbook per il deploy dell'infrastruttura e la configurazione del software
-di base utilizza il file `secrets.yml` per leggere tutti i parametri che vanno
-tenuti segreti per motivi di sicurezza.
+di base utilizza il file [`secrets.yml`](playbooks/secrets.yml) per leggere
+tutti i parametri che vanno tenuti segreti per motivi di sicurezza.
 
 Per condividere il file `secrets.yml`, è possibile utilizzare `ansible-vault`.
 
@@ -200,68 +172,34 @@ tutti gli host presenti nell'inventory con il comando:
 $ ansible all -m ping --limit 'wai'
 ```
 
-Per eseguire il playbook:
+Per l'installazione è consigliabile usare questa sequenza ordinata di tag con il
+comando:
 
 ```bash
-$ ansible-playbook playbooks/wai.yml -b --ask-vault-pass --limit 'wai'
+$ ansible-playbook playbooks/wai.yml -b --limit 'wai' --tags=<tag>
 ```
 
-## Immagini docker
+1. *infrastructure*: controlli iniziali sui requisiti;
+2. *openvpn*: server OpenVPN;
+3. *elastic,kibana*: ElasticSearch e Kibana;
+4. *galera,mariadb*: DBMS e cluster;
+5. *gluster*: GlusterFS;
+6. *matomo*: database Matomo;
+7. *kubernetes*: cluster Kubernetes;
+8. *elastic-deploy*: risorse di ElasticSearch;
+9. *kubernetes-deploy*: risorse di Kubernetes;
+10. *kubernetes-deploy-helm*: risorse di Kubernetes via Helm;
 
-TODO: _Breve descrizione e link all'md di dettaglio_
+Per generare in ambiente locale tutti i file relativi ai template si può
+usare il tag _templates_:
 
-### Redis
+```bash
+$ ansible-playbook playbooks/wai.yml -i playbooks/inventory/30-localhost -t templates
+```
 
-TODO: _Breve descrizione e link all'md di dettaglio_
+## Immagini per i container
 
-#### Sentinel
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-### Matomo
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-#### Base Matomo
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-#### Matomo Portal
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-#### Matomo Ingestion
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-#### Matomo API
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-#### Matomo Worker
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-#### Matomo Cron Job
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-### WAI
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-#### WAI Portal
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-#### WAI API
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-#### WAI Cron Job
-
-TODO: _Breve descrizione e link all'md di dettaglio_
-
-## Deployment Kubernetes
-
-TODO: _Breve descrizione e link all'md di dettaglio_
+Le immagini docker usate per i container sono disponibili pubblicamente nella
+pagina dell'organizzazione
+[Web Analytics Italia](https://hub.docker.com/u/webanalyticsitalia) su Docker
+Hub.
