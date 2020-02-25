@@ -4,7 +4,7 @@
 - name: WAI Infrastructure CA .:. Ensure folders
   become: true
   file:
-    path: '{{ item }}' 
+    path: '{{ item }}'
     state: directory
   with_items:
     - "{{ wai_infrastructure_ca.root_folder }}/crt"
@@ -41,7 +41,7 @@
   become: true
   openssl_certificate:
     path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
-    provider: selfsigned 
+    provider: selfsigned
     subject_alt_name_strict: false
     csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/wai-ca.csr"
     privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
@@ -50,7 +50,7 @@
 
 - name: WAI Infrastructure CA .:. Set facts
   set_fact:
-    pki_hosts: "{{ pki_hosts | default([]) + [ { 'hostname': item, 'ip' : hostvars[item].ansible_default_ipv4.address }  ] }}"
+    pki_hosts: "{{ pki_hosts | default([]) + [ { 'hostname': item, 'ip' : hostvars[item].ansible_default_ipv4.address } ] }}"
   with_inventory_hostnames:
     - wai
 
@@ -63,7 +63,7 @@
   with_items: "{{ pki_hosts }}"
   when: pki_hosts is defined
 
-- name: WAI Infrastructure CA  .:. Create  hosts csr
+- name: WAI Infrastructure CA .:. Create hosts csr
   become: true
   openssl_csr:
     path: "{{ wai_infrastructure_ca.root_folder }}/csr/{{ item.hostname }}.csr"
@@ -83,11 +83,11 @@
   with_items: "{{ pki_hosts }}"
   when: pki_hosts is defined
 
-- name: WAI Infrastructure CA .:.  Create  hosts certificate
+- name: WAI Infrastructure CA .:. Create hosts certificate
   become: true
   openssl_certificate:
     path: "{{ wai_infrastructure_ca.root_folder }}/crt/{{ item.hostname }}.crt"
-    provider: ownca 
+    provider: ownca
     subject_alt_name_strict: false
     csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/{{ item.hostname }}.csr"
     ownca_path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"

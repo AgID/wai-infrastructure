@@ -22,7 +22,7 @@
 - name: K8S .:. Prepare namespace dependant deployment
   vars:
     item: "{{ filevar[0] }}"
-  template:      
+  template:
     src: "{{ filevar[1] }}"
     dest : "{{ wai_k8s_deployment_dir }}/{{ filevar[0] }}/{{ filevar[1] | basename | regex_replace('.j2','') }}"
   with_nested:
@@ -43,7 +43,7 @@
   template:
     dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-ingestion.yml"
     src: k8s/jail/matomo-jail.yml.j2
-  with_items: "{{ wai_k8s_namespaces }}" 
+  with_items: "{{ wai_k8s_namespaces }}"
 
 # Matomo API
 - name: K8S .:. Prepare Matomo API deployment file
@@ -56,7 +56,7 @@
   template:
     dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-api.yml"
     src: k8s/jail/matomo-jail.yml.j2
-  with_items: "{{ wai_k8s_namespaces }}" 
+  with_items: "{{ wai_k8s_namespaces }}"
 
 # Matomo Portal
 - name: K8S .:. Prepare Matomo portal deployment file
@@ -69,4 +69,4 @@
   template:
     dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-portal.yml"
     src: k8s/jail/matomo-jail.yml.j2
-  with_items: "{{ wai_k8s_namespaces }}" 
+  with_items: "{{ wai_k8s_namespaces }}"

@@ -218,7 +218,7 @@ resource "openstack_compute_instance_v2" "k8s_worker_instance" {
     ansible_user = var.ssh_user
     groups       = join(", ", ["wai", element(var.k8s_worker_instance_groups, count.index)])
   }
-  # scheduler_hints  {
+  # scheduler_hints {
   #   group = openstack_compute_servergroup_v2.k8s_server_group.0.id
   # }
 }
@@ -267,7 +267,7 @@ resource "openstack_networking_port_v2" "k8s_worker_port" {
     content {
       ip_address = allowed_address_pairs.value.ip
     }
-  }  
+  }
 }
 
 # Kubernetes worker node floating IP association

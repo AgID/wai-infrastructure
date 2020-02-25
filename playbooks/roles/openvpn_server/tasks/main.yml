@@ -9,7 +9,7 @@
 
 - name: OpenVPNServer .:. Ensure directories
   file:
-    path: /etc/openvpn/certs 
+    path: /etc/openvpn/certs
     state: directory
 
 - name: OpenVPN Server .:. Create root CA private key
@@ -39,7 +39,7 @@
 - name: OpenVPN Server .:. Create root CA certificate
   openssl_certificate:
     path: /etc/openvpn/certs/wai-operation-root-ca.crt
-    provider: selfsigned 
+    provider: selfsigned
     subject_alt_name_strict: false
     csr_path: /etc/openvpn/certs/wai-operation-root-ca.csr
     privatekey_passphrase: "{{ openvpn_root_ca_password }}"
@@ -69,7 +69,7 @@
 - name: OpenVPN Server .:. Create vpn server certificate
   openssl_certificate:
     path: /etc/openvpn/certs/vpn-server.crt
-    provider: ownca 
+    provider: ownca
     subject_alt_name_strict: false
     csr_path: /etc/openvpn/certs/vpn-server.csr
     ownca_path: /etc/openvpn/certs/wai-operation-root-ca.crt
@@ -100,7 +100,7 @@
 - name: OpenVPN Server .:. Create default user certificate
   openssl_certificate:
     path: /etc/openvpn/certs/user-admin.crt
-    provider: ownca 
+    provider: ownca
     subject_alt_name_strict: false
     csr_path: /etc/openvpn/certs/user-admin.crs
     ownca_path: /etc/openvpn/certs/wai-operation-root-ca.crt

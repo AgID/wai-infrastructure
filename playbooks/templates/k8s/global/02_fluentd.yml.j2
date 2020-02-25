@@ -69,9 +69,9 @@ spec:
       - name: fluentd
         image: fluent/fluentd-kubernetes-daemonset:v1.7.3-debian-elasticsearch7-1.0
         env:
-          - name:  FLUENT_ELASTICSEARCH_HOST
+          - name: FLUENT_ELASTICSEARCH_HOST
             value: {{ wai_load_balancer['wai-prod'].elastic[0] }}
-          - name:  FLUENT_ELASTICSEARCH_PORT
+          - name: FLUENT_ELASTICSEARCH_PORT
             value: "9200"
           - name: FLUENT_ELASTICSEARCH_SCHEME
             value: "https"

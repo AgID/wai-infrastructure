@@ -364,7 +364,7 @@ data:
       protocol: layer2
       addresses:
   {% for item in wai_k8s_namespaces %}
-  {% for host in  wai_ip_addresses[item] %}
+  {% for host in wai_ip_addresses[item] %}
       - {{ host }}-{{ host }}
   {% endfor %}
   {% endfor %}

@@ -1,1 +1,1 @@
-DATA_SOURCE_NAME='exporter:{{prometheus_mysqld_exporter_password}}@({{ hostvars[inventory_hostname].ansible_default_ipv4.address }}:3306)/'
+DATA_SOURCE_NAME='exporter:{{ prometheus_mysqld_exporter_password }}@({{ hostvars[inventory_hostname].ansible_default_ipv4.address }}:3306)/'

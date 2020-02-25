@@ -22,4 +22,4 @@
         kubectl: "{{ wai_kubectl }}"
         filename: "{{ item }}"
         state: "latest"
-      with_items: "{{ deployment_files.stdout_lines }}" 
+      with_items: "{{ deployment_files.stdout_lines }}"

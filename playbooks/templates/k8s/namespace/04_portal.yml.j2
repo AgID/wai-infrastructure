@@ -143,7 +143,7 @@ data:
     REDIS_SESSIONS_DB=2
     REDIS_QUEUE_DB=3
 
-{% if wai_settings[item].mail is defined and  wai_settings[item].mail.enabled %}
+{% if wai_settings[item].mail is defined and wai_settings[item].mail.enabled %}
     MAIL_DRIVER=smtp
     MAIL_HOST={{ wai_settings[item].mail.host }}
     MAIL_PORT={{ wai_settings[item].mail.port }}
@@ -154,7 +154,7 @@ data:
     MAIL_FROM_NAME="{{ wai_settings[item].mail.from_name }}"
 {% endif %}
 
-{% if wai_settings[item].pec is defined and  wai_settings[item].pec.enabled %}
+{% if wai_settings[item].pec is defined and wai_settings[item].pec.enabled %}
     PEC_HOST={{ wai_settings[item].pec.host }}
     PEC_PORT={{ wai_settings[item].pec.port }}
     PEC_USERNAME={{ wai_settings[item].pec.user }}
@@ -303,7 +303,7 @@ metadata:
   name: portal
   namespace: {{ item }}
 spec:
-  replicas: {{ wai_matomo_pod_size[item]['wai-portal']}}
+  replicas: {{ wai_matomo_pod_size[item]['wai-portal'] }}
   strategy:
     type: RollingUpdate
     rollingUpdate:

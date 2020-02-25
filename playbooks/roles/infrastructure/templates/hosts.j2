@@ -11,6 +11,6 @@ ff02::2     ip6-allrouters
 # Network nodes as generated through Ansible.
 {% for host in ansible_play_hosts_all %}
 {% if 'private_ipv4' in hostvars[host] %}
-{{ hostvars[host]['private_ipv4'] }}  {{ host }}
+{{ hostvars[host]['private_ipv4'] }} {{ host }}
 {% endif %}
 {% endfor %}

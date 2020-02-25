@@ -124,7 +124,7 @@ wai_base_https_port: 30443
 es_version: 7.6.0
 es_major_version: 7.x
 es_apt_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
-es_apt_url: "deb https://artifacts.elastic.co/packages/{{es_major_version}}/apt stable main"
+es_apt_url: "deb https://artifacts.elastic.co/packages/{{ es_major_version }}/apt stable main"
 
 kibana_elastic_hosts: "https://{{ hostvars[groups['elastic'][0]].ansible_default_ipv4.address }}:9200"
 

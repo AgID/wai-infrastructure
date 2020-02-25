@@ -454,7 +454,7 @@ INSERT INTO `option` VALUES
   ('version_log_visit.visitor_localtime','TIME NULL',1),
   ('version_log_visit.visitor_returning','TINYINT(1) NULL1',1),
   ('version_log_visit.visit_entry_idaction_name','INTEGER(10) UNSIGNED NULL',1),
-  ('version_log_visit.visit_entry_idaction_url','INTEGER(11) UNSIGNED NULL  DEFAULT NULL',1),
+  ('version_log_visit.visit_entry_idaction_url','INTEGER(11) UNSIGNED NULL DEFAULT NULL',1),
   ('version_log_visit.visit_exit_idaction_name','INTEGER(10) UNSIGNED NULL',1),
   ('version_log_visit.visit_exit_idaction_url','INTEGER(10) UNSIGNED NULL DEFAULT 0',1),
   ('version_log_visit.visit_first_action_time','DATETIME NOT NULL',1),
@@ -793,7 +793,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES 
+INSERT INTO `user` VALUES
   ('{{ matomo_vars.super_user.login }}','{{ matomo_database_superuser_password }}','{{ matomo_vars.super_user.login }}','{{ matomo_vars.super_user.email }}','','{{ matomo_vars.super_user.token }}',1,'2019-03-03 12:48:30','2019-03-03 12:48:30'),
   ('anonymous','','anonymous','anonymous@example.org','','anonymous',0,'2019-03-03 12:46:31','2019-03-03 12:46:31');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;

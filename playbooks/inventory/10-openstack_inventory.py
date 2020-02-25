@@ -13,11 +13,11 @@
 #
 # This software is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+# along with this software. If not, see <http://www.gnu.org/licenses/>.
 
 # The OpenStack Inventory module uses os-client-config for configuration.
 # https://github.com/openstack/os-client-config
@@ -31,9 +31,9 @@
 #  - /etc/ansible/openstack.yml
 # The clouds.yaml file can contain entries for multiple clouds and multiple
 # regions of those clouds. If it does, this inventory module will by default
-# connect to all of them and present them as one contiguous inventory.  You
+# connect to all of them and present them as one contiguous inventory. You
 # can limit to one cloud by passing the `--cloud` parameter, or use the
-# OS_CLOUD environment variable.  If caching is enabled, and a cloud is
+# OS_CLOUD environment variable. If caching is enabled, and a cloud is
 # selected, then per-cloud cache folders will be used.
 #
 # See the adjacent openstack.yml file for an example config file

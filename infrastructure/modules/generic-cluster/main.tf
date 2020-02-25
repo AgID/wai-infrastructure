@@ -54,7 +54,7 @@ resource "openstack_networking_secgroup_rule_v2" "cluster_secgroup_rule" {
   security_group_id = openstack_networking_secgroup_v2.cluster_secgroup[0].id
 }
 
-# Cluster  node boot volume
+# Cluster node boot volume
 resource "openstack_blockstorage_volume_v3" "cluster_boot_volume" {
   count       = var.enabled ? lookup(var.cluster_instance, "num_instances", 0) : 0
   name        = format("%s-boot-volume-%02d", local.cluster_node_name, count.index + 1)

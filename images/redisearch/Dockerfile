@@ -18,6 +18,6 @@ FROM docker.io/bitnami/redis:${REDIS_VERSION}
 ENV LIBDIR /opt/bitnami/redis/bin
 WORKDIR /data
 USER 0
-COPY --from=builder /build-redisearch/RediSearch/src/redisearch.so  "$LIBDIR"
+COPY --from=builder /build-redisearch/RediSearch/src/redisearch.so "$LIBDIR"
 USER 1001
 CMD ["redis-server", "--loadmodule", "/opt/bitnami/redis/bin/redisearch.so"]

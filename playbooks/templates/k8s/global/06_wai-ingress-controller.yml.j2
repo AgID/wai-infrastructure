@@ -316,7 +316,7 @@ spec:
   - port: 80
     targetPort: 8080
   selector:
-    app: default-http-backend            
+    app: default-http-backend
 ---
 apiVersion: v1
 kind: Service
@@ -350,4 +350,4 @@ status:
   loadBalancer:
     ingress:
     - ip: {{ wai_ip_addresses[ns].private_ip }}
-{% endfor %}              
+{% endfor %}

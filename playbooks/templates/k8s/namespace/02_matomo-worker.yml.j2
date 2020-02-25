@@ -79,13 +79,13 @@ spec:
           configMap:
             name: matomo-worker-config
         - name: matomo-php-config
-          configMap: 
+          configMap:
             name: matomo-php-config
         - name: matomo-extra-content
           persistentVolumeClaim:
             claimName: matomo-extra-content-pvc
         - name: matomo-initc-config
-          configMap: 
+          configMap:
             name: matomo-initc-config
         - name: html
           emptyDir: {}
