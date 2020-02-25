@@ -95,13 +95,13 @@ spec:
           mountPath: /var/www/html
       volumes:
         - name: {{ matomo_name }}-config
-          configMap: 
+          configMap:
             name: matomo-php-config
         - name: {{ matomo_name }}-initc-config
-          configMap: 
+          configMap:
             name: matomo-initc-config
         - name: {{ matomo_name }}-nginx-conf
-          configMap: 
+          configMap:
             name: {{ matomo_name }}-nginx-configmap
         - name: {{ matomo_name }}-extra-content
           persistentVolumeClaim:

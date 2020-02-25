@@ -70,7 +70,7 @@
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
       when: wai_db_status.rc != 0
 
-    - name: Database .:.  Create Matomo super user
+    - name: Database .:. Create Matomo super user
       mysql_user:
         name: "{{ wai_database_credentials[wai_environment]['matomo-admin-username'] }}"
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
@@ -79,7 +79,7 @@
         host: "%"
         state: present
 
-    - name: Database .:.  Create Matomo readonly user
+    - name: Database .:. Create Matomo readonly user
       mysql_user:
         name: "{{ wai_database_credentials[wai_environment]['matomo-user-username'] }}"
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
@@ -88,7 +88,7 @@
         host: "%"
         state: present
 
-    - name: Database .:.  Create WAI super user
+    - name: Database .:. Create WAI super user
       mysql_user:
         name: "{{ wai_database_credentials[wai_environment]['wai-admin-username'] }}"
         login_unix_socket: "/var/run/mysqld/mysqld.sock"

@@ -47,16 +47,16 @@ spec:
           restartPolicy: OnFailure
           volumes:
             - name: matomo-php-config
-              configMap: 
+              configMap:
                 name: matomo-php-config
             - name: matomo-extra-content
               persistentVolumeClaim:
                 claimName: matomo-extra-content-pvc
             - name: matomo-initc-config
-              configMap: 
+              configMap:
                 name: matomo-initc-config
             - name: matomo-cron-config
-              configMap: 
+              configMap:
                 name: matomo-cron-config
             - name: html
               emptyDir: {}

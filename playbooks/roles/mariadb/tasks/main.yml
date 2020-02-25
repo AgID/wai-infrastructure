@@ -1,7 +1,7 @@
 ---
 # MariaDB installation
 - name: MariaDB .:. Install required dependencies
-  apt: 
+  apt:
     update_cache: true
     name: ['software-properties-common', 'python3-pymysql']
     state: present
@@ -33,7 +33,7 @@
   register: mariadb_data_moved
 
 - name: MariaDB .:. Install MariaDB
-  apt: 
+  apt:
     update_cache: false
     name: "mariadb-server-{{ mariadb_version }}"
     state: present
@@ -51,12 +51,12 @@
     name: mysql
     state: stopped
     enabled: yes
-  when: 
+  when:
     - mariadb_mycnf_result.stat.exists == false
 
 - name: MariaDB .:. Copy mysql data directory to storage device
   raw: 'cp -R -p /var/lib/mysql /opt/data/mysql && rm -fR /var/lib/mysql'
-  when: 
+  when:
     - mariadb_mycnf_result.stat.exists == false
     - mariadb_data_moved.stat.exists == false
 
@@ -65,7 +65,7 @@
       path: /etc/mysql/my.cnf
       regexp: "^datadir.*"
       replace: "datadir = /opt/data/mysql"
-  when: 
+  when:
     - mariadb_mycnf_result.stat.exists == false
     - mariadb_data_moved.stat.exists == false
 
@@ -74,5 +74,5 @@
     name: mysql
     state: restarted
     enabled: yes
-  when: 
+  when:
     - mariadb_mycnf_result.stat.exists == false

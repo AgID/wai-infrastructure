@@ -19,7 +19,7 @@
     size: +100%FREE
 
 - name: Create filesytem
-  filesystem: 
+  filesystem:
     fstype: ext4
     dev: /dev/data-vg/data-lv-01
 

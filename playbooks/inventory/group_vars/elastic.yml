@@ -2,14 +2,14 @@
 es_data_dirs:
   - "/opt/data/elastic/data"
 es_log_dir: "/opt/data/elastic/log"
-es_instance_name: "wai" 
+es_instance_name: "wai"
 es_api_port: 9200
 es_heap_size: "{{ (ansible_memtotal_mb * 0.5) | int }}m"
 es_enable_xpack: true
 es_xpack_features:
   - monitoring
   - security
-es_enable_auto_ssl_configuration: true            
+es_enable_auto_ssl_configuration: true
 es_enable_http_ssl: true
 es_enable_transport_ssl: true
 es_ssl_verification_mode: none

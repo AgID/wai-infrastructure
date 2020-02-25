@@ -1,6 +1,6 @@
-{%  if production_slave_node is defined and production_slave_node == true %}
+{% if production_slave_node is defined and production_slave_node == true %}
 {%    set current_group_name = 'galera-prod-slave' %}
-{%  elif production_master_node is defined and production_master_node == true %}
+{% elif production_master_node is defined and production_master_node == true %}
 {%    set current_group_name = 'galera-prod' %}
 {% else %}
 {%    set current_group_name = 'galera-play' %}

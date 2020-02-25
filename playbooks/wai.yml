@@ -53,7 +53,7 @@
       - "{{ wai_infrastructure_ca.root_folder }}/key/{{ inventory_hostname }}.key"
       - "{{ wai_infrastructure_ca.root_folder }}/crt/{{ inventory_hostname }}.crt"
 
-    - name: WAI Infrastructure CA .:. Copy WAI Infrastructure CA 
+    - name: WAI Infrastructure CA .:. Copy WAI Infrastructure CA
       copy:
         src: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
         dest: "/usr/local/share/ca-certificates"
@@ -77,7 +77,7 @@
   gather_facts: no
   vars_files:
     - secrets.yml
-  vars:    
+  vars:
     es_ssl_key_password: "{{ elasticsearch_secrets.ssl_key_password }}"
     es_api_host: "{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}"
     es_ssl_key: "{{ wai_infrastructure_ca.root_folder }}/key/{{ inventory_hostname }}.key"
@@ -169,7 +169,7 @@
     - glusterfs
     - heketi
     - prometheus_node_exporter
-    
+
 # Install GlusterFS client
 - hosts: kube-node
   gather_facts: no
@@ -230,7 +230,7 @@
 
 # Because of https://github.com/kubernetes/kubernetes/issues/68607 remove proxy settings if configured
 # Kubectl uses proxy settings for livenessProbe and readinessProbe so remove env proxy settings and restart kubelet
-- hosts:  k8s-cluster
+- hosts: k8s-cluster
   gather_facts: no
   tasks:
     - name: Remove http proxy to environment

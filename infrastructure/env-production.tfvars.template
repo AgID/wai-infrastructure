@@ -188,7 +188,7 @@ k8s_metallb_address_pairs = [
     }
 ]
 
-# K8S worker assigned floating IPs  (uncomment if needed)
+# K8S worker assigned floating IPs (uncomment if needed)
 #k8s_worker_floatingips = [<FLOATING_IP_1>, <FLOATING_IP_2>, ...]
 
 # Galera slug name

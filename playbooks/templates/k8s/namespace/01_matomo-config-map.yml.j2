@@ -2,7 +2,7 @@
 ---
 kind: ConfigMap
 apiVersion: v1
-metadata: 
+metadata:
   name: matomo-php-config
   namespace: {{ item }}
 data:
@@ -204,13 +204,13 @@ data:
 ---
 kind: ConfigMap
 apiVersion: v1
-metadata: 
+metadata:
   name: matomo-initc-config
   namespace: {{ item }}
 data:
   entrypoint.sh: |-
     #!/bin/sh
-    
+
     # Copy matomo content to emptydir
     cp -a /var/www/html/* /html/
 
@@ -248,7 +248,7 @@ data:
 ---
 kind: ConfigMap
 apiVersion: v1
-metadata: 
+metadata:
   name: matomo-cron-config
   namespace: {{ item }}
 data:

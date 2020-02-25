@@ -1,5 +1,5 @@
 - name: Adding Elastic PGP key
-  apt_key: 
+  apt_key:
     url: "{{ es_apt_key }}"
     state: present
 
