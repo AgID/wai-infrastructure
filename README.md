@@ -1,5 +1,7 @@
 # WAI - Kubernetes
 
+[![Build Status](https://travis-ci.com/AgID/wai-infrastructure.svg?branch=develop)](https://travis-ci.com/AgID/wai-infrastructure)
+
 Il repository contiene gli script di installazione e configurazione di tutte le
 componenti infrastrutturali e del software di base della soluzione Web Analitycs
 Italia, WAI:
@@ -34,6 +36,7 @@ l'accesso tramite ssh utilizzando il comando:
 ```bash
 $ ssh-keygen -t rsa -b 4096 -N '' -f ssh_wai_key
 ```
+
 Il comando creerà una copia di chiavi (pubblica e privata) che saranno
 utilizzate per l'accesso agli host dell'infrastruttura.
 
@@ -125,17 +128,17 @@ $ git clone --branch v2.12.0 https://github.com/kubernetes-sigs/kubespray.git pl
 Il playbook per l'installazione di Web Analytics Italia contiene i seguenti
 ruoli:
 
-- *infrastructure*: Utilizzato per alcuni task di preparazione degli host;
-- *elastic.elasticsearch*: Installazione di Elasticsearch tramite i ruoli
+- _infrastructure_: Utilizzato per alcuni task di preparazione degli host;
+- _elastic.elasticsearch_: Installazione di Elasticsearch tramite i ruoli
   installati con `ansible-galaxy`;
-- *kibana*: Installazione di [Kibana](https://www.elastic.co/products/kibana);
-- *glusterfs*: Installazione di [GlusterFS](https://www.gluster.org/)
+- _kibana_: Installazione di [Kibana](https://www.elastic.co/products/kibana);
+- _glusterfs_: Installazione di [GlusterFS](https://www.gluster.org/)
   **DA ULTIMARE CONFIGURAZIONE PEER**
-- *mariadb*: Installazione di [MariaDB](https://mariadb.com/)
+- _mariadb_: Installazione di [MariaDB](https://mariadb.com/)
   **DA ULTIMARE PARAMETRI DI STARTUP**
-- *galera*: Configurazione dei due cluster [Galera](https://galeracluster.com/)
+- _galera_: Configurazione dei due cluster [Galera](https://galeracluster.com/)
   per produzione e public-playground **DA FARE**
-- *kubernetes*: Installazione del cluster di
+- _kubernetes_: Installazione del cluster di
   [Kubernetes](https://kubernetes.io/) con il playbook esterno
   [kubespray](https://github.com/kubernetes-sigs/kubespray)
 
@@ -143,20 +146,20 @@ ruoli:
 
 Il playbook contiene anche i seguenti tag:
 
-- *check*: per i controlli iniziali sui requisiti;
-- *install*: relativo all'installazione di tutto il software in tutti e tre gli
+- _check_: per i controlli iniziali sui requisiti;
+- _install_: relativo all'installazione di tutto il software in tutti e tre gli
   ambienti;
-- *production*: relativo all'installazione nel solo ambiente *production*;
-- *staging*: relativo all'installazione nel solo ambiente *staging*;
-- *public-playground*: relativo all'installazione nel solo ambiente
-  *public-playground*;
-- *deploy*: relativo al deploy del database *Matomo* e di tutte le risorse
-  *Kubernetes*;
-- *matomo*: relativo al deploy del solo database *Matomo*;
-- *kubernetes-deploy*: relativo al deploy di tutte le risorse *Kubernetes*;
+- _production_: relativo all'installazione nel solo ambiente _production_;
+- _staging_: relativo all'installazione nel solo ambiente _staging_;
+- _public-playground_: relativo all'installazione nel solo ambiente
+  _public-playground_;
+- _deploy_: relativo al deploy del database _Matomo_ e di tutte le risorse
+  _Kubernetes_;
+- _matomo_: relativo al deploy del solo database _Matomo_;
+- _kubernetes-deploy_: relativo al deploy di tutte le risorse _Kubernetes_;
 
 Per generare in ambiente locale tutti i file relativi alle risorse K8S si può
-usare il tag *templates*:
+usare il tag _templates_:
 
 ```bash
 $ ansible-playbook playbooks/wai.yml -i playbooks/inventory/30-localhost -t templates
@@ -205,60 +208,60 @@ $ ansible-playbook playbooks/wai.yml -b --ask-vault-pass --limit 'wai'
 
 ## Immagini docker
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 ### Redis
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 #### Sentinel
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 ### Matomo
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 #### Base Matomo
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 #### Matomo Portal
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 #### Matomo Ingestion
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 #### Matomo API
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 #### Matomo Worker
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 #### Matomo Cron Job
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 ### WAI
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 #### WAI Portal
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 #### WAI API
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 #### WAI Cron Job
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
 
 ## Deployment Kubernetes
 
-TODO: *Breve descrizione e link all'md di dettaglio*
+TODO: _Breve descrizione e link all'md di dettaglio_
