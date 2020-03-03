@@ -883,6 +883,33 @@ CREATE TABLE `custom_dimensions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table alterations for `custom_dimensions`
+--
+
+ALTER TABLE `log_conversion`
+  ADD COLUMN `custom_dimension_1` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_2` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_3` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_4` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_5` varchar(255) DEFAULT NULL;
+
+ALTER TABLE `log_visit`
+  ADD COLUMN `custom_dimension_1` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_2` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_3` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_4` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_5` varchar(255) DEFAULT NULL,
+  ADD COLUMN `last_idlink_va` bigint unsigned DEFAULT NULL;
+
+ALTER TABLE `log_link_visit_action`
+  ADD COLUMN `custom_dimension_1` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_2` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_3` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_4` varchar(255) DEFAULT NULL,
+  ADD COLUMN `custom_dimension_5` varchar(255) DEFAULT NULL,
+  ADD COLUMN `time_spent` int unsigned DEFAULT NULL;
+
+--
 -- Table structure for table `locks`
 --
 
