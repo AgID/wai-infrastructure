@@ -25,12 +25,12 @@ output "k8s-master-public-ips" {
 
 output "out_subnet_id" {
   description = "Subnet id"
-  value = length(openstack_networking_subnet_v2.k8s_subnet) > 0 ? openstack_networking_subnet_v2.k8s_subnet.0.id : ""
+  value       = length(openstack_networking_subnet_v2.k8s_subnet) > 0 ? openstack_networking_subnet_v2.k8s_subnet.0.id : ""
 }
 
 output "out_members_access_ip_v4" {
   description = "K8S Worker addresses"
-  value = openstack_compute_instance_v2.k8s_worker_instance.*.access_ip_v4
+  value       = openstack_compute_instance_v2.k8s_worker_instance.*.access_ip_v4
 }
 
 output "out_security_group_ids" {

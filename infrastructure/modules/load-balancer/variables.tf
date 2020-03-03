@@ -6,36 +6,36 @@ variable "enabled" {
 
 # Load balancer name
 variable "lb_name" {
-  type = string
+  type        = string
   description = "Load balancer ports"
-  default = ""
+  default     = ""
 }
 
 # Load balancer subnet id
 variable "lb_subnet_id" {
-  type = string
+  type        = string
   description = "Subnet id"
-  default = ""
+  default     = ""
 }
 
 # Load balanced ports
 variable "lb_ports" {
-  type = list
+  type        = list
   description = "Load balancer ports"
-  default = []
+  default     = []
 }
 
 # Load balanced ports
 variable "lb_members" {
-  type = list(string)
+  type        = list(string)
   description = "Load members ip addresses"
-  default = []
+  default     = []
 }
 
 variable "lb_security_group_ids" {
-  type = list(string)
+  type        = list(string)
   description = "Security group ids"
-  default = []
+  default     = []
 }
 
 locals {

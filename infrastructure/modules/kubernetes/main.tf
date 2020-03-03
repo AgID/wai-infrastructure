@@ -115,8 +115,8 @@ resource "openstack_compute_instance_v2" "k8s_master_instance" {
     )
   }
   block_device {
-    boot_index      = 0
-    uuid            = element(openstack_blockstorage_volume_v3.k8s_master_boot_volume.*.id, count.index)
+    boot_index       = 0
+    uuid             = element(openstack_blockstorage_volume_v3.k8s_master_boot_volume.*.id, count.index)
     source_type      = "volume"
     destination_type = "volume"
   }
@@ -160,8 +160,8 @@ resource "openstack_blockstorage_volume_v3" "k8s_master_data_volume" {
   name        = format("%s-data-volume-%02d", local.k8s_master_node_name, count.index + 1)
   size        = var.k8s_master_instance["data_volume_size"]
   volume_type = var.k8s_master_instance["data_volume_type"]
-  metadata    = {
-    data_storage = true
+  metadata = {
+    data_storage  = true
     attached_mode = "rw"
   }
 }
@@ -225,7 +225,7 @@ resource "openstack_compute_instance_v2" "k8s_worker_instance" {
 
 # Kubernetes MetalLB ports
 resource "openstack_networking_port_v2" "k8s_metallb_ports" {
-  count = var.enabled ? length(var.k8s_metallb_address_pairs) : 0
+  count              = var.enabled ? length(var.k8s_metallb_address_pairs) : 0
   name               = format("k8s-metallb-port-%s", var.k8s_metallb_address_pairs[count.index].ip)
   network_id         = openstack_networking_network_v2.k8s_network[0].id
   admin_state_up     = true
@@ -240,7 +240,7 @@ resource "openstack_networking_port_v2" "k8s_metallb_ports" {
 resource "openstack_networking_floatingip_associate_v2" "k8s_metallb_address_floatingip_association" {
   count       = var.enabled ? min(length(openstack_networking_port_v2.k8s_metallb_ports), length(var.k8s_metallb_address_pairs)) : 0
   floating_ip = var.k8s_metallb_address_pairs[count.index].floating_ip
-  port_id     = element(
+  port_id = element(
     openstack_networking_port_v2.k8s_metallb_ports.*.id,
     count.index,
   )
@@ -286,8 +286,8 @@ resource "openstack_blockstorage_volume_v3" "k8s_worker_data_volume" {
   name        = format("%s-data-volume-%02d", local.k8s_worker_node_name, count.index + 1)
   size        = var.k8s_worker_instance["data_volume_size"]
   volume_type = var.k8s_worker_instance["data_volume_type"]
-  metadata    = {
-    data_storage = true
+  metadata = {
+    data_storage  = true
     attached_mode = "rw"
   }
 }

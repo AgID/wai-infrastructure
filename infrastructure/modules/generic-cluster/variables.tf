@@ -69,9 +69,9 @@ variable "cluster_instance_groups" {
 
 # Load balanced ports
 variable "load_balancer_ports" {
-  type = list
+  type        = list
   description = "Load balancer ports"
-  default = []
+  default     = []
 }
 
 # Cluster security rules

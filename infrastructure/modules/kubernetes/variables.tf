@@ -105,9 +105,9 @@ variable "k8s_worker_floatingips" {
 
 # K8S workerr load balanced ports
 variable "load_balancer_ports" {
-  type = list
+  type        = list
   description = "Load balancer ports"
-  default = []
+  default     = []
 }
 
 
