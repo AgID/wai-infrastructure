@@ -228,6 +228,14 @@ data:
 {% endif %}
 
 {% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
+        location = /matomo.js {
+          allow all;
+          ## Cache matomo javascript tracking code
+          expires 1h;
+          add_header Pragma public;
+          add_header Cache-Control "public";
+        }
+
         location ~* / {
           deny all;
           return 404;
