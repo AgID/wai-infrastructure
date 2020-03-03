@@ -72,6 +72,8 @@ spec:
         volumeMounts:
         - name: html
           mountPath: /var/www/html/
+        - name: {{ matomo_name }}-extra-content
+          mountPath: /opt/extra-content
       - image: nginx:1.15.8
         name: nginx
         resources:
