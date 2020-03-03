@@ -34,6 +34,6 @@ output "out_members_access_ip_v4" {
 }
 
 output "out_security_group_ids" {
-  description = "K8S security group ids"
-  value = openstack_networking_secgroup_v2.k8s_master_secgroup.*.id
+  description = "K8S workers security group ids"
+  value       = openstack_networking_secgroup_v2.k8s_worker_secgroup.*.id
 }
