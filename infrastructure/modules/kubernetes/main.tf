@@ -101,6 +101,13 @@ resource "openstack_blockstorage_volume_v3" "k8s_master_boot_volume" {
   volume_type = var.k8s_master_instance["boot_volume_type"]
 }
 
+# Kubernetes masters group
+resource "openstack_compute_servergroup_v2" "k8s_masters_group" {
+  count    = var.enabled ? 1 : 0
+  name     = "kubernetes-masters-group"
+  policies = ["anti-affinity"]
+}
+
 # Kubernetes master node instance
 resource "openstack_compute_instance_v2" "k8s_master_instance" {
   count     = var.enabled ? lookup(var.k8s_master_instance, "num_instances", 0) : 0
@@ -123,6 +130,9 @@ resource "openstack_compute_instance_v2" "k8s_master_instance" {
   metadata = {
     ansible_user = var.ssh_user
     groups       = join(", ", ["wai", element(var.k8s_master_instance_groups, count.index)])
+  }
+  scheduler_hints {
+    group = openstack_compute_servergroup_v2.k8s_masters_group.0.id
   }
 }
 
@@ -188,12 +198,12 @@ resource "openstack_blockstorage_volume_v3" "k8s_worker_boot_volume" {
   volume_type = var.k8s_worker_instance["boot_volume_type"]
 }
 
-# Kubernetes server group
-# resource "openstack_compute_servergroup_v2" "k8s_server_group" {
-#   count       = var.enabled ? 1 : 0
-#   name = "kubernetes-server-group"
-#   policies = ["anti-affinity"]
-# }
+# Kubernetes workers group
+resource "openstack_compute_servergroup_v2" "k8s_workers_group" {
+  count    = var.enabled ? 1 : 0
+  name     = "kubernetes-workers-group"
+  policies = ["anti-affinity"]
+}
 
 # Kubernetes worker node instance
 resource "openstack_compute_instance_v2" "k8s_worker_instance" {
@@ -218,9 +228,9 @@ resource "openstack_compute_instance_v2" "k8s_worker_instance" {
     ansible_user = var.ssh_user
     groups       = join(", ", ["wai", element(var.k8s_worker_instance_groups, count.index)])
   }
-  # scheduler_hints {
-  #   group = openstack_compute_servergroup_v2.k8s_server_group.0.id
-  # }
+  scheduler_hints {
+    group = openstack_compute_servergroup_v2.k8s_workers_group.0.id
+  }
 }
 
 # Kubernetes MetalLB ports
