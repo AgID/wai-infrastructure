@@ -398,6 +398,8 @@ spec:
       app: portal-queue-worker
   template:
     metadata:
+      annotations:
+        releaseDate: now
       labels:
         app: portal-queue-worker
     spec:
