@@ -50,9 +50,26 @@
 
 - name: WAI Infrastructure CA .:. Set facts
   set_fact:
-    pki_hosts: "{{ pki_hosts | default([]) + [ { 'hostname': item, 'ip' : hostvars[item].ansible_default_ipv4.address } ] }}"
+    pki_hosts: "{{ pki_hosts | default([]) + [ { 'hostname': item, 'sans' : 'IP: ' + hostvars[item].ansible_default_ipv4.address } ] }}"
   with_inventory_hostnames:
     - wai
+
+- name: WAI Infrastructure CA .:. Add Elastic IP Subject Alternative Names
+  set_fact:
+    elastic_sans: "{{ elastic_sans | default([]) + ['IP: ' + item ] }} "
+  with_items: "{{ groups['elastic'] | map('extract', hostvars, ['ansible_default_ipv4', 'address'])  | list + [ wai_load_balancer['wai-prod'].elastic[0] ] }}"
+
+- name: WAI Infrastructure CA .:. Add Elastic DNS Subject Alternative Names
+  set_fact:
+    elastic_sans: "{{ elastic_sans | default([]) + ['DNS: ' + item ] }} "
+  with_inventory_hostnames:
+    - elastic
+
+- name: WAI Infrastructure CA .:. Add extended certificates
+  set_fact:
+    pki_hosts: "{{ pki_hosts + [ { 'hostname': item.hostname, 'sans' : item.sans } ] }}"
+  with_items:
+    - { hostname: "elastic",  sans: "{{ elastic_sans }}" }
 
 - name: WAI Infrastructure CA .:. Create private key
   become: true
@@ -73,8 +90,7 @@
     organization_name: AGID
     email_address: protocollo@pec.agid.gov.it
     common_name: "{{ item.hostname }}"
-    subject_alt_name:
-      - "IP:{{ item.ip }}"
+    subject_alt_name: "{{ item.sans }}"
     key_usage:
       - digitalSignature
       - keyAgreement
