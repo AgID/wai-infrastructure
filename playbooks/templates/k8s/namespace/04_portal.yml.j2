@@ -344,6 +344,7 @@ spec:
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+        command: ["sh", "-c", "/usr/sbin/update-ca-certificates ; php-fpm -F -y /opt/bitnami/php/etc/php-fpm.conf"]
         name: portal
         resources:
           limits:
@@ -356,6 +357,8 @@ spec:
         - name: portal-env-conf
           mountPath: /var/www/html/.env
           subPath: env
+        - name: infrastructure-ca-conf
+          mountPath: /usr/local/share/ca-certificates/
       - image: nginx:1.15.8
         name: nginx
         resources:
@@ -378,6 +381,9 @@ spec:
         - name: portal-env-conf
           configMap:
             name: portal-env-configmap
+        - name: infrastructure-ca-conf
+          configMap:
+            name: infrastructure-configmap
         - name: html
           emptyDir: {}
 ---
