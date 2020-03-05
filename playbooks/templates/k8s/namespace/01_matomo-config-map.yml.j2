@@ -228,7 +228,6 @@ data:
     find -P /opt/extra-content/premium_plugins/* -prune -type d -printf "%f\n" | while IFS= read -r directory; do
         # Extract plugin code
         unzip -u "/opt/extra-content/premium_plugins/$directory/*.zip" -d /html/plugins
-
         if ! grep -q "$directory" $MATOMO_INI; then
             # Add plugin into "installed" list
             sed -i -E -e "/^PluginsInstalled\[\] = .*$/!b;:a;n;//ba;i\PluginsInstalled\[\] = \"$directory\"" $MATOMO_INI
@@ -245,6 +244,8 @@ data:
             fi
         fi
     done
+    chown -R 33:33 /html/plugins/
+
 ---
 kind: ConfigMap
 apiVersion: v1
