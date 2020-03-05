@@ -420,7 +420,7 @@ spec:
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         name: portal
-        command: ["php", "artisan", "queue:work", "--tries=3", "--sleep=10"]
+        command: ["sh", "-c", "/usr/sbin/update-ca-certificates ; php artisan queue:work --tries=3 --sleep=10"]
         resources:
           limits:
             cpu: "0.75"
@@ -429,7 +429,12 @@ spec:
         - name: portal-env-conf
           mountPath: /var/www/html/.env
           subPath: env
+        - name: infrastructure-ca-conf
+          mountPath: /usr/local/share/ca-certificates/
       volumes:
         - name: portal-env-conf
           configMap:
             name: portal-env-configmap
+        - name: infrastructure-ca-conf
+          configMap:
+            name: infrastructure-configmap
