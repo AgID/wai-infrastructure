@@ -31,6 +31,14 @@
   loop_control:
     loop_var: filevar
 
+- name: K8S .:. Prepare infrastructure ca certificate config map
+  vars:
+    certificate_lines:  "{{ lookup('file', wai_infrastructure_ca.root_folder + '/crt/wai-ca.crt').splitlines() }}"
+  template:
+    src: "k8s/infrastructure-ca-cm.yml.j2"
+    dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/00_infrastruxture-ca-config-map.yml"
+  with_items: "{{ wai_k8s_namespaces }}"
+
 # Matomo Ingestion
 - name: K8S .:. Prepare Matomo Ingestion deployment file
   vars:
