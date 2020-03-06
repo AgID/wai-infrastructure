@@ -361,7 +361,7 @@ INSERT INTO `option` VALUES
   ('UpdateCheck_LatestVersion','3.13.1',0),
   ('usercountry.location_provider','geoip2php',0),
   ('usercountry.switchtoisoregions','1552992886',0),
-  ('useridsalt','{{ ansible_date_time.iso8601_micro | hash('sha1') }}',1),
+  ('useridsalt','{{ matomo_vars.salt[env] }}',1),
   ('UsersManager.lastSeen.matomo','1548799404',1),
   ('geoip2.isp_db_url','',0),
   ('geoip2.loc_db_url','https://download.db-ip.com/free/dbip-city-lite-{{ ansible_date_time.year }}-{{ ansible_date_time.month }}.mmdb.gz',0),
