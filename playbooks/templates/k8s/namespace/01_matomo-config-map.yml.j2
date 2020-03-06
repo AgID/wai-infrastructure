@@ -43,7 +43,8 @@ data:
     browser_archiving_disabled_enforce = 1
     enable_browser_archiving_triggering = 0
     multi_server_environment = 1
-
+    archiving_custom_ranges[] = previous30
+    
     [Plugins]
     Plugins[] = "CorePluginsAdmin"
     Plugins[] = "CoreAdminHome"
@@ -90,7 +91,6 @@ data:
     Plugins[] = "PrivacyManager"
     Plugins[] = "ImageGraph"
     Plugins[] = "Annotations"
-    Plugins[] = "MobileMessaging"
     Plugins[] = "Overlay"
     Plugins[] = "SegmentEditor"
     Plugins[] = "Insights"
@@ -158,7 +158,6 @@ data:
     PluginsInstalled[] = "PrivacyManager"
     PluginsInstalled[] = "ImageGraph"
     PluginsInstalled[] = "Annotations"
-    PluginsInstalled[] = "MobileMessaging"
     PluginsInstalled[] = "Overlay"
     PluginsInstalled[] = "SegmentEditor"
     PluginsInstalled[] = "Insights"
@@ -224,7 +223,6 @@ data:
     find -P /opt/extra-content/premium_plugins/* -prune -type d -printf "%f\n" | while IFS= read -r directory; do
         # Extract plugin code
         unzip -u "/opt/extra-content/premium_plugins/$directory/*.zip" -d /html/plugins
-
         if ! grep -q "$directory" $MATOMO_INI; then
             # Add plugin into "installed" list
             sed -i -E -e "/^PluginsInstalled\[\] = .*$/!b;:a;n;//ba;i\PluginsInstalled\[\] = \"$directory\"" $MATOMO_INI
@@ -241,6 +239,8 @@ data:
             fi
         fi
     done
+    chown -R 33:33 /html/
+
 ---
 kind: ConfigMap
 apiVersion: v1

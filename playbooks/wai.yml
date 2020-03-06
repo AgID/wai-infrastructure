@@ -80,8 +80,8 @@
   vars:
     es_ssl_key_password: "{{ elasticsearch_secrets.ssl_key_password }}"
     es_api_host: "{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}"
-    es_ssl_key: "{{ wai_infrastructure_ca.root_folder }}/key/{{ inventory_hostname }}.key"
-    es_ssl_certificate: "{{ wai_infrastructure_ca.root_folder }}/crt/{{ inventory_hostname }}.crt"
+    es_ssl_key: "{{ wai_infrastructure_ca.root_folder }}/key/elastic.key"
+    es_ssl_certificate: "{{ wai_infrastructure_ca.root_folder }}/crt/elastic.crt"
   tags:
     - install
     - elastic
@@ -263,6 +263,10 @@
     - name: K8S .:. Compile templates locally
       vars:
         wai_k8s_deployment_dir: "{{ playbook_dir }}/compiled-templates/k8s"
+        wai_infrastructure_ca:
+          root_folder: "{{ playbook_dir }}/compiled-templates/ca"
+          secrets:
+            ca_key_password: secret_key_password
       tags:
         - never
         - templates
