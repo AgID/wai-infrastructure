@@ -263,6 +263,10 @@
     - name: K8S .:. Compile templates locally
       vars:
         wai_k8s_deployment_dir: "{{ playbook_dir }}/compiled-templates/k8s"
+        wai_infrastructure_ca:
+          root_folder: "{{ playbook_dir }}/compiled-templates/ca"
+          secrets:
+            ca_key_password: secret_key_password
       tags:
         - never
         - templates
