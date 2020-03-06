@@ -104,7 +104,6 @@
   openssl_certificate:
     path: "{{ wai_infrastructure_ca.root_folder }}/crt/{{ item.hostname }}.crt"
     provider: ownca
-    subject_alt_name_strict: false
     csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/{{ item.hostname }}.csr"
     ownca_path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
     ownca_privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"

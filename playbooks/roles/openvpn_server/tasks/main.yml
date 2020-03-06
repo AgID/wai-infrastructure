@@ -40,7 +40,6 @@
   openssl_certificate:
     path: /etc/openvpn/certs/wai-operation-root-ca.crt
     provider: selfsigned
-    subject_alt_name_strict: false
     csr_path: /etc/openvpn/certs/wai-operation-root-ca.csr
     privatekey_passphrase: "{{ openvpn_root_ca_password }}"
     privatekey_path: /etc/openvpn/certs/wai-operation-root-ca.key
@@ -70,7 +69,6 @@
   openssl_certificate:
     path: /etc/openvpn/certs/vpn-server.crt
     provider: ownca
-    subject_alt_name_strict: false
     csr_path: /etc/openvpn/certs/vpn-server.csr
     ownca_path: /etc/openvpn/certs/wai-operation-root-ca.crt
     ownca_privatekey_passphrase: "{{ openvpn_root_ca_password }}"
@@ -101,7 +99,6 @@
   openssl_certificate:
     path: /etc/openvpn/certs/user-admin.crt
     provider: ownca
-    subject_alt_name_strict: false
     csr_path: /etc/openvpn/certs/user-admin.crs
     ownca_path: /etc/openvpn/certs/wai-operation-root-ca.crt
     ownca_privatekey_passphrase: "{{ openvpn_root_ca_password }}"
