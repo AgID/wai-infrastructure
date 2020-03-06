@@ -1,10 +1,10 @@
 - include_vars:
     file: secrets.yml
 
-- name: WAI Infrastructure CA .:. Ensure folders
+- name: WAI Infrastructure CA .:. Ensure directories
   become: true
   file:
-    path: '{{ item }}'
+    path: "{{ item }}"
     state: directory
   with_items:
     - "{{ wai_infrastructure_ca.root_folder }}/crt"
@@ -42,7 +42,6 @@
   openssl_certificate:
     path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
     provider: selfsigned
-    subject_alt_name_strict: false
     csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/wai-ca.csr"
     privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
     privatekey_path: "{{ wai_infrastructure_ca.root_folder }}/key/wai-ca.key"
@@ -104,7 +103,6 @@
   openssl_certificate:
     path: "{{ wai_infrastructure_ca.root_folder }}/crt/{{ item.hostname }}.crt"
     provider: ownca
-    subject_alt_name_strict: false
     csr_path: "{{ wai_infrastructure_ca.root_folder }}/csr/{{ item.hostname }}.csr"
     ownca_path: "{{ wai_infrastructure_ca.root_folder }}/crt/wai-ca.crt"
     ownca_privatekey_passphrase: "{{ wai_infrastructure_ca.secrets.ca_key_password }}"
