@@ -28,7 +28,7 @@ spec:
               mountPath: /entrypoint.sh
               subPath: entrypoint.sh
           containers:
-          - name: matomo
+          - name: matomo-cron
             image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
             command: ["sh", "-c", ". /entrypoint.sh"]
