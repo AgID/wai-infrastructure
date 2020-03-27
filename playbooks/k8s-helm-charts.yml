@@ -150,6 +150,22 @@
                       annotations:
                         description: "MariaDB instance {{ '{{' }} $labels.instance {{ '}}' }} of job {{ '{{' }} $labels.job {{ '}}' }} has been down for more than 5 minutes."
                         summary: "MariaDB Instance {{ '{{' }} $labels.instance {{ '}}' }} is down"
+                    - alert: SlaveSQLNotRunnin
+                      annotations:
+                        description: Slave SQL not running on galera cluster slave node
+                        summary: Slave SQL not running
+                      expr: mysql_slave_status_slave_sql_running==0 or absent(mysql_slave_status_slave_sql_running)
+                      for: 1m
+                      labels:
+                        severity: critical
+                    - alert: SlaveIONotRunnin
+                      annotations:
+                        description: Slave IO not running on galera cluster slave node
+                        summary: Slave IO not running
+                      expr: mysql_slave_status_slave_io_running==0 or absent(mysql_slave_status_slave_io_running)
+                      for: 1m
+                      labels:
+                        severity: critical
                 - name: IstanceAlert
                   rules:
                     - alert: InstanceNoK8sDown
