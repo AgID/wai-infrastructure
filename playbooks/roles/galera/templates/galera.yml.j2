@@ -52,7 +52,7 @@ innodb_flush_log_at_timeout=1
 
 # Shot conflicts
 wsrep_log_conflicts=ON
-wsrep_provider_options="cert.log_conflicts=YES"
+wsrep_provider_options="cert.log_conflicts=YES;gcache.size=1G"
 
 # 80% of free memory
 innodb_buffer_pool_size={{ (ansible_memtotal_mb * 0.8) | int }}m
