@@ -170,7 +170,7 @@
                   rules:
                   - alert: NginxErrorCode
                     annotations:
-                      description: '{{ $labels.ingress }} http status code !~[4-5].* < 99.0 % '
+                      description: '{{ $labels.ingress }} http status code !~[4-5].* < 99.0 %, current value is {{ $value }}
                       summary: http status code
                     expr: sum(nginx_ingress_controller_requests{namespace="wai-prod",status!~"[4-5].*"}) by (ingress) / sum(nginx_ingress_controller_requests{namespace="wai-prod"}) by (ingress)*100 < 99.00
                     for: 1m
@@ -210,6 +210,16 @@
                       annotations:
                         description: "{{ '{{' }} $labels.kubernetes_node {{ '}}' }}: CPU usage is above 75% (current value is: {{ '{{' }} $value {{ '}}' }})"
                         summary: "{{ '{{' }} $labels.kubernetes_node {{ '}}' }}: High CPU usage detect"
+                - name: Kubernetes
+                  rules:
+                    - alert: AvailableReplicas
+                      annotations:
+                        description: 'Missing {{ $value }} replicas of deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }}'
+                        summary: Unavailable replica
+                      expr: kube_deployment_status_replicas_unavailable > 0
+                      for: 1m
+                      labels:
+                        severity: critical
       when: helm_status.stdout == "0"
 
     # Install Grafana
