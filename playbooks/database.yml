@@ -51,7 +51,7 @@
         name: matomo
         login_unix_socket: "/var/run/mysqld/mysqld.sock"
         state: import
-        target: "/root/matomo_3_13_1.sql"
+        target: "/root/matomo_3_13_5.sql"
       when: matomo_db_status.rc != 0
 
     - name: Database .:. Execute Matomo extra sql scripts
