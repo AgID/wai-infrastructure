@@ -15,16 +15,16 @@
   vars:
     env: "{{ wai_environment }}"
   template:
-    src: "mariadb/matomo_3_13_1.sql.j2"
-    dest: "{{ db_dump_dir }}/matomo_3_13_1.sql"
+    src: "mariadb/matomo_3_13_5.sql.j2"
+    dest: "{{ db_dump_dir }}/matomo_3_13_5.sql"
   when: inventory_hostname != 'localhost'
 
 - name: Database .:. Prepare matomo template sql script [only local]
   vars:
     env: "{{ item }}"
   template:
-    src: "mariadb/matomo_3_13_1.sql.j2"
-    dest: "{{ db_dump_dir }}/{{ item }}/matomo_3_13_1.sql"
+    src: "mariadb/matomo_3_13_5.sql.j2"
+    dest: "{{ db_dump_dir }}/{{ item }}/matomo_3_13_5.sql"
   with_items: "{{ wai_k8s_namespaces }}"
   when: inventory_hostname == 'localhost'
 

@@ -38,10 +38,17 @@ data:
     enable_update_communication = 0
     enable_auto_update = 0
     show_update_notification_to_superusers_only = 1
+    enable_delete_old_data_settings_admin = 0
+    enable_geolocation_admin = 0
+    enable_installer = 0
+    enable_plugins_admin = 0
     proxy_uri_header = 1
     enable_general_settings_admin = 0
     browser_archiving_disabled_enforce = 1
     enable_browser_archiving_triggering = 0
+    default_day = "previous30"
+    default_period = "range"
+    default_language = "it"
     multi_server_environment = 1
     archiving_custom_ranges[] = previous30
 
@@ -75,7 +82,6 @@ data:
     Plugins[] = "VisitTime"
     Plugins[] = "VisitorInterest"
     Plugins[] = "RssWidget"
-    Plugins[] = "Feedback"
     Plugins[] = "Monolog"
     Plugins[] = "Login"
     Plugins[] = "TwoFactorAuth"
@@ -91,7 +97,6 @@ data:
     Plugins[] = "PrivacyManager"
     Plugins[] = "ImageGraph"
     Plugins[] = "Annotations"
-    Plugins[] = "Overlay"
     Plugins[] = "SegmentEditor"
     Plugins[] = "Insights"
     Plugins[] = "Morpheus"
@@ -147,7 +152,6 @@ data:
     PluginsInstalled[] = "VisitTime"
     PluginsInstalled[] = "VisitorInterest"
     PluginsInstalled[] = "RssWidget"
-    PluginsInstalled[] = "Feedback"
     PluginsInstalled[] = "TwoFactorAuth"
     PluginsInstalled[] = "CoreUpdater"
     PluginsInstalled[] = "CoreConsole"
@@ -158,7 +162,6 @@ data:
     PluginsInstalled[] = "PrivacyManager"
     PluginsInstalled[] = "ImageGraph"
     PluginsInstalled[] = "Annotations"
-    PluginsInstalled[] = "Overlay"
     PluginsInstalled[] = "SegmentEditor"
     PluginsInstalled[] = "Insights"
     PluginsInstalled[] = "Morpheus"
@@ -170,7 +173,6 @@ data:
     PluginsInstalled[] = "UserId"
     PluginsInstalled[] = "CustomPiwikJs"
     PluginsInstalled[] = "DisableTracking"
-    PluginsInstalled[] = "Tour"
     PluginsInstalled[] = "WAIMatomoTheme"
     PluginsInstalled[] = "QueuedTracking"
     PluginsInstalled[] = "ProtectTrackID"
