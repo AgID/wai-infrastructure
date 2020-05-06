@@ -108,7 +108,7 @@ redis_image_version: 5.0.7
 
 # Matomo Image
 wai_matomo_image: webanalyticsitalia/wai-matomo
-wai_matomo_image_tag: 3.13.1
+wai_matomo_image_tag: 3.13.5
 
 # Kubectl executable
 wai_kubectl: /usr/local/bin/kubectl
