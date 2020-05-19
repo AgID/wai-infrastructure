@@ -5,11 +5,20 @@
     msg: "Wrong configuration for Galera cluster: less than 3 members found"
   when: "groups[group_names[0]] | length < 3"
 
-# - name: Galera .:. Install galera dependencies
-#   apt:
-#     update_cache: true
-#     name: galera-3
-#     state: present
+- name: Galera  .:. Test if prod password
+  set_fact:
+    wai_environment: wai-prod
+  when: inventory_hostname in groups['galera-prod'] or inventory_hostname in groups['galera-prod-slave']
+
+- name: Galera .:. Test if play password
+  set_fact:
+    wai_environment: wai-play
+  when: inventory_hostname in groups['galera-play']
+
+- name: Galera .:. Fail if password is not found
+  fail:
+    msg: "STS Password for the current environment not found"
+  when: "wai_environment is not defined or wai_database_credentials[wai_environment] is not defined"
 
 - name: Galera .:. Test if galera has been configured
   stat:
@@ -81,6 +90,17 @@
   when:
     - inventory_hostname == groups['galera-prod'][0]
 
+- name: Galera .:. Create sst replication user on production master primary node
+  mysql_user:
+    login_user: "root"
+    name: "{{ wai_database_credentials['wai-prod']['sst-user-username'] }}"
+    password: "{{ wai_database_credentials['wai-prod']['sst-user-password'] }}"
+    priv: "*.*:RELOAD, PROCESS, LOCK TABLES, REPLICATION CLIENT"
+    host: "localhost"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when:
+    - inventory_hostname == groups['galera-prod'][0]
+    
 - name: Galera .:. Activate replica on production slave primary node
   mysql_replication:
     mode: changemaster
