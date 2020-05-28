@@ -17,6 +17,15 @@ metadata:
   namespace: {{ item }}
 spec:
   rules:
+{% if item == 'wai-prod' %}
+  - host: {{ wai_hostname['portal'] }}.{{ wai_base_domain[item] }}
+    http:
+      paths:
+      - backend:
+          serviceName: portal-service
+          servicePort: 80
+        path: /
+{% endif %}
   - host: {{ wai_base_domain[item] }}
     http:
       paths:
