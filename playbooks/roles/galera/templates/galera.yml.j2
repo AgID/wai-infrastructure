@@ -17,6 +17,7 @@ server_id=02
 # Configure settings for replication
 server_id=01
 log_bin = /opt/data/mysql-binlog/binlog
+log_bin_index = /opt/data/mysql-binlog/binlog.index
 log_slave_updates = ON
 expire_logs_days = 7
 gtid-domain-id = 1
@@ -35,7 +36,8 @@ wsrep_cluster_name="wai-galera_cluster"
 wsrep_cluster_address="gcomm://{{ groups[current_group_name] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | join(',') }}"
 
 # Galera Synchronization Configuration
-wsrep_sst_method=rsync
+wsrep_sst_method = mariabackup
+wsrep_sst_auth = {{ wai_database_credentials[wai_environment]['sst-user-username'] }}:{{ wai_database_credentials[wai_environment]['sst-user-password'] }}
 
 # Galera Node Configuration
 wsrep_node_address="{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"

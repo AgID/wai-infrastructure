@@ -35,9 +35,13 @@
 - name: MariaDB .:. Install MariaDB
   apt:
     update_cache: false
-    name: "mariadb-server-{{ mariadb_version }}"
+    name: "{{ item }}"
     state: present
   when: mariadb_mycnf_result.stat.exists == false
+  with_items:
+    - "mariadb-server-{{ mariadb_version }}"
+    - socat
+    - mariadb-backup
 
 - name: MariaDB .:. Configure bind address
   replace:
