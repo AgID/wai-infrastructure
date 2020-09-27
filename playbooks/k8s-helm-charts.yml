@@ -430,6 +430,7 @@
                 cpu: 100m
                 memory: 128Mi
           master:
+            disableCommands: "{{ ['FLUSHDB', 'FLUSHALL'] if item[0] == 'wai-prod' else []}}"
             persistence:
               enabled: true
               storageClass: storage-heketi
