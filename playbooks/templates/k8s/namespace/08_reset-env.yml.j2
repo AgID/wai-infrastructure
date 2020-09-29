@@ -26,7 +26,7 @@ spec:
           - name: matomo
             env:
             - name: MATOMO_VERSION
-              value: "3_13_5"
+              value: "{{ wai_matomo_image_tag | replace('.','_') }}"
             image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
             command: ["bash", "-c", ". /tmp/reset-env/matomo-entrypoint.sh"]
