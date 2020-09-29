@@ -108,7 +108,7 @@ data:
     j2 -f yaml $MATOMO_J2_SQL_FILE $WORK_DIR/reset-env-vars.yaml > $MATOMO_SQL_FILE
     [ $(wc -c < $MATOMO_SQL_FILE) -eq 0 ] && fail "Unable to create $MATOMO_SQL_FILE"
     DUMP_OPT="--dump=$MATOMO_SQL_FILE"
-    echo "Looking for plugins sql file"
+    echo "Looking for plugins sql files"
     while read file
     do
       DUMP_OPT+=" --dump=$file"
