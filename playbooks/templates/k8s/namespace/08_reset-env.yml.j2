@@ -79,10 +79,6 @@ data:
       {{ item }}:
         matomo-worker: {{ wai_matomo_pod_size[item]['matomo-worker'] }}
     matomo_database_superuser_password: {{ matomo_database_superuser_password }}
-    wai_settings:
-      {{ item }}:
-        log:
-          slack_webhook_url: {{ wai_settings[item].log.slack_webhook_url }}
 
   matomo-entrypoint.sh: |
     #!/bin/bash
