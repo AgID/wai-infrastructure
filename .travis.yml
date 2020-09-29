@@ -16,7 +16,6 @@ install:
   - curl -sLo kubeval.tar.gz https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
   - tar xf kubeval.tar.gz
   - sudo mv kubeval /usr/local/bin
-  - pip install ansible
   - pip install -r requirements.txt
   - ansible-galaxy install -r playbooks/requirements.yml
   - git clone --branch v2.12.0 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
