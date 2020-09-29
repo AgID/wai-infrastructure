@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
-{% if item == 'wai-play' %}
+{% if wai_settings[item].environment.reset.enabled  %}
 {% set matomo_database_superuser_password = matomo_vars.super_user.password | md5 | password_hash('bcrypt') %}
 ---
 apiVersion: batch/v1beta1
@@ -8,7 +8,7 @@ metadata:
   name: wai-reset-environment
   namespace: {{ item }}
 spec:
-  schedule: "00 01 * * 0"
+  schedule: "{{ wai_settings[item].environment.reset.cron_expression }}"
   jobTemplate:
     spec:
       template:
