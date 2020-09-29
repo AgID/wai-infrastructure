@@ -18,7 +18,7 @@ spec:
           - name: portal
             image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
-            command: ["sh", "-c", " chmod +x /var/www/html/artisan ;  /var/www/html/artisan app:reset-environment"]
+            command: ["sh", "-c", "chmod +x /var/www/html/artisan ;  /var/www/html/artisan app:reset-environment"]
             resources:
               limits:
                 cpu: "0.50"
@@ -26,7 +26,7 @@ spec:
           - name: matomo
             env:
             - name: MATOMO_VERSION
-              value: "3_13_5"
+              value: "{{ wai_matomo_image_tag | replace('.','_') }}"
             image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
             command: ["bash", "-c", ". /tmp/reset-env/matomo-entrypoint.sh"]
@@ -108,7 +108,7 @@ data:
     j2 -f yaml $MATOMO_J2_SQL_FILE $WORK_DIR/reset-env-vars.yaml > $MATOMO_SQL_FILE
     [ $(wc -c < $MATOMO_SQL_FILE) -eq 0 ] && fail "Unable to create $MATOMO_SQL_FILE"
     DUMP_OPT="--dump=$MATOMO_SQL_FILE"
-    echo "Looking for plugins sql file"
+    echo "Looking for plugins sql files"
     while read file
     do
       DUMP_OPT+=" --dump=$file"

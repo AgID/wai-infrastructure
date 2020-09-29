@@ -58,7 +58,7 @@
     organization_name: AGID
     email_address: protocollo@pec.agid.gov.it
     common_name: AGID - Web Analytics Italia - Root CA
-    basic_constraints: "CA:true"
+    basic_constraints: "CA:TRUE"
     basic_constraints_critical: true
     key_usage:
       - keyCertSign
