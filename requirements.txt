@@ -1,4 +1,4 @@
-python-openstackclient==5.2.0
+python-openstackclient==5.3.1
 python-terraform==0.10.1
 ansible==2.10.0
 passlib==1.7.2
