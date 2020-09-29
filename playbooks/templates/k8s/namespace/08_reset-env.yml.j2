@@ -88,8 +88,11 @@ data:
     #!/bin/bash
     echo "Started"
     fail() {
-       echo Failed $1
-       exit 1
+      {% if wai_settings[item].log.slack_webhook_url_extra != "" %}
+      curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$1\"}" {{ wai_settings[item].log.slack_webhook_url_extra }}
+      {% endif %}
+      echo Failed $1
+      exit 1
     }
     success() {
        echo Success $1
@@ -114,7 +117,6 @@ data:
       DUMP_OPT+=" --dump=$file"
     done <<<$(find /opt/extra-content/premium_plugins -type f -name "*.sql")
     cd /var/www/html && chmod +x console
-    ./console reset-database $DUMP_OPT
-    success "Environment cleared"
+    ./console reset-database $DUMP_OPT && success "Environment cleared" || fail "An error occurred during reset operation"
 
 {% endif %}
