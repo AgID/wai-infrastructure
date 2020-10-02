@@ -199,6 +199,9 @@ data:
     {% if openvpn_server_addr is defined -%}
     allow_login_from[] = "{{ openvpn_server_addr }}"
     {% endif -%}
+    {% if 'wai-stag' == item -%}
+    allow_login_from[] = "0.0.0.0/0"
+    {% endif -%}
     redirect_unallowed_to = "https://{{ wai_base_domain[item] }}"
 
     [TrackerHostname]
