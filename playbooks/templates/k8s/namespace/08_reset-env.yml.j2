@@ -1,0 +1,118 @@
+# {{ ansible_managed }}
+{% if wai_settings[item].environment.reset.enabled  %}
+{% set matomo_database_superuser_password = matomo_vars.super_user.password | md5 | password_hash('bcrypt') %}
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: wai-reset-environment
+  namespace: {{ item }}
+spec:
+  schedule: "{{ wai_settings[item].environment.reset.cron_expression }}"
+  jobTemplate:
+    spec:
+      template:
+        backoffLimit: 5
+        spec:
+          containers:
+          - name: portal
+            image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
+            imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+            command: ["sh", "-c", "chmod +x /var/www/html/artisan ;  /var/www/html/artisan app:reset-environment"]
+            resources:
+              limits:
+                cpu: "0.50"
+                memory: "256Mi"            
+          - name: matomo
+            env:
+            - name: MATOMO_VERSION
+              value: "{{ wai_matomo_image_tag | replace('.','_') }}"
+            image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
+            imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+            command: ["bash", "-c", ". /tmp/reset-env/matomo-entrypoint.sh"]
+            resources:
+              limits:
+                cpu: "0.50"
+                memory: "256Mi"
+            volumeMounts:
+            - mountPath: /tmp/reset-env/
+              name: reset-env-config
+            - mountPath: /opt/extra-content
+              name: matomo-extra-content
+          restartPolicy: Never
+          volumes:
+            - name: reset-env-config
+              configMap:
+                name: reset-env-config
+            - name: matomo-extra-content
+              persistentVolumeClaim:
+                claimName: matomo-extra-content-pvc
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: reset-env-config
+  namespace: {{ item }}
+data: 
+  reset-env-vars.yaml: |
+    env: {{ item }}
+    matomo_vars:
+      salt:
+        {{ item }}: {{ matomo_vars.salt[item] }}
+      plugins:
+        protect_track_id:
+          {{ item }}:
+            base_settings: {{ matomo_vars.plugins.protect_track_id[item].base_settings }}
+            salt_settings: {{ matomo_vars.plugins.protect_track_id[item].salt_settings }}
+            length_settings: {{ matomo_vars.plugins.protect_track_id[item].length_settings }}
+      super_user: 
+        login: {{ matomo_vars.super_user.login }}
+        email: {{ matomo_vars.super_user.email }}
+        token: {{ matomo_vars.super_user.token }}
+    ansible_date_time:
+      year: {{ ansible_date_time.year }}
+      month: {{ ansible_date_time.month }}
+    redis_password:
+      ingestion_redis_master:
+        {{ item }}: {{ redis_password.ingestion_redis_master[item] }}
+    wai_matomo_pod_size:
+      {{ item }}:
+        matomo-worker: {{ wai_matomo_pod_size[item]['matomo-worker'] }}
+    matomo_database_superuser_password: {{ matomo_database_superuser_password }}
+
+  matomo-entrypoint.sh: |
+    #!/bin/bash
+    echo "Started"
+    fail() {
+      {% if wai_settings[item].log.slack_webhook_url_extra != "" %}
+      curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$1\"}" {{ wai_settings[item].log.slack_webhook_url_extra }}
+      {% endif %}
+      echo Failed $1
+      exit 1
+    }
+    success() {
+       echo Success $1
+       exit 0
+    }
+    WORK_DIR="/tmp/reset-env"
+    MATOMO_SQL_FILE="/tmp/matomo.sql"
+    MATOMO_J2_SQL_FILE="/tmp/matomo.sql.j2"
+    echo "Download matomo_$MATOMO_VERSION.sql.j2 sql script file"
+    curl https://raw.githubusercontent.com/AgID/wai-infrastructure/master/playbooks/templates/mariadb/matomo_$MATOMO_VERSION.sql.j2 -s -o $MATOMO_J2_SQL_FILE > /dev/null
+    echo "Update packages"
+    apt-get update && apt-get install -y python python-pip
+    echo "Install requirements"
+    pip install j2cli pyyaml j2cli[yaml]
+    echo "Create main matomo sql file"
+    j2 -f yaml $MATOMO_J2_SQL_FILE $WORK_DIR/reset-env-vars.yaml > $MATOMO_SQL_FILE
+    [ $(wc -c < $MATOMO_SQL_FILE) -eq 0 ] && fail "Unable to create $MATOMO_SQL_FILE"
+    DUMP_OPT="--dump=$MATOMO_SQL_FILE"
+    echo "Looking for plugins sql files"
+    while read file
+    do
+      DUMP_OPT+=" --dump=$file"
+    done <<<$(find /opt/extra-content/premium_plugins -type f -name "*.sql")
+    cd /var/www/html && chmod +x console
+    ./console reset-database $DUMP_OPT && success "Environment cleared" || fail "An error occurred during reset operation"
+
+{% endif %}
