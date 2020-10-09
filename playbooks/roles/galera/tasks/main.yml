@@ -17,12 +17,12 @@
 
 - name: Galera .:. Fail if password is not found
   fail:
-    msg: "STS Password for the current environment not found"
+    msg: "STS Password for the current environment not found for environment {{ wai_environment }} {{ wai_database_credentials[wai_environment].root }}"
   when: "wai_environment is not defined or wai_database_credentials[wai_environment] is not defined"
 
 - name: Galera .:. Test if galera has been configured
   stat:
-    path: "/etc/mysql/conf.d/galera.cnf"
+    path: "/etc/mysql/mariadb.conf.d/70-galera-wai.cnf"
   register: galera_present_result
 
 - include_role:
@@ -35,7 +35,7 @@
     production_slave_node: "{{ (groups['galera-prod-slave'] | intersect(inventory_hostname) | list | length > 0) }}"
   template:
     src: "galera.yml.j2"
-    dest: "/etc/mysql/conf.d/galera.cnf"
+    dest: "/etc/mysql/mariadb.conf.d/70-galera-wai.cnf"
     owner: "root"
     group: "root"
     mode: "0644"
@@ -73,8 +73,10 @@
 - name: Galera .:. Restart MariaDB on other nodes
   service:
     name: mysql
-    state: restarted
+    state: started
     enabled: yes
+  throttle: 1
+  ignore_errors: true
   when:
     - "galera_first_node is not defined"
     - "galera_present_result.stat.exists == false"
@@ -95,7 +97,7 @@
     login_user: "root"
     name: "{{ wai_database_credentials['wai-prod']['sst-user-username'] }}"
     password: "{{ wai_database_credentials['wai-prod']['sst-user-password'] }}"
-    priv: "*.*:RELOAD, PROCESS, LOCK TABLES, REPLICATION CLIENT"
+    priv: "*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT"
     host: "localhost"
     login_unix_socket: /var/run/mysqld/mysqld.sock
   when:
@@ -108,6 +110,7 @@
     master_password: "{{ wai_database_credentials['wai-prod']['replica-user-password'] }}"
     master_host: "{{ hostvars[groups['galera-prod'][0]]['ansible_default_ipv4']['address'] }}"
     login_unix_socket: /var/run/mysqld/mysqld.sock
+  ignore_errors: true
   when:
     - inventory_hostname == groups['galera-prod-slave'][0]
 
