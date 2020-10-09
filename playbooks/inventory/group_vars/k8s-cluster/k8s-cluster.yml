@@ -1,6 +1,9 @@
 # Override Kubespray: use weave network plugin
 kube_network_plugin: weave
 
+# must be set to true for MetalLB to work
+kube_proxy_strict_arp: true
+
 # Add public ip address of wai-k8s-master-01 to ssl keys
 supplementary_addresses_in_ssl_keys: ["{{ hostvars['wai-k8s-master-01']['ansible_host'] }}"]
 
