@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: infrastructure-configmap
+  namespace: {{ item }}
 data:
   wai-ca.crt: |
 {% for line in certificate_lines %}
