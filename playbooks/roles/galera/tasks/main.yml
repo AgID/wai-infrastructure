@@ -17,7 +17,11 @@
 
 - name: Galera .:. Fail if password is not found
   fail:
+<<<<<<< HEAD
     msg: "STS Password for the current environment not found for environment {{ wai_environment }} {{ wai_database_credentials[wai_environment].root }}"
+=======
+    msg: "STS Password for the current environment not found for environment"
+>>>>>>> 5bb7fed8f6d34802732993c488acb882e605acc2
   when: "wai_environment is not defined or wai_database_credentials[wai_environment] is not defined"
 
 - name: Galera .:. Test if galera has been configured

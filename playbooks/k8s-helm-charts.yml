@@ -32,10 +32,18 @@
           - pyhelm==2.14.5
           - grpcio
 
+<<<<<<< HEAD
     - name: K8S Helm .:. Add stable chart repo
       community.kubernetes.helm_repository:
         repo_name: stable
         repo_url: "https://kubernetes-charts.storage.googleapis.com"
+=======
+    # Install cert manager
+    - name: K8S Helm .:. Download Cert-Manager requirements
+      get_url:
+        url: "https://github.com/jetstack/cert-manager/releases/download/{{ helm.cert_manager.version  }}/cert-manager.crds.yaml"
+        dest: "{{ wai_k8s_deployment_dir }}/helm/crds.yaml"
+>>>>>>> 5bb7fed8f6d34802732993c488acb882e605acc2
 
     - name: K8S Helm .:. Add Jetstack repo
       community.kubernetes.helm_repository:
@@ -47,6 +55,7 @@
         repo_name: prometheus-community 
         repo_url: https://prometheus-community.github.io/helm-charts
 
+<<<<<<< HEAD
     - name: K8S Helm .:. Add grafana chart repo
       community.kubernetes.helm_repository:
         repo_name: grafana
@@ -66,6 +75,36 @@
         release_state: present
         values:
           installCRDs: true
+=======
+    - name: K8S Helm .:. Test if Cert-Manager is installed
+      shell: "helm list --namespace cert-manager | grep cert-manager -c"
+      failed_when: helm_status.rc != 0 and helm_status.rc != 1
+      register: helm_status
+
+    - name: K8S Helm .:. Install Cert-Manager
+      shell: "kubectl create ns cert-manager ; helm install cert-manager --namespace cert-manager jetstack/cert-manager --version {{ helm.cert_manager.version }}"
+      when: helm_status.stdout == "0"
+
+    - name: K8S Helm .:. Add stable chart repo
+      community.kubernetes.helm_repository:
+        repo_name: stable
+        repo_url: "https://kubernetes-charts.storage.googleapis.com"
+
+    - name: K8S Helm .:. Add prometheus chart repo
+      community.kubernetes.helm_repository:
+        repo_name: prometheus-community 
+        repo_url: https://prometheus-community.github.io/helm-charts
+
+    - name: K8S Helm .:. Add grafana chart repo
+      community.kubernetes.helm_repository:
+        repo_name: grafana
+        repo_url: https://grafana.github.io/helm-charts
+
+    - name: K8S Helm .:. Add bitname chart repo
+      community.kubernetes.helm_repository:
+        repo_name: bitnami
+        repo_url: https://charts.bitnami.com/bitnami
+>>>>>>> 5bb7fed8f6d34802732993c488acb882e605acc2
 
     - name: K8S Helm .:. Install Prometheus
       community.kubernetes.helm:
@@ -105,7 +144,7 @@
                     - channel: "#wai"
                       send_resolved: true
                       title: "{{ '{{' }} range .Alerts {{ '}}' }}{{ '{{' }} .Annotations.summary {{ '}}' }}\n{{ '{{' }} end {{ '}}' }}"
-                      text: "{{ '{{' }} range .Alerts {{ '}}' }}{{ '{{' }} .Annotations.description {{ '}}' }}}}\n{{ '{{' }} end {{ '}}' }}"
+                      text: "{{ '{{' }} range .Alerts {{ '}}' }}{{ '{{' }} .Annotations.description {{ '}}' }}\n{{ '{{' }} end {{ '}}' }}"
               route:
                 group_wait: 10s
                 group_interval: 5m
@@ -214,6 +253,10 @@
                       for: 1m
                       labels:
                         severity: critical
+<<<<<<< HEAD
+=======
+      when: helm_status.stdout == "0"
+>>>>>>> 5bb7fed8f6d34802732993c488acb882e605acc2
 
     - name: K8S Helm .:. Install Grafana
       community.kubernetes.helm:
