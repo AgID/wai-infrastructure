@@ -32,31 +32,15 @@
           - pyhelm==2.14.5
           - grpcio
 
-    # Install cert manager
-    - name: K8S Helm .:. Download Cert-Manager requirements
-      get_url:
-        url: "https://github.com/jetstack/cert-manager/releases/download/{{ helm.cert_manager.version  }}/cert-manager.crds.yaml"
-        dest: "{{ wai_k8s_deployment_dir }}/helm/crds.yaml"
-
-    - name: K8S Helm .:. Install Cert-Manager requirements
-      shell: "{{ wai_kubectl }} apply --validate=false -f {{ wai_k8s_deployment_dir }}/helm/crds.yaml"
-
-    - name: K8S Helm .:. Add Cert-Manager repo
-      shell: "helm repo add jetstack https://charts.jetstack.io"
-
-    - name: K8S Helm .:. Test if Cert-Manager is installed
-      shell: "helm list --namespace cert-manager | grep cert-manager -c"
-      failed_when: helm_status.rc != 0 and helm_status.rc != 1
-      register: helm_status
-
-    - name: K8S Helm .:. Install Cert-Manager
-      shell: "kubectl create ns cert-manager ; helm install cert-manager --namespace cert-manager jetstack/cert-manager --version {{ helm.cert_manager.version }}"
-      when: helm_status.stdout == "0"
-
     - name: K8S Helm .:. Add stable chart repo
       community.kubernetes.helm_repository:
         repo_name: stable
         repo_url: "https://kubernetes-charts.storage.googleapis.com"
+
+    - name: K8S Helm .:. Add Jetstack repo
+      community.kubernetes.helm_repository:
+        repo_name: jetstack
+        repo_url: "https://charts.jetstack.io"
 
     - name: K8S Helm .:. Add prometheus chart repo
       community.kubernetes.helm_repository:
@@ -72,6 +56,16 @@
       community.kubernetes.helm_repository:
         repo_name: bitnami
         repo_url: https://charts.bitnami.com/bitnami
+
+    - name: K8S Helm .:. Install CertManager
+      community.kubernetes.helm:
+        release_namespace: cert-manager
+        create_namespace: true
+        name: cert-manager
+        chart_ref: jetstack/cert-manager
+        release_state: present
+        values:
+          installCRDs: true
 
     - name: K8S Helm .:. Install Prometheus
       community.kubernetes.helm:
@@ -220,7 +214,6 @@
                       for: 1m
                       labels:
                         severity: critical
-      when: helm_status.stdout == "0"
 
     - name: K8S Helm .:. Install Grafana
       community.kubernetes.helm:
@@ -297,7 +290,6 @@
                 gnetId: 7362
                 revision: 5
                 datasource: Prometheus
-      when: helm_status.stdout == "0"
 
     # Install Redis
     - name: K8S Helm .:. Install Redis
