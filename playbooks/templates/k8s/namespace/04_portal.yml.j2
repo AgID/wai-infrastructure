@@ -138,7 +138,7 @@ data:
 
     REDIS_HOST=application-redis
     REDIS_PASSWORD={{ redis_password.application_redis_master[item] }}
-    REDIS_PORT=26379
+    REDIS_PORT=6379
     REDIS_QUEUE=default
     REDIS_SENTINELS=tcp://application-redis:26379
     {%- for i in range(0, wai_redisearch_slave_count) -%}
@@ -149,7 +149,7 @@ data:
     REDIS_INDEXES_USE_SENTINELS=false
     REDIS_IPA_INDEX_HOST=ipa-redisearch
     REDIS_IPA_INDEX_PASSWORD={{ redis_password.ipa_redisearch_master[item] }}
-    REDIS_IPA_INDEX_PORT=26379
+    REDIS_IPA_INDEX_PORT=6379
     REDIS_IPA_INDEX_USE_SENTINELS=false
     REDIS_IPA_INDEX_SENTINELS=tcp://ipa-redisearch:26379
     REDIS_IPA_INDEX_SENTINEL_SET=ipa-redisearch-master
