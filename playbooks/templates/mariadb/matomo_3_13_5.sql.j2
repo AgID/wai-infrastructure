@@ -526,10 +526,10 @@ LOCK TABLES `plugin_setting` WRITE;
 INSERT INTO `plugin_setting` VALUES
   ('CoreUpdater','enable_plugin_update_communication','0',0,'',13),
   ('QueuedTracking','backend','redis',0,'',25),
-  ('QueuedTracking','useSentinelBackend','1',0,'',26),
-  ('QueuedTracking','sentinelMasterName','ingestion-redis-master',0,'',27),
+  ('QueuedTracking','useSentinelBackend','0',0,'',26),
+  ('QueuedTracking','sentinelMasterName','',0,'',27),
   ('QueuedTracking','redisHost','ingestion-redis',0,'',28),
-  ('QueuedTracking','redisPort','26379',0,'',29),
+  ('QueuedTracking','redisPort','6379',0,'',29),
   ('QueuedTracking','redisDatabase','0',0,'',30),
   ('QueuedTracking','redisPassword','{{ redis_password.ingestion_redis_master[env] }}',0,'',31),
   ('QueuedTracking','queueEnabled','1',0,'',32),

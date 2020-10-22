@@ -146,11 +146,11 @@ data:
     {%- endfor %}
 
     REDIS_SENTINEL_SET=application-redis-master
-    REDIS_INDEXES_USE_SENTINELS=true
+    REDIS_INDEXES_USE_SENTINELS=false
     REDIS_IPA_INDEX_HOST=ipa-redisearch
     REDIS_IPA_INDEX_PASSWORD={{ redis_password.ipa_redisearch_master[item] }}
     REDIS_IPA_INDEX_PORT=26379
-    REDIS_IPA_INDEX_USE_SENTINELS=true
+    REDIS_IPA_INDEX_USE_SENTINELS=false
     REDIS_IPA_INDEX_SENTINELS=tcp://ipa-redisearch:26379
     REDIS_IPA_INDEX_SENTINEL_SET=ipa-redisearch-master
     REDIS_CACHE_DB=1

@@ -303,7 +303,7 @@
             repository: "{{ wai_redisearch_image }}"
             tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_redisearch_image_tag }}"
           cluster:
-            enabled: true
+            enabled: false
           usePassword: true
           existingSecret: redis-master-secret
           existingSecretPasswordKey: "{{ item[1] }}-password"
@@ -320,7 +320,7 @@
           master:
             extraFlags:
               - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
-              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '2000' }}mb"
+              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '256' }}mb"
               - "--maxmemory-policy noeviction"
             disableCommands: "{{ ['FLUSHDB', 'FLUSHALL'] if item[0] == 'wai-prod' else []}}"
             persistence:
@@ -334,35 +334,6 @@
               requests:
                 cpu: 250m
                 memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '1Gi' }}"
-          slave:
-            extraFlags:
-              - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
-              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '2000' }}mb"
-              - "--maxmemory-policy noeviction"
-            persistence:
-              enabled: true
-              storageClass: storage-heketi
-              size: 5Gi
-            resources:
-              limits:
-                cpu: 250m
-                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '2Gi' }}"
-              requests:
-                cpu: 250m
-                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '1Gi' }}"
-          sentinel:
-            usePassword: false
-            enabled: true
-            masterSet: "{{ item[1] }}-master"
-            downAfterMilliseconds: 5000
-            failoverTimeout: 5000
-            resources:
-              limits:
-                cpu: 250m
-                memory: 512Mi
-              requests:
-                cpu: 250m
-                memory: 512Mi
       with_nested:
         - "{{ wai_k8s_namespaces }}"
         - ["ingestion-redis", "application-redis"]
@@ -380,7 +351,7 @@
             repository: "{{ wai_ipa_redisearch_image }}"
             tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_ipa_redisearch_image_tag }}"
           cluster:
-            enabled: true
+            enabled: false
           usePassword: true
           existingSecret: redis-master-secret
           existingSecretPasswordKey: ipa-redisearch-password
@@ -404,41 +375,13 @@
             resources:
               limits:
                 cpu: 250m
-                memory: 2Gi
+                memory: 256Mi
               requests:
                 cpu: 250m
-                memory: 1Gi
+                memory: 256Mi
             extraFlags:
-              - "--maxmemory 2000mb"
+              - "--maxmemory 256mb"
               - "--maxmemory-policy noeviction"
-          slave:
-            persistence:
-              enabled: true
-              storageClass: storage-heketi
-              size: 2Gi
-            resources:
-              limits:
-                cpu: 250m
-                memory: 2Gi
-              requests:
-                cpu: 250m
-                memory: 1Gi
-            extraFlags:
-              - "--maxmemory 2000mb"
-              - "--maxmemory-policy noeviction"
-          sentinel:
-            usePassword: false
-            enabled: true
-            masterSet: "ipa-redisearch-master"
-            downAfterMilliseconds: 5000
-            failoverTimeout: 5000
-            resources:
-              limits:
-                cpu: 250m
-                memory: 512Mi
-              requests:
-                cpu: 250m
-                memory: 512Mi
       with_items:
         - "{{ wai_k8s_namespaces }}"
 
