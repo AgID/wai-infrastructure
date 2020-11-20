@@ -90,7 +90,7 @@ data:
     CLOSED_BETA_WHITELIST_REPOSITORY_FULL_NAME={{ wai_settings[item].closed_beta.repository.name }}
     CLOSED_BETA_WHITELIST_REPOSITORY_BRANCH={{ wai_settings[item].closed_beta.repository.branch }}
     CLOSED_BETA_WHITELIST_REPOSITORY_FILE_NAME={{ wai_settings[item].closed_beta.repository.file }}
-
+    
     APP_SUPER_ADMIN_NAME={{ wai_settings.super_user.name }}
     APP_SUPER_ADMIN_FAMILY_NAME={{ wai_settings.super_user.family_name }}
     APP_SUPER_ADMIN_FISCAL_NUMBER={{ wai_settings.super_user.fiscal_number }}
@@ -101,6 +101,10 @@ data:
     LOG_STACK_CHANNELS={{ wai_settings[item].log.channels }}
     LOG_SLACK_WEBHOOK_URL={{ wai_settings[item].log.slack_webhook_url }}
     LOG_SLACK_USERNAME={{ wai_settings[item].log.slack_username }}
+    LOG_SLACK_WEBHOOK_URL_EXTRA_CHANNEL={{ wai_settings[item].log.slack_extra_channel_webhook_url }}
+    LOG_SLACK_USERNAME_EXTRA_CHANNEL={{ wai_settings[item].log.slack_extra_channel_username }}
+
+    APP_CUSTOM_PUBLIC_ADMINISTRATIONS_ENABLED={{ wai_settings[item].custom_public_administration.enabled }}
 
     CRON_AUTH_TOKEN={{ wai_settings[item].cron_auth_token }}
 
@@ -151,6 +155,13 @@ data:
     REDIS_CACHE_DB=1
     REDIS_SESSIONS_DB=2
     REDIS_QUEUE_DB=3
+
+{% if wai_settings[item].environment.reset.date.day is defined %}
+    RESET_PUBLIC_PLAYGROUND_DAY_VERBOSE={{ wai_settings[item].environment.reset.date.verbose }}
+    RESET_PUBLIC_PLAYGROUND_DAY={{ wai_settings[item].environment.reset.date.day }}
+    RESET_PUBLIC_PLAYGROUND_HOUR={{ wai_settings[item].environment.reset.date.hour }}
+    RESET_PUBLIC_PLAYGROUND_MINUTE={{ wai_settings[item].environment.reset.date.minute }}
+{% endif %}
 
 {% if wai_settings[item].mail is defined and wai_settings[item].mail.enabled %}
     MAIL_DRIVER=smtp
