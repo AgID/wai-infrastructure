@@ -1,0 +1,11 @@
+# Global project prefix
+project_name_prefix = "<PROJECT>"
+
+# Public network ID
+spccloud_public_network_id = "<PUBLIC_NETWORD_ID>"
+
+# DNS servers added to all instances
+public_dns_ips = ["<DNS_PRIMARY>", "<DNS_SECONDARY>"]
+
+# SSH user added to instances metadata for ansible dynamic inventory
+ssh_user = "<USER>"

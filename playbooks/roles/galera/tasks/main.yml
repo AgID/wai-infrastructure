@@ -1,0 +1,119 @@
+---
+# Galera role
+- name: Galera .:. Fail if galera members are less than 3
+  fail:
+    msg: "Wrong configuration for Galera cluster: less than 3 members found"
+  when: "groups[group_names[0]] | length < 3"
+
+- name: Galera  .:. Test if prod password
+  set_fact:
+    wai_environment: wai-prod
+  when: inventory_hostname in groups['galera-prod'] or inventory_hostname in groups['galera-prod-slave']
+
+- name: Galera .:. Test if play password
+  set_fact:
+    wai_environment: wai-play
+  when: inventory_hostname in groups['galera-play']
+
+- name: Galera .:. Fail if password is not found
+  fail:
+    msg: "STS Password for the current environment not found"
+  when: "wai_environment is not defined or wai_database_credentials[wai_environment] is not defined"
+
+- name: Galera .:. Test if galera has been configured
+  stat:
+    path: "/etc/mysql/conf.d/galera.cnf"
+  register: galera_present_result
+
+- include_role:
+    name: mariadb
+  when: galera_present_result.stat.exists == false
+
+- name: Galera .:. Create configuration file
+  vars:
+    production_master_node: "{{ (groups['galera-prod'] | intersect(inventory_hostname) | list | length > 0) }}"
+    production_slave_node: "{{ (groups['galera-prod-slave'] | intersect(inventory_hostname) | list | length > 0) }}"
+  template:
+    src: "galera.yml.j2"
+    dest: "/etc/mysql/conf.d/galera.cnf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  when: galera_present_result.stat.exists == false
+
+- name: Galera .:. Prepare binlog dir on production master nodes
+  file:
+    path: '/opt/data/mysql-binlog'
+    state: directory
+    group: mysql
+    owner: mysql
+  when: (groups['galera-prod'] | intersect(inventory_hostname) | list | length > 0)
+
+- name: Galera .:. Identify first node
+  set_fact:
+    galera_first_node: true
+  with_items: ["galera-prod", "galera-prod-slave", "galera-play"]
+  when:
+    - groups[item]|length > 0
+    - inventory_hostname == groups[item][0]
+
+- name: Galera .:. Stop MariaDB
+  service:
+    name: mysql
+    state: stopped
+    enabled: yes
+  when: galera_present_result.stat.exists == false
+
+- name: Galera .:. Create cluster
+  raw: "galera_new_cluster"
+  when:
+    - "galera_first_node is defined"
+    - "galera_present_result.stat.exists == false"
+
+- name: Galera .:. Restart MariaDB on other nodes
+  service:
+    name: mysql
+    state: restarted
+    enabled: yes
+  when:
+    - "galera_first_node is not defined"
+    - "galera_present_result.stat.exists == false"
+
+- name: Galera .:. Create replication user on production master primary node
+  mysql_user:
+    login_user: "root"
+    name: "{{ wai_database_credentials['wai-prod']['replica-user-username'] }}"
+    password: "{{ wai_database_credentials['wai-prod']['replica-user-password'] }}"
+    priv: "*.*:REPLICATION SLAVE"
+    host: "%"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when:
+    - inventory_hostname == groups['galera-prod'][0]
+
+- name: Galera .:. Create sst replication user on production master primary node
+  mysql_user:
+    login_user: "root"
+    name: "{{ wai_database_credentials['wai-prod']['sst-user-username'] }}"
+    password: "{{ wai_database_credentials['wai-prod']['sst-user-password'] }}"
+    priv: "*.*:RELOAD, PROCESS, LOCK TABLES, REPLICATION CLIENT"
+    host: "localhost"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when:
+    - inventory_hostname == groups['galera-prod'][0]
+    
+- name: Galera .:. Activate replica on production slave primary node
+  mysql_replication:
+    mode: changemaster
+    master_user: "{{ wai_database_credentials['wai-prod']['replica-user-username'] }}"
+    master_password: "{{ wai_database_credentials['wai-prod']['replica-user-password'] }}"
+    master_host: "{{ hostvars[groups['galera-prod'][0]]['ansible_default_ipv4']['address'] }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when:
+    - inventory_hostname == groups['galera-prod-slave'][0]
+
+- name: Galera .:. Start slave on slave primary node
+  mysql_replication:
+    mode: startslave
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when:
+    - inventory_hostname == groups['galera-prod-slave'][0]

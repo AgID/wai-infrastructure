@@ -1,0 +1,168 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  name: spid-idp
+  namespace: wai-stag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spid-idp
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: spid-idp
+    spec:
+      containers:
+      - image: italia/spid-testenv2:1.0.1
+        imagePullPolicy: IfNotPresent
+        name: spid-idp
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 250m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        volumeMounts:
+        - name: spid-configmap
+          mountPath: /app/conf
+        - name: spid-config-volume
+          mountPath: /data
+      volumes:
+        - name: spid-configmap
+          configMap:
+            name: spid-configmap
+        - name: spid-config-volume
+          persistentVolumeClaim:
+            claimName: spid-idp-config-pvc
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: spid-configmap
+  namespace: wai-stag
+data:
+  config.yaml: |-
+    base_url: "https://spid.{{ wai_base_domain['wai-stag'] }}"
+    key_file: "conf/idp.key"
+    cert_file: "conf/idp.crt"
+    debug: true
+    host: 0.0.0.0
+    port: 80
+    https: false
+    users_file: "/data/users.json"
+    can_add_user: true
+    database_admin_interface: false
+    show_response_options: true
+    metadata:
+      local:
+{% for ns in wai_k8s_namespaces %}
+        - conf/sp_{{ ns }}_meta.xml
+{% endfor %}
+
+  idp.key: |-
+{{ test_env_idp.key | indent( width=4, indentfirst=True) }}
+
+  idp.crt: |-
+{{ test_env_idp.crt | indent( width=4, indentfirst=True) }}
+
+{% for ns in wai_k8s_namespaces %}
+  sp_{{ ns }}_meta.xml: |-
+    <?xml version="1.0"?>
+    <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+      xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="{{ wai_settings[ns].spid.entityId }}" >
+      <md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
+        <md:KeyDescriptor use="signing">
+          <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+          <ds:X509Data>
+            <ds:X509Certificate>{{ wai_settings[ns].spid.crt }}</ds:X509Certificate>
+          </ds:X509Data>
+          </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://{{ wai_base_domain[ns] }}/spid/logout" />
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+        <md:AssertionConsumerService
+          Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://{{ wai_base_domain[ns] }}/spid/acs"
+          index="{{ wai_settings[ns].spid.acsIndex }}" {{ 'isDefault="true" ' if wai_settings[ns].spid.acsIndex == 0 else ' ' }}/>
+        <md:AttributeConsumingService index="{{ wai_settings[ns].spid.attributesIndex }}">
+          <md:ServiceName xml:lang="it">Web Analytics Italia</md:ServiceName>
+          <md:RequestedAttribute Name="spidCode"/>
+          <md:RequestedAttribute Name="name"/>
+          <md:RequestedAttribute Name="familyName"/>
+          <md:RequestedAttribute Name="fiscalNumber"/>
+        </md:AttributeConsumingService>
+      </md:SPSSODescriptor>
+      <md:Organization>
+        <md:OrganizationName xml:lang="it">AGID</md:OrganizationName>
+        <md:OrganizationDisplayName xml:lang="it">AGID - Web Analytics Italia [staging environment]</md:OrganizationDisplayName>
+        <md:OrganizationURL xml:lang="it">https://www.agid.gov.it</md:OrganizationURL>
+      </md:Organization>
+    </md:EntityDescriptor>
+
+{% endfor %}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: spid-idp-config-pvc
+  namespace: wai-stag
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: storage-heketi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spid-idp-service
+  namespace: wai-stag
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+  selector:
+    app: spid-idp
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-wai-stag
+    kubernetes.io/ingress.class: nginx-wai-stag
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header Allow "GET, POST" always;
+
+      if ($request_method !~ ^(GET|POST)$) {
+        return 405;
+      }
+  name: spid-idp
+  namespace: wai-stag
+spec:
+  rules:
+  - host: spid.{{ wai_base_domain['wai-stag'] }}
+    http:
+      paths:
+      - backend:
+          serviceName: spid-idp-service
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - spid.{{ wai_base_domain['wai-stag'] }}
+    secretName: spid-idp-tls

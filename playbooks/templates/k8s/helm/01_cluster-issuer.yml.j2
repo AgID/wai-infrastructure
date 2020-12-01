@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-cluster-issuer-{{ item }}
+spec:
+  acme:
+    email: protocollo@pec.agid.gov.it
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: acme-issuer-account-key-{{ item }}
+    solvers:
+    - http01:
+        ingress:
+          class: nginx-{{ item }}

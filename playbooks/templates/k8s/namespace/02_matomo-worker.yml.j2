@@ -1,0 +1,107 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: matomo-worker
+  namespace: {{ item }}
+spec:
+  replicas: {{ wai_matomo_pod_size[item]['matomo-worker'] }}
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: matomo-worker
+  serviceName: matomo-worker
+  template:
+    metadata:
+      annotations:
+        releaseDate: now
+      labels:
+        app: matomo-worker
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - matomo-worker
+            topologyKey: "kubernetes.io/hostname"
+      initContainers:
+      - name: copy
+        image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+        command: ["sh", "-c", ". /entrypoint.sh"]
+        resources:
+          limits:
+            cpu: 0.1
+            memory: "50Mi"
+        volumeMounts:
+        - mountPath: /html
+          name: html
+        - name: matomo-php-config
+          mountPath: /tmp/config.ini.php.orig
+          subPath: config.ini.php
+        - name: matomo-initc-config
+          mountPath: /entrypoint.sh
+          subPath: entrypoint.sh
+        - name: matomo-extra-content
+          mountPath: /opt/extra-content
+      containers:
+      - image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+        name: matomo-worker
+        resources:
+          limits:
+            cpu: "0.50"
+            memory: "256Mi"
+        command: ["/bin/sh", "/var/www/scripts/qt-worker.sh"]
+        readinessProbe:
+          exec:
+            command: ["php", "/var/www/html/console", "-V"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          exec:
+            command: ["php", "/var/www/html/console", "-V"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+        volumeMounts:
+        - name: matomo-worker-config
+          mountPath: /var/www/scripts
+        - name: html
+          mountPath: /var/www/html/
+      volumes:
+        - name: matomo-worker-config
+          configMap:
+            name: matomo-worker-config
+        - name: matomo-php-config
+          configMap:
+            name: matomo-php-config
+        - name: matomo-extra-content
+          persistentVolumeClaim:
+            claimName: matomo-extra-content-pvc
+        - name: matomo-initc-config
+          configMap:
+            name: matomo-initc-config
+        - name: html
+          emptyDir: {}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: matomo-worker-config
+  namespace: {{ item }}
+data:
+  qt-worker.sh: |-
+    #!/bin/sh
+    QUEUE_ID=${HOSTNAME##*-}
+    cd /var/www/html
+    while true;
+    do
+      php console queuedtracking:process --queue-id $QUEUE_ID > /dev/null
+      sleep 0.5
+    done

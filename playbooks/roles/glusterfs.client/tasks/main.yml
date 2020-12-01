@@ -1,0 +1,13 @@
+---
+# Installing GlusterFS
+- name: GlusterFS Client .:. Adding PPA repository
+  apt_repository:
+    repo: '{{ gluster_apt_repo }}'
+    state: present
+
+- name: GlusterFS Client .:. Installing GlusterFS client
+  apt:
+    update_cache: true
+    name: glusterfs-client={{ gluster_package_version }}
+    state: present
+

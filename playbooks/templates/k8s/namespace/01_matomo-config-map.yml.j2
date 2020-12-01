@@ -1,0 +1,270 @@
+# {{ ansible_managed }}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: matomo-php-config
+  namespace: {{ item }}
+data:
+  config.ini.php: |-
+    [database]
+    host = "{{ wai_load_balancer[item].rdbms[0] }}"
+    username = "{{ wai_database_credentials[item]['matomo-admin-username'] }}"
+    password = "{{ wai_database_credentials[item]['matomo-admin-password'] }}"
+    dbname = "matomo"
+
+{% if wai_load_balancer[item].rdbms | length > 1 %}
+    [database_reader]
+    host = "{{ wai_load_balancer[item].rdbms[1] }}"
+    username = "{{ wai_database_credentials[item]['matomo-user-username'] }}"
+    password = "{{ wai_database_credentials[item]['matomo-user-password'] }}"
+    dbname = "matomo"
+{% endif %}
+
+    [General]
+    salt = "{{ matomo_vars.salt[item] }}"
+    trusted_hosts[] = "localhost"
+    trusted_hosts[] = "127.0.0.1"
+    trusted_hosts[] = "{{ wai_base_domain[item] }}"
+    {% for attr in wai_hostname -%}
+    trusted_hosts[] = "{{ wai_hostname[attr] }}.{{ wai_base_domain[item] }}"
+    {% endfor -%}
+    proxy_client_headers[] = HTTP_X_FORWARDED_FOR
+    enable_trusted_host_check = 1
+    force_ssl = 1
+    enable_update_users_email = 0
+    emails_enabled = 0
+    assume_secure_protocol = 1
+    enable_update_communication = 0
+    enable_auto_update = 0
+    show_update_notification_to_superusers_only = 1
+    enable_delete_old_data_settings_admin = 0
+    enable_geolocation_admin = 0
+    enable_installer = 0
+    enable_plugins_admin = 0
+    proxy_uri_header = 1
+    enable_general_settings_admin = 0
+    browser_archiving_disabled_enforce = 1
+    enable_browser_archiving_triggering = 0
+    default_day = "previous30"
+    default_period = "range"
+    default_language = "it"
+    multi_server_environment = 1
+    archiving_custom_ranges[] = previous30
+    time_before_today_archive_considered_outdated = 2700
+    time_before_week_archive_considered_outdated = 2700
+    time_before_month_archive_considered_outdated = 2700
+    time_before_year_archive_considered_outdated = 2700
+    time_before_range_archive_considered_outdated = 2700
+
+    [Plugins]
+    Plugins[] = "CorePluginsAdmin"
+    Plugins[] = "CoreAdminHome"
+    Plugins[] = "CoreHome"
+    Plugins[] = "WebsiteMeasurable"
+    Plugins[] = "IntranetMeasurable"
+    Plugins[] = "Diagnostics"
+    Plugins[] = "CoreVisualizations"
+    Plugins[] = "Proxy"
+    Plugins[] = "API"
+    Plugins[] = "Widgetize"
+    Plugins[] = "Transitions"
+    Plugins[] = "LanguagesManager"
+    Plugins[] = "Actions"
+    Plugins[] = "Dashboard"
+    Plugins[] = "MultiSites"
+    Plugins[] = "Referrers"
+    Plugins[] = "UserLanguage"
+    Plugins[] = "DevicesDetection"
+    Plugins[] = "Goals"
+    Plugins[] = "Ecommerce"
+    Plugins[] = "SEO"
+    Plugins[] = "Events"
+    Plugins[] = "UserCountry"
+    Plugins[] = "GeoIp2"
+    Plugins[] = "VisitsSummary"
+    Plugins[] = "VisitFrequency"
+    Plugins[] = "VisitTime"
+    Plugins[] = "VisitorInterest"
+    Plugins[] = "RssWidget"
+    Plugins[] = "Monolog"
+    Plugins[] = "Login"
+    Plugins[] = "TwoFactorAuth"
+    Plugins[] = "UsersManager"
+    Plugins[] = "SitesManager"
+    Plugins[] = "Installation"
+    Plugins[] = "CoreUpdater"
+    Plugins[] = "CoreConsole"
+    Plugins[] = "ScheduledReports"
+    Plugins[] = "UserCountryMap"
+    Plugins[] = "Live"
+    Plugins[] = "CustomVariables"
+    Plugins[] = "PrivacyManager"
+    Plugins[] = "ImageGraph"
+    Plugins[] = "Annotations"
+    Plugins[] = "SegmentEditor"
+    Plugins[] = "Insights"
+    Plugins[] = "Morpheus"
+    Plugins[] = "Contents"
+    Plugins[] = "BulkTracking"
+    Plugins[] = "Resolution"
+    Plugins[] = "DevicePlugins"
+    Plugins[] = "Heartbeat"
+    Plugins[] = "Intl"
+    Plugins[] = "UserId"
+    Plugins[] = "CustomPiwikJs"
+    Plugins[] = "DisableTracking"
+    Plugins[] = "WAIMatomoTheme"
+    Plugins[] = "QueuedTracking"
+    Plugins[] = "ProtectTrackID"
+    Plugins[] = "CustomDimensions"
+    Plugins[] = "LoginFilterIp"
+    Plugins[] = "TrackerHostname"
+
+    [PluginsInstalled]
+    PluginsInstalled[] = "Diagnostics"
+    PluginsInstalled[] = "Login"
+    PluginsInstalled[] = "CoreAdminHome"
+    PluginsInstalled[] = "UsersManager"
+    PluginsInstalled[] = "SitesManager"
+    PluginsInstalled[] = "Installation"
+    PluginsInstalled[] = "Monolog"
+    PluginsInstalled[] = "Intl"
+    PluginsInstalled[] = "CorePluginsAdmin"
+    PluginsInstalled[] = "CoreHome"
+    PluginsInstalled[] = "WebsiteMeasurable"
+    PluginsInstalled[] = "IntranetMeasurable"
+    PluginsInstalled[] = "CoreVisualizations"
+    PluginsInstalled[] = "Proxy"
+    PluginsInstalled[] = "API"
+    PluginsInstalled[] = "Widgetize"
+    PluginsInstalled[] = "Transitions"
+    PluginsInstalled[] = "LanguagesManager"
+    PluginsInstalled[] = "Actions"
+    PluginsInstalled[] = "Dashboard"
+    PluginsInstalled[] = "MultiSites"
+    PluginsInstalled[] = "Referrers"
+    PluginsInstalled[] = "UserLanguage"
+    PluginsInstalled[] = "DevicesDetection"
+    PluginsInstalled[] = "Goals"
+    PluginsInstalled[] = "Ecommerce"
+    PluginsInstalled[] = "SEO"
+    PluginsInstalled[] = "Events"
+    PluginsInstalled[] = "UserCountry"
+    PluginsInstalled[] = "GeoIp2"
+    PluginsInstalled[] = "VisitsSummary"
+    PluginsInstalled[] = "VisitFrequency"
+    PluginsInstalled[] = "VisitTime"
+    PluginsInstalled[] = "VisitorInterest"
+    PluginsInstalled[] = "RssWidget"
+    PluginsInstalled[] = "TwoFactorAuth"
+    PluginsInstalled[] = "CoreUpdater"
+    PluginsInstalled[] = "CoreConsole"
+    PluginsInstalled[] = "ScheduledReports"
+    PluginsInstalled[] = "UserCountryMap"
+    PluginsInstalled[] = "Live"
+    PluginsInstalled[] = "CustomVariables"
+    PluginsInstalled[] = "PrivacyManager"
+    PluginsInstalled[] = "ImageGraph"
+    PluginsInstalled[] = "Annotations"
+    PluginsInstalled[] = "SegmentEditor"
+    PluginsInstalled[] = "Insights"
+    PluginsInstalled[] = "Morpheus"
+    PluginsInstalled[] = "Contents"
+    PluginsInstalled[] = "BulkTracking"
+    PluginsInstalled[] = "Resolution"
+    PluginsInstalled[] = "DevicePlugins"
+    PluginsInstalled[] = "Heartbeat"
+    PluginsInstalled[] = "UserId"
+    PluginsInstalled[] = "CustomPiwikJs"
+    PluginsInstalled[] = "DisableTracking"
+    PluginsInstalled[] = "WAIMatomoTheme"
+    PluginsInstalled[] = "QueuedTracking"
+    PluginsInstalled[] = "ProtectTrackID"
+    PluginsInstalled[] = "CustomDimensions"
+    PluginsInstalled[] = "LoginFilterIp"
+    PluginsInstalled[] = "TrackerHostname"
+
+    [WAIMatomoTheme]
+    waiUrl = "https://{{ wai_base_domain[item] }}"
+
+    [QueuedTracking]
+    notify_queue_threshold_single_queue = 250000
+    {% for email in wai_alert_email_destination | default([]) -%}
+    notify_queue_threshold_emails[]={{ email }}
+    {% endfor %}
+
+    [LoginFilterIp]
+    allow_login_from[] = "{{ wai_infrastructure_cidr }}"
+    {% if openvpn_server_addr is defined -%}
+    allow_login_from[] = "{{ openvpn_server_addr }}"
+    {% endif -%}
+    {% if 'wai-stag' == item -%}
+    allow_login_from[] = "0.0.0.0/0"
+    {% endif -%}
+    redirect_unallowed_to = "https://{{ wai_base_domain[item] }}"
+
+    [TrackerHostname]
+    hostname = "{{ wai_hostname['ingestion'] }}.{{ wai_base_domain[item] }}"
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: matomo-initc-config
+  namespace: {{ item }}
+data:
+  entrypoint.sh: |-
+    #!/bin/sh
+
+    # Copy matomo content to emptydir
+    cp -a /var/www/html/* /html/
+
+    # Copy config.ini.php.orig to matomo config folder
+    cp /tmp/config.ini.php.orig /html/config/config.ini.php
+
+    # Create a soft link to geoip file even if it does not exist because of it is not in the image. The cron archive job will create this file.
+    MATOMO_GEOIP_PATH=/html/misc/DBIP-City.mmdb
+    MATOMO_GEOIP_EXTERNAL_PATH=/opt/extra-content/geoip/DBIP-City.mmdb
+    rm -f $MATOMO_GEOIP_PATH
+    ln -s $MATOMO_GEOIP_EXTERNAL_PATH $MATOMO_GEOIP_PATH
+
+    # Copy premium plugins
+    MATOMO_INI=/html/config/config.ini.php
+    find -P /opt/extra-content/premium_plugins/* -prune -type d -printf "%f\n" | while IFS= read -r directory; do
+        # Extract plugin code
+        unzip -u "/opt/extra-content/premium_plugins/$directory/*.zip" -d /html/plugins
+        if ! grep -q "$directory" $MATOMO_INI; then
+            # Add plugin into "installed" list
+            sed -i -E -e "/^PluginsInstalled\[\] = .*$/!b;:a;n;//ba;i\PluginsInstalled\[\] = \"$directory\"" $MATOMO_INI
+
+            # Add plugin into "activated" list
+            sed -i -E -e "/^Plugins\[\] = .*$/!b;:a;n;//ba;i\Plugins\[\] = \"$directory\"" $MATOMO_INI
+
+            # Add plugin specific configuration
+            if [ -f "/opt/extra-content/premium_plugins/$directory/config.ini.php" ]; then
+                echo "" >> $MATOMO_INI
+                echo "[$directory]" >> $MATOMO_INI
+                cat "/opt/extra-content/premium_plugins/$directory/config.ini.php" >> $MATOMO_INI
+                echo "" >> $MATOMO_INI
+            fi
+        fi
+    done
+    chown -R 33:33 /html/
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: matomo-cron-config
+  namespace: {{ item }}
+data:
+  entrypoint.sh: |-
+    #!/bin/sh
+    MATOMO_GEOIP_PATH=/var/www/html/misc/DBIP-City.mmdb
+    MATOMO_GEOIP_EXTERNAL_PATH=/opt/extra-content/geoip/DBIP-City.mmdb
+    rm -f $MATOMO_GEOIP_PATH
+    chmod +x /var/www/html/console ; cd /var/www/html/
+    ./console core:archive
+    if [ -f "$MATOMO_GEOIP_PATH" ]; then
+      cp -f $MATOMO_GEOIP_PATH $MATOMO_GEOIP_EXTERNAL_PATH
+    fi

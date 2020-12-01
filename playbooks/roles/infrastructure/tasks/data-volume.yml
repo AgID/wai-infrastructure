@@ -1,0 +1,32 @@
+# Task to create data volume: enabled only if storage_dev is defined
+#- name: Create primary data partition
+#  parted:
+#    device: '{{ storage_dev }}'
+#    number: 1
+#    state: present
+
+- name: Create volume group data-vg
+  lvg:
+    vg: data-vg
+    pvs: '{{ storage_dev }}'
+    pesize: 4
+    state: present
+
+- name: Create logical volume data-lv-01
+  lvol:
+    vg: data-vg
+    lv: data-lv-01
+    size: +100%FREE
+
+- name: Create filesytem
+  filesystem:
+    fstype: ext4
+    dev: /dev/data-vg/data-lv-01
+
+- name: Add mount point
+  mount:
+      state: mounted
+      path: /opt/data
+      src: /dev/data-vg/data-lv-01
+      boot: yes
+      fstype: ext4

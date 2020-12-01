@@ -1,0 +1,8 @@
+{
+  "index_patterns": ["logstash*"],
+  "settings": {
+    "number_of_replicas": 1,
+    "number_of_shards": 2,
+    "index.lifecycle.name": "wai-logstash-retention"
+  }
+}

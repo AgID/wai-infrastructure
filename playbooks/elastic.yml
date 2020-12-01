@@ -1,0 +1,63 @@
+---
+# Configure Matomo database
+- hosts:
+    - elastic[0]
+  tasks:
+    - include_vars:
+        file: secrets.yml
+
+    - name: Elasticsearch .:. Setup policy
+      uri:
+        url: "https://localhost:9200/_ilm/policy/wai-logstash-retention"
+        body: "{{ item }}"
+        user: elastic
+        password: "{{ elasticsearch_secrets.elastic }}"
+        force_basic_auth: yes
+        method: PUT
+        status_code: 200
+        body_format: json
+        validate_certs: no
+      with_file:
+        - templates/elastic/01_policy.json
+
+    - name: Elasticsearch .:. Setup policy
+      uri:
+        url: "https://localhost:9200/_template/wai-logstash"
+        user: elastic
+        password: "{{ elasticsearch_secrets.elastic }}"
+        force_basic_auth: yes
+        body: "{{ item }}"
+        method: PUT
+        status_code: 200
+        body_format: json
+        validate_certs: no
+      with_file:
+        - templates/elastic/02_template.json
+
+    - name: Elasticsearch .:. Setup WAI portal index template
+      uri:
+        url: 'https://localhost:9200/_template/wai-application-log'
+        user: elastic
+        password: '{{ elasticsearch_secrets.elastic }}'
+        force_basic_auth: yes
+        body: "{{ item }}"
+        method: PUT
+        status_code: 200
+        body_format: json
+        validate_certs: no
+      with_file:
+        - templates/elastic/03_wai_index_settings.json
+
+    - name: Elasticsearch .:. Setup WAI search template
+      uri:
+        url: 'https://localhost:9200/_scripts/wai-portal-search-template'
+        user: elastic
+        password: '{{ elasticsearch_secrets.elastic }}'
+        force_basic_auth: yes
+        body: "{{ item }}"
+        method: POST
+        status_code: 200
+        body_format: json
+        validate_certs: no
+      with_file:
+        - templates/elastic/04_wai_log_search_template.json

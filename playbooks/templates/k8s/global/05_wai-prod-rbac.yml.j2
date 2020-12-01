@@ -1,0 +1,27 @@
+# {{ ansible_managed }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: default-role
+  namespace: wai-prod
+rules:
+- apiGroups: [""]
+  resources: ["pods", "configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: default-rolebinding
+  namespace: wai-prod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: default-role
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: wai-prod-users

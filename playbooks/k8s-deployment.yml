@@ -1,0 +1,25 @@
+---
+# Deploy K8S WAI Resources
+- hosts: kube-master[0]
+  tasks:
+    - include_vars:
+        file: secrets.yml
+
+    - name: K8S .:. Add label to worker nodes
+      raw: "{{ wai_kubectl }} label nodes {{ item }} role=metallb"
+      with_inventory_hostnames:
+      - kube-node
+
+    - name: K8S .:. Compile resources templates
+      include_tasks: k8s-templates.yml
+
+    - name: K8S .:. Enumerate deployment files
+      shell: 'find {{ wai_k8s_deployment_dir }} -type f | sort'
+      register: deployment_files
+
+    - name: K8S .:. Deploy Web Analytics Italia
+      kube:
+        kubectl: "{{ wai_kubectl }}"
+        filename: "{{ item }}"
+        state: "latest"
+      with_items: "{{ deployment_files.stdout_lines }}"

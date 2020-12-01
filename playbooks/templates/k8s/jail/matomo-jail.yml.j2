@@ -1,0 +1,303 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ matomo_name }}
+  namespace: {{ item }}
+spec:
+  replicas: {{ wai_matomo_pod_size[item][matomo_pod_size_index] }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: {{ matomo_name }}
+  template:
+    metadata:
+      annotations:
+        releaseDate: now
+      labels:
+        app: {{ matomo_name }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{ matomo_name }}
+            topologyKey: "kubernetes.io/hostname"
+      initContainers:
+      - name: copy
+        image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+        command: ["sh", "-c", ". /entrypoint.sh"]
+        resources:
+          limits:
+            cpu: 0.1
+            memory: "50Mi"
+        volumeMounts:
+        - mountPath: /html
+          name: html
+        - name: {{ matomo_name }}-config
+          mountPath: /tmp/config.ini.php.orig
+          subPath: config.ini.php
+        - name: {{ matomo_name }}-initc-config
+          mountPath: /entrypoint.sh
+          subPath: entrypoint.sh
+        - name: {{ matomo_name }}-extra-content
+          mountPath: /opt/extra-content
+      containers:
+      - image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+        name: {{ matomo_name }}
+        resources:
+          limits:
+            cpu: "0.75"
+            memory: "250Mi"
+        ports:
+        - containerPort: 9000
+          name: fpm-port
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /var/www/html/config/config.ini.php
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: html
+          mountPath: /var/www/html/
+        - name: {{ matomo_name }}-extra-content
+          mountPath: /opt/extra-content
+      - image: nginx:1.15.8
+        name: nginx
+        resources:
+          limits:
+            cpu: "0.25"
+            memory: "256Mi"
+        args: ["nginx", "-g", "daemon off;", "-c", "/etc/config/nginx.conf"]
+        ports:
+        - containerPort: 80
+          name: nginx
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+        volumeMounts:
+        - name: {{ matomo_name }}-nginx-conf
+          mountPath: /etc/config/
+        - name: html
+          mountPath: /var/www/html
+      volumes:
+        - name: {{ matomo_name }}-config
+          configMap:
+            name: matomo-php-config
+        - name: {{ matomo_name }}-initc-config
+          configMap:
+            name: matomo-initc-config
+        - name: {{ matomo_name }}-nginx-conf
+          configMap:
+            name: {{ matomo_name }}-nginx-configmap
+        - name: {{ matomo_name }}-extra-content
+          persistentVolumeClaim:
+            claimName: matomo-extra-content-pvc
+        - name: html
+          emptyDir: {}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ matomo_name }}-nginx-configmap
+  namespace: {{ item }}
+data:
+  nginx.conf: |-
+    user nginx;
+    worker_processes 1;
+    error_log /var/log/nginx/error.log warn;
+    pid /var/run/nginx.pid;
+
+    events {
+      worker_connections 2048;
+    }
+
+    http {
+      server_tokens off;
+      sendfile on;
+      tcp_nopush on;
+      tcp_nodelay on;
+      keepalive_timeout 15s;
+      types_hash_max_size 2048;
+
+      upstream backend {
+        server localhost:9000;
+      }
+
+      include /etc/nginx/mime.types;
+      default_type application/octet-stream;
+      gzip on;
+      gzip_disable "msie6";
+
+      server {
+        listen 80;
+        root /var/www/html/;
+
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+        add_header Referrer-Policy origin;
+        add_header Content-Security-Policy "frame-ancestors https://{{ wai_base_domain[item] }}";
+
+        index index.php;
+
+        location = /favicon.ico {
+          log_not_found off;
+          access_log off;
+        }
+
+{% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
+        location = {{ matomo_app_filename }} {
+{% else %}
+        ## only allow accessing the following php files
+        location ~ ^/(index|plugins/HeatmapSessionRecording/configs)\.php {
+{% endif %}
+          fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
+          fastcgi_param  SERVER_SOFTWARE    nginx;
+          fastcgi_param  QUERY_STRING       $query_string;
+          fastcgi_param  REQUEST_METHOD     $request_method;
+          fastcgi_param  CONTENT_TYPE       $content_type;
+          fastcgi_param  CONTENT_LENGTH     $content_length;
+          fastcgi_param  SCRIPT_FILENAME    $document_root$fastcgi_script_name;
+          fastcgi_param  SCRIPT_NAME        $fastcgi_script_name;
+          fastcgi_param  REQUEST_URI        $request_uri;
+          fastcgi_param  DOCUMENT_URI       $document_uri;
+          fastcgi_param  DOCUMENT_ROOT      $document_root;
+          fastcgi_param  SERVER_PROTOCOL    $server_protocol;
+          fastcgi_param  REMOTE_ADDR        $remote_addr;
+          fastcgi_param  REMOTE_PORT        $remote_port;
+          fastcgi_param  SERVER_ADDR        $server_addr;
+          fastcgi_param  SERVER_PORT        $server_port;
+          fastcgi_param  SERVER_NAME        $server_name;
+          fastcgi_param  HTTP_X_FORWARDED_URI '{{ wai_portal_matomo_sub_path }}';
+          fastcgi_intercept_errors on;
+          fastcgi_pass backend;
+        }
+
+{% if matomo_nginx_jailed is defined and not matomo_nginx_jailed %}
+        ## deny access to all other .php files
+        location ~* ^.+\.php$ {
+          deny all;
+          return 404;
+        }
+
+        ## serve all other files normally
+        location / {
+          try_files $uri $uri/ =404;
+        }
+
+        ## disable access to the following directories
+        location ~ /(config|tmp|core|lang) {
+          deny all;
+          return 404;
+        }
+
+        ## disable access to the following files
+        location ~ /(.+\.md|LEGALNOTICE|LICENSE|\.ht) {
+          deny all;
+          return 404;
+        }
+
+        location ~ \.(gif|ico|jpg|png|svg|js|css|htm|html|mp3|mp4|wav|ogg|avi|ttf|eot|woff|woff2|json)$ {
+          allow all;
+          ## Cache images,CSS,JS and webfonts for an hour
+          ## Increasing the duration may improve the load-time, but may cause old files to show after an Matomo upgrade
+          expires 1h;
+          add_header Pragma public;
+          add_header Cache-Control "public";
+        }
+
+        ## disable access to the following directories
+        location ~ /(libs|vendor|plugins|misc/user) {
+          deny all;
+          return 404;
+        }
+{% endif %}
+
+{% if matomo_nginx_jailed is defined and matomo_nginx_jailed %}
+        location = /matomo.js {
+          allow all;
+          ## Cache matomo javascript tracking code
+          expires 1h;
+          add_header Pragma public;
+          add_header Cache-Control "public";
+        }
+
+        location ~* / {
+          deny all;
+          return 404;
+        }
+{% endif %}
+
+        access_log /var/log/nginx/access.log combined if=$loggable;
+      }
+
+      map $uri $basename {
+          ~/(?<captured_basename>[^/]*)$ $captured_basename;
+      }
+
+      # don't log access to matomo|piwik.js
+      map $basename $loggable {
+        matomo.js 0;
+        piwik.js 0;
+        default 1;
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ matomo_name }}-service
+  namespace: {{ item }}
+spec:
+  ports:
+  - name: matomo
+    protocol: TCP
+    port: 80
+  selector:
+    app: {{ matomo_name }}
+{% if matomo_create_ingress is defined and matomo_create_ingress %}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ matomo_name }}
+  namespace: {{ item }}
+  annotations:
+    kubernetes.io/ingress.class: nginx-{{ item }}
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header Allow "GET, POST" always;
+
+      if ($request_method !~ ^(GET|POST)$) {
+        return 405;
+      }
+spec:
+  tls:
+  - hosts:
+    - {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
+    secretName: ingress-acme-tls
+  rules:
+    - host: {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ matomo_name }}-service
+              servicePort: 80
+{% endif %}

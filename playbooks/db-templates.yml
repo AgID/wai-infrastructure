@@ -1,0 +1,36 @@
+---
+# Compile database dumps templates
+- name: Database .:. Create destination directories [only local]
+  file:
+    path: "{{ db_dump_dir }}/{{ item }}"
+    state: directory
+  with_items: "{{ wai_k8s_namespaces }}"
+  when: inventory_hostname == 'localhost'
+
+- name: Database .:. Calculate matomo super user password
+  set_fact:
+    matomo_database_superuser_password: "{{ matomo_vars.super_user.password | md5 | password_hash('bcrypt') }}"
+
+- name: Database .:. Prepare matomo template sql script
+  vars:
+    env: "{{ wai_environment }}"
+  template:
+    src: "mariadb/matomo_3_13_5.sql.j2"
+    dest: "{{ db_dump_dir }}/matomo_3_13_5.sql"
+  when: inventory_hostname != 'localhost'
+
+- name: Database .:. Prepare matomo template sql script [only local]
+  vars:
+    env: "{{ item }}"
+  template:
+    src: "mariadb/matomo_3_13_5.sql.j2"
+    dest: "{{ db_dump_dir }}/{{ item }}/matomo_3_13_5.sql"
+  with_items: "{{ wai_k8s_namespaces }}"
+  when: inventory_hostname == 'localhost'
+
+- name: Database .:. Prepare matomo extra sql script
+  template:
+    src: "{{ item }}"
+    dest: "{{ db_dump_dir }}/{{ item | basename }}"
+  with_fileglob:
+    - templates/mariadb/plugins/*.sql

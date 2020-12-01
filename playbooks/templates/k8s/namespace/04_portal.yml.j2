@@ -1,0 +1,461 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
+    kubernetes.io/ingress.class: nginx-{{ item }}
+{% if item == 'wai-prod' %}
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+{% endif %}
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header Allow "GET, POST" always;
+
+      if ($request_method !~ ^(GET|POST)$) {
+        return 405;
+      }
+  name: portal
+  namespace: {{ item }}
+spec:
+  rules:
+{% if item == 'wai-prod' %}
+  - host: {{ wai_hostname['portal'] }}.{{ wai_base_domain[item] }}
+    http:
+      paths:
+      - backend:
+          serviceName: portal-service
+          servicePort: 80
+        path: /
+{% endif %}
+  - host: {{ wai_base_domain[item] }}
+    http:
+      paths:
+      - backend:
+          serviceName: portal-service
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - {{ wai_base_domain[item] }}
+{% if item == 'wai-prod' %}
+    - {{ wai_hostname['portal'] }}.{{ wai_base_domain[item] }}
+{% endif %}
+    secretName: portal-ingress-acme-tls
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    kubernetes.io/ingress.class: nginx-{{ item }}
+{% if item == 'wai-prod' %}
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+{% endif %}
+  name: matomo
+  namespace: {{ item }}
+spec:
+  rules:
+  - host: {{ wai_base_domain[item] }}
+    http:
+      paths:
+      - backend:
+          serviceName: matomo-service
+          servicePort: 80
+        path: {{ wai_portal_matomo_sub_path }}/(.*)
+  tls:
+  - hosts:
+    - {{ wai_base_domain[item] }}
+{% if item == 'wai-prod' %}
+    - {{ wai_hostname['portal'] }}.{{ wai_base_domain[item] }}
+{% endif %}
+    secretName: portal-ingress-acme-tls
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: portal-env-configmap
+  namespace: {{ item }}
+data:
+  env: |-
+    APP_NAME="Web Analytics Italia"
+    APP_NAME_SHORT="WAI"
+    APP_ENV={{ wai_portal_environments[item] }}
+    APP_KEY={{ wai_settings[item].app_key }}
+    APP_SALT={{ wai_settings[item].app_salt }}
+    APP_DEBUG=false
+    APP_URL=https://{{ wai_base_domain[item] }}
+
+    APP_CLOSED_BETA_ENABLED={{ wai_settings[item].closed_beta.enabled }}
+    CLOSED_BETA_WHITELIST_WEBHOOK_CLIENT_SECRET={{ wai_settings[item].closed_beta.secret }}
+    CLOSED_BETA_WHITELIST_REPOSITORY_FULL_NAME={{ wai_settings[item].closed_beta.repository.name }}
+    CLOSED_BETA_WHITELIST_REPOSITORY_BRANCH={{ wai_settings[item].closed_beta.repository.branch }}
+    CLOSED_BETA_WHITELIST_REPOSITORY_FILE_NAME={{ wai_settings[item].closed_beta.repository.file }}
+    
+    APP_SUPER_ADMIN_NAME={{ wai_settings.super_user.name }}
+    APP_SUPER_ADMIN_FAMILY_NAME={{ wai_settings.super_user.family_name }}
+    APP_SUPER_ADMIN_FISCAL_NUMBER={{ wai_settings.super_user.fiscal_number }}
+    APP_SUPER_ADMIN_EMAIL={{ wai_settings.super_user.email }}
+    APP_SUPER_ADMIN_PASSWORD={{ wai_settings.super_user.password }}
+
+    LOG_CHANNEL=stack
+    LOG_STACK_CHANNELS={{ wai_settings[item].log.channels }}
+    LOG_SLACK_WEBHOOK_URL={{ wai_settings[item].log.slack_webhook_url }}
+    LOG_SLACK_USERNAME={{ wai_settings[item].log.slack_username }}
+    LOG_SLACK_WEBHOOK_URL_EXTRA_CHANNEL={{ wai_settings[item].log.slack_extra_channel_webhook_url }}
+    LOG_SLACK_USERNAME_EXTRA_CHANNEL={{ wai_settings[item].log.slack_extra_channel_username }}
+
+    APP_CUSTOM_PUBLIC_ADMINISTRATIONS_ENABLED={{ wai_settings[item].custom_public_administration.enabled }}
+
+    CRON_AUTH_TOKEN={{ wai_settings[item].cron_auth_token }}
+
+    PENDING_WEBSITE_WARNING=10
+    PENDING_WEBSITE_REMOVE=15
+
+    ARCHIVING_WEBSITE_WARNING=10
+    ARCHIVING_WEBSITE_ARCHIVE=20
+    ARCHIVING_WEBSITE_NOTIFICATION_INTERVAL=5
+    PRIMARY_WEBSITE_NOT_TRACKING_NOTIFICATION_WEEK_DAY=1
+    ARCHIVING_WEBSITE_DAILY_NOTIFICATION=3
+
+    DB_CONNECTION=mysql
+    DB_HOST={{ wai_load_balancer[item].rdbms[0] }}
+    DB_PORT=3306
+    DB_DATABASE=wai
+    DB_USERNAME={{ wai_database_credentials[item]['wai-admin-username'] }}
+    DB_PASSWORD={{ wai_database_credentials[item]['wai-admin-password'] }}
+
+    BROADCAST_DRIVER=log
+    CACHE_DRIVER=redis
+    CACHE_CONNECTION=cache-sentinel
+    SESSION_DRIVER=redis
+    SESSION_LIFETIME=120
+    SESSION_CONNECTION=sessions-sentinel
+    SESSION_ENCRYPT=true
+    SESSION_SECURE_COOKIE=true
+    QUEUE_CONNECTION=redis
+    QUEUE_REDIS_CONNECTION=queue-sentinel
+
+    REDIS_HOST=application-redis
+    REDIS_PASSWORD={{ redis_password.application_redis_master[item] }}
+    REDIS_PORT=26379
+    REDIS_QUEUE=default
+    REDIS_SENTINELS=tcp://application-redis:26379
+    {%- for i in range(0, wai_redisearch_slave_count) -%}
+      ,tcp://application-redis:26379
+    {%- endfor %}
+
+    REDIS_SENTINEL_SET=application-redis-master
+    REDIS_INDEXES_USE_SENTINELS=true
+    REDIS_IPA_INDEX_HOST=ipa-redisearch
+    REDIS_IPA_INDEX_PASSWORD={{ redis_password.ipa_redisearch_master[item] }}
+    REDIS_IPA_INDEX_PORT=26379
+    REDIS_IPA_INDEX_USE_SENTINELS=true
+    REDIS_IPA_INDEX_SENTINELS=tcp://ipa-redisearch:26379
+    REDIS_IPA_INDEX_SENTINEL_SET=ipa-redisearch-master
+    REDIS_CACHE_DB=1
+    REDIS_SESSIONS_DB=2
+    REDIS_QUEUE_DB=3
+
+{% if wai_settings[item].environment.reset.date.day is defined %}
+    RESET_PUBLIC_PLAYGROUND_DAY_VERBOSE={{ wai_settings[item].environment.reset.date.verbose }}
+    RESET_PUBLIC_PLAYGROUND_DAY={{ wai_settings[item].environment.reset.date.day }}
+    RESET_PUBLIC_PLAYGROUND_HOUR={{ wai_settings[item].environment.reset.date.hour }}
+    RESET_PUBLIC_PLAYGROUND_MINUTE={{ wai_settings[item].environment.reset.date.minute }}
+{% endif %}
+
+{% if wai_settings[item].mail is defined and wai_settings[item].mail.enabled %}
+    MAIL_DRIVER=smtp
+    MAIL_HOST={{ wai_settings[item].mail.host }}
+    MAIL_PORT={{ wai_settings[item].mail.port }}
+    MAIL_USERNAME={{ wai_settings[item].mail.username }}
+    MAIL_PASSWORD={{ wai_settings[item].mail.password }}
+    MAIL_ENCRYPTION={{ wai_settings[item].mail.encryption }}
+    MAIL_FROM_ADDRESS={{ wai_settings[item].mail.from_address }}
+    MAIL_FROM_NAME="{{ wai_settings[item].mail.from_name }}"
+{% endif %}
+
+{% if wai_settings[item].pec is defined and wai_settings[item].pec.enabled %}
+    PEC_HOST={{ wai_settings[item].pec.host }}
+    PEC_PORT={{ wai_settings[item].pec.port }}
+    PEC_USERNAME={{ wai_settings[item].pec.user }}
+    PEC_PASSWORD={{ wai_settings[item].pec.password }}
+    PEC_ENCRYPTION={{ wai_settings[item].pec.encryption }}
+{% endif %}
+
+    SPID_SP_ENTITY_ID={{ wai_settings[item].spid.entityId }}
+    SPID_SP_ACS_INDEX={{ wai_settings[item].spid.acsIndex }}
+    SPID_SP_ATTRIBUTES_INDEX={{ wai_settings[item].spid.attributesIndex }}
+    SPID_SP_PRIVATE_KEY={{ wai_settings[item].spid.key }}
+    SPID_SP_CERTIFICATE={{ wai_settings[item].spid.crt }}
+
+    SPID_TESTENV_ENABLED={{ wai_settings[item].spid.testenv.enabled | default('false') }}
+    SPID_TESTENV_ENTITY_ID={{ wai_settings[item].spid.testenv.idpEntityId }}
+    SPID_TESTENV_SSO={{ wai_settings[item].spid.testenv.ssoUrl }}
+    SPID_TESTENV_SLO={{ wai_settings[item].spid.testenv.sloUrl }}
+    SPID_TESTENV_CERT={{ wai_settings[item].spid.testenv.crt }}
+
+    SPID_VALIDATOR_IDP_ENABLED={{ wai_settings[item].spid.validator.enabled | default('false') }}
+    SPID_VALIDATOR_IDP_ENTITY_ID={{ wai_settings[item].spid.validator.idpEntityId }}
+    SPID_VALIDATOR_IDP_SSO={{ wai_settings[item].spid.validator.ssoUrl }}
+    SPID_VALIDATOR_IDP_SLO={{ wai_settings[item].spid.validator.sloUrl }}
+    SPID_VALIDATOR_IDP_CERT={{ wai_settings[item].spid.validator.crt }}
+
+    ANALYTICS_ADMIN_TOKEN={{ matomo_vars.super_user.token }}
+    ANALYTICS_API_BASE_URL=http://matomo-service
+    ANALYTICS_API_SSL_VERIFY=false
+    ANALYTICS_PUBLIC_URL=https://{{ wai_base_domain[item] }}{{ wai_portal_matomo_sub_path }}
+    ANALYTICS_PUBLIC_DASHBOARD_ID={{ wai_settings[item].analytics_public_dashboard_id }}
+
+    ELASTICSEARCH_HOST={{ wai_load_balancer[item].elastic[0] }}
+    ELASTICSEARCH_PORT=9200
+    ELASTICSEARCH_INDEX_NAME=wai-application-log-{{ wai_portal_environments[item] }}
+    ELASTICSEARCH_IGNORE_EXCEPTIONS=false
+    ELASTICSEARCH_SEARCH_TEMPLATE_NAME=wai-portal-search-template
+    ELASTICSEARCH_USER=portal_user
+    ELASTICSEARCH_PASSWORD={{ elasticsearch_secrets.portal_user }}
+
+    TRACKING_MATOMO_ID={{ wai_settings[item].tracking.matomo }}
+    TRACKING_GA_ID={{ wai_settings[item].tracking.ga }}
+    TRACKING_HOTJAR_ID={{ wai_settings[item].tracking.hotjar }}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: portal-nginx-configmap
+  namespace: {{ item }}
+data:
+  nginx.conf: |-
+    user nginx;
+    worker_processes 1;
+    error_log /var/log/nginx/error.log warn;
+    pid /var/run/nginx.pid;
+
+    events {
+      worker_connections 2048;
+    }
+
+    http {
+      server_tokens off;
+      sendfile on;
+      tcp_nopush on;
+      tcp_nodelay on;
+      keepalive_timeout 15s;
+      types_hash_max_size 2048;
+
+      upstream backend {
+        server localhost:9000;
+      }
+
+      include /etc/nginx/mime.types;
+      default_type application/octet-stream;
+      gzip on;
+      gzip_disable "msie6";
+
+      server {
+        listen 80;
+        root /var/www/html/public;
+        index index.php index.html index.htm;
+
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+        add_header Referrer-Policy "no-referrer-when-downgrade";
+
+        location / {
+          try_files $uri /index.php$is_args$args;
+        }
+
+        location = /index.php {
+          fastcgi_param  QUERY_STRING       $query_string;
+          fastcgi_param  REQUEST_METHOD     $request_method;
+          fastcgi_param  CONTENT_TYPE       $content_type;
+          fastcgi_param  CONTENT_LENGTH     $content_length;
+          fastcgi_param  SCRIPT_NAME        $fastcgi_script_name;
+          fastcgi_param  REQUEST_URI        $request_uri;
+          fastcgi_param  DOCUMENT_URI       $document_uri;
+          fastcgi_param  DOCUMENT_ROOT      $document_root;
+          fastcgi_param  SERVER_PROTOCOL    $server_protocol;
+          fastcgi_param  REQUEST_SCHEME     $scheme;
+          fastcgi_param  HTTPS              'on';
+          fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
+          fastcgi_param  SERVER_SOFTWARE    nginx/$nginx_version;
+          fastcgi_param  REMOTE_ADDR        $remote_addr;
+          fastcgi_param  REMOTE_PORT        $remote_port;
+          fastcgi_param  SERVER_ADDR        $server_addr;
+          fastcgi_param  SERVER_PORT        $server_port;
+          fastcgi_param  SERVER_NAME        $server_name;
+          fastcgi_param  REDIRECT_STATUS    200;
+          fastcgi_index index.php;
+          fastcgi_buffers 16 16k;
+          fastcgi_buffer_size 32k;
+          fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+          fastcgi_pass backend;
+        }
+
+        location ~* \.(jpg|jpeg|png|gif|svg|ico|css|js|pdf|ttf|woff|woff2)(\?id\=.+)?$ {
+          expires max;
+        }
+
+        location ~ /\.ht {
+          deny all;
+          return 404;
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal-service
+  namespace: {{ item }}
+spec:
+  ports:
+  - name: portal
+    protocol: TCP
+    port: 80
+  selector:
+    app: portal
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal
+  namespace: {{ item }}
+spec:
+  replicas: {{ wai_matomo_pod_size[item]['wai-portal'] }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: portal
+  template:
+    metadata:
+      annotations:
+        releaseDate: now
+      labels:
+        app: portal
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - portal
+            topologyKey: "kubernetes.io/hostname"
+      initContainers:
+      - name: copy
+        image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+        command: ["sh", "-c", "cp -a /var/www/html/* /html/"]
+        resources:
+          limits:
+            cpu: "0.1"
+            memory: "50Mi"
+        volumeMounts:
+        - mountPath: /html
+          name: html
+      containers:
+      - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+        command: ["sh", "-c", "/usr/sbin/update-ca-certificates ; php-fpm -F -y /opt/bitnami/php/etc/php-fpm.conf"]
+        name: portal
+        resources:
+          limits:
+            cpu: "0.75"
+            memory: "250Mi"
+        ports:
+        - containerPort: 9000
+          name: fpm-port
+        volumeMounts:
+        - name: portal-env-conf
+          mountPath: /var/www/html/.env
+          subPath: env
+        - name: infrastructure-ca-conf
+          mountPath: /usr/local/share/ca-certificates/
+      - image: nginx:1.15.8
+        name: nginx
+        resources:
+          limits:
+            cpu: "0.25"
+            memory: "256Mi"
+        args: ["nginx", "-g", "daemon off;", "-c", "/etc/config/nginx.conf"]
+        ports:
+        - containerPort: 80
+          name: nginx
+        volumeMounts:
+        - name: portal-nginx-conf
+          mountPath: /etc/config
+        - name: html
+          mountPath: /var/www/html
+      volumes:
+        - name: portal-nginx-conf
+          configMap:
+            name: portal-nginx-configmap
+        - name: portal-env-conf
+          configMap:
+            name: portal-env-configmap
+        - name: infrastructure-ca-conf
+          configMap:
+            name: infrastructure-configmap
+        - name: html
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-queue-worker
+  namespace: {{ item }}
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: portal-queue-worker
+  template:
+    metadata:
+      annotations:
+        releaseDate: now
+      labels:
+        app: portal-queue-worker
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - portal
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
+        name: portal
+        command: ["sh", "-c", "/usr/sbin/update-ca-certificates ; php artisan queue:work --tries=3 --sleep=10"]
+        resources:
+          limits:
+            cpu: "0.75"
+            memory: "250Mi"
+        volumeMounts:
+        - name: portal-env-conf
+          mountPath: /var/www/html/.env
+          subPath: env
+        - name: infrastructure-ca-conf
+          mountPath: /usr/local/share/ca-certificates/
+      volumes:
+        - name: portal-env-conf
+          configMap:
+            name: portal-env-configmap
+        - name: infrastructure-ca-conf
+          configMap:
+            name: infrastructure-configmap

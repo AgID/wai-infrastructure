@@ -1,0 +1,7 @@
+python-openstackclient==5.3.1
+python-terraform==0.10.1
+ansible==2.10.0
+passlib==1.7.2
+termcolor==1.1.0
+pyOpenSSL==19.1.0
+bcrypt==3.2.0

@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+{% for item in wai_k8s_namespaces %}
+# K8S Namespaces
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ item }}
+  labels:
+    environment: {{ item }}
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: resource-quota-{{ item }}
+  namespace: {{ item }}
+spec:
+  hard:
+  {% for key, value in wai_k8s_resource_quota[item].items() %}
+  {{ key }}: {{ value }}
+  {% endfor %}
+{% endfor %}

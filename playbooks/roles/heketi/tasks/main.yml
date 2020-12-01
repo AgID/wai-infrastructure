@@ -1,0 +1,123 @@
+- name: Heketi .:. Identify first node
+  set_fact:
+    heketi_first_node: true
+  when:
+    - inventory_hostname == groups['gluster'][0]
+
+- name: Heketi .:. Install requirements
+  apt:
+    update_cache: true
+    name: thin-provisioning-tools
+    state: present
+
+- name: Heketi .:. Add Group
+  group:
+    name: '{{ heketi_group }}'
+    state: present
+    gid: '{{ heketi_gid }}'
+
+- name: Heketi .:. Add user
+  user:
+    name: '{{ heketi_user }}'
+    create_home: yes
+    home: '{{ heketi_home }}'
+    uid: '{{ heketi_uid }}'
+    group: '{{ heketi_group }}'
+    state: present
+    shell: /bin/bash
+
+- name: Heketi .:. Base directory
+  file:
+    path: '{{ item }}'
+    state: directory
+    owner: '{{ heketi_user }}'
+    group: '{{ heketi_group }}'
+  with_items:
+    - '{{ heketi_home }}'
+    - '{{ heketi_home }}/.ssh'
+
+- name: Heketi .:. Download file
+  get_url:
+    url: '{{ heketi_url }}'
+    dest: /tmp/heketi.tar.gz
+  when: heketi_first_node is defined and heketi_first_node
+
+- name: Heketi .:. Explode distribution
+  unarchive:
+    src: /tmp/heketi.tar.gz
+    dest: '{{ heketi_home }}'
+    owner: '{{ heketi_user }}'
+    group: '{{ heketi_group }}'
+    extra_opts: [--strip-components=1]
+    remote_src: yes
+  when: heketi_first_node is defined and heketi_first_node
+
+- name: Heketi .:. Configuration file
+  template:
+    dest: '{{ heketi_home }}/heketi.json'
+    src: 'heketi.json.j2'
+    owner: '{{ heketi_user }}'
+    group: '{{ heketi_group }}'
+  when: heketi_first_node is defined and heketi_first_node
+
+- name: Heketi .:. Topology file
+  template:
+    dest: '{{ heketi_home }}/topology.json'
+    src: 'topology.json.j2'
+    owner: '{{ heketi_user }}'
+    group: '{{ heketi_group }}'
+  when: heketi_first_node is defined and heketi_first_node
+
+- name: Heketi .:. Create key pair
+  shell: 'ssh-keygen -b 2048 -t rsa -f {{ heketi_home }}/.ssh/id_rsa -q -N ""'
+  become: yes
+  become_user: '{{ heketi_user }}'
+  args:
+    creates: '{{ heketi_home }}/.ssh/id_rsa'
+  when: heketi_first_node is defined and heketi_first_node
+
+- name: Heketi .:. Retrieve public key
+  shell: "cat {{ heketi_home }}/.ssh/id_rsa.pub"
+  register: heketi_first_node_public_key
+  changed_when: false
+  when: heketi_first_node is defined and heketi_first_node
+
+- name: Heketi .:. Trust heketi user
+  authorized_key:
+    user: '{{ heketi_user }}'
+    key: "{{ hostvars[groups['gluster'][0]].heketi_first_node_public_key.stdout }}"
+
+- name: Heketi .:. Sudo without password
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^{{ heketi_user }}'
+    line: '{{ heketi_user }} ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
+- name: Heketi .:. Create systemctl service file
+  template:
+    dest: '/etc/systemd/system/heketi.service'
+    src: 'heketi.service.j2'
+  when: heketi_first_node is defined and heketi_first_node
+
+- name: Heketi .:. Enable and start service
+  systemd:
+    name: 'heketi'
+    enabled: yes
+    daemon_reload: yes
+    state: started
+  when: heketi_first_node is defined and heketi_first_node
+
+- name: Heketi .:. Clean up
+  file:
+    state: absent
+    path: /tmp/heketi.tar.gz
+  when: heketi_first_node is defined and heketi_first_node
+
+- name: Heketi .:. Create topology
+  shell: "{{ heketi_home }}/heketi-cli topology load --json={{ heketi_home }}/topology.json --user admin --secret {{ heketi_secrets.admin }} -s {{ 'https' if heketi_enable_tls == true else 'http' }}://{{ hostvars[ansible_hostname].ansible_default_ipv4.address }}:{{ heketi_port }}"
+  no_log: true
+  become: yes
+  become_user: '{{ heketi_user }}'
+  when: heketi_first_node is defined and heketi_first_node

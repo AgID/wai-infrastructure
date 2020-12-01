@@ -1,0 +1,81 @@
+# Environment name
+environment = "public-playground"
+environment_short = "play"
+
+# Galera slug name
+galera_slug = "galera"
+
+# Galera network CIDR
+galera_network_cidr = "<GALERA_CIDR>"
+
+# Galera instance parameters
+galera_instance = {
+    image_id = "<IMAGE_ID>"
+    flavor_id = "<FLAVOR_ID>"
+    num_instances = <NUM_OF_INSTANCES>
+    boot_volume_size = <VOLUME_SIZE>
+    boot_volume_type = <VOLUME_TYPE>
+    data_volume_size = <VOLUME_SIZE>
+    data_volume_type = <VOLUME_TYPE>
+}
+
+# Galera instance groups added to metadata for ansible dynamic inventory
+# Each item in the list will be added to the corresponding instance number
+# i.e. the first item in the list will be added to the first instance and so on
+# if there are more instances than items in the list it will restart from the first one
+galera_instance_groups = ["galera-play"]
+
+# Galera security rules
+# See http://galeracluster.com/documentation-webpages/firewallsettings.html
+galera_sec_rules = [
+    {
+        protocol = "icmp"
+        from = 0
+        to = 0
+        cidr = "<CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 22
+        to = 22
+        cidr = "<CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 3306
+        to = 3306
+        cidr = "<CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 4567
+        to = 4568
+        cidr = "<GALERA_CIDR>"
+    },
+    {
+        protocol = "udp"
+        from = 4567
+        to = 4567
+        cidr = "<GALERA_CIDR>"
+    },
+    {
+        protocol = "tcp"
+        from = 4444
+        to = 4444
+        cidr = "<GALERA_CIDR>"
+    },
+    # Prometheus Node Exporter
+    {
+        protocol = "tcp"
+        from = 9100
+        to = 9100
+        cidr = "<K8S_CIDR>"
+    },
+    # Prometheus MYSQLD Exporter
+    {
+        protocol = "tcp"
+        from = 9104
+        to = 9104
+        cidr = "<K8S_CIDR>"
+    }
+]

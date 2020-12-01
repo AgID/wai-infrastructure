@@ -1,0 +1,24 @@
+---
+# Installing GlusterFS
+- name: GlusterFS .:. Adding PPA repository
+  apt_repository:
+    repo: '{{ gluster_apt_repo }}'
+    state: present
+
+- name: GlusterFS .:. Installing GlusterFS
+  apt:
+    update_cache: true
+    name: glusterfs-server={{ gluster_package_version }}
+    state: present
+
+- name: GlusterFS .:. Create peer
+  gluster_peer:
+    state: present
+    nodes: '{{ groups["gluster"] | map("extract", hostvars, ["ansible_default_ipv4", "address"]) | list }}'
+  when:
+    - inventory_hostname == groups['gluster'][0]
+
+- name: GlusterFS .:. Ensure base directory
+  file:
+    path: /opt/data
+    state: directory

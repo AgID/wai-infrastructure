@@ -1,0 +1,31 @@
+{
+  "clusters": [
+    {
+      "nodes": [
+        {% for node in groups['gluster'] %}
+        {
+          "node": { "hostnames": {
+              "manage": [
+                "{{ hostvars[node]['ansible_default_ipv4']['address'] }}"
+              ],
+              "storage": [
+                "{{ hostvars[node]['ansible_default_ipv4']['address'] }}"
+              ]
+            },
+            "zone": 1
+          },
+          "devices": [
+            {
+              "name": "{{ storage_dev }}",
+              "destroydata": false
+            }
+          ]
+        }
+        {% if not loop.last %}
+          ,
+        {% endif %}
+        {% endfor %}
+      ]
+    }
+  ]
+}

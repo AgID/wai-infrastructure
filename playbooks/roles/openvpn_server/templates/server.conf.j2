@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+port 443
+proto tcp
+dev tun
+ca /etc/openvpn/certs/wai-operation-root-ca.crt
+cert /etc/openvpn/certs/vpn-server.crt
+key /etc/openvpn/certs/vpn-server.key
+dh /etc/openvpn/certs/dhparams.pem
+topology subnet
+server 192.168.10.0 255.255.255.0
+ifconfig-pool-persist /var/log/openvpn/ipp.txt
+push "route 10.0.0.0 255.255.0.0"
+{% for env in wai_k8s_namespaces -%}
+push "route {{ wai_ip_addresses[env].public_ip }} 255.255.255.255"
+{% endfor -%}
+keepalive 10 120
+cipher AES-256-CBC
+comp-lzo
+max-clients 100
+persist-key
+persist-tun
+status /var/log/openvpn/openvpn-status.log
+log-append /var/log/openvpn/openvpn.log
+verb 3

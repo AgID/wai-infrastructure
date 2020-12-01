@@ -1,0 +1,3 @@
+[k8s-cluster:children]
+kube-master
+kube-node

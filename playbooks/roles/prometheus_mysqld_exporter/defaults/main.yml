@@ -1,0 +1,8 @@
+prometheus_mysqld_exporter_url: https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mysqld_exporter-0.12.1.linux-amd64.tar.gz
+prometheus_mysqld_exporter_user: mysqld_exporter
+prometheus_mysqld_exporter_uid: 10002
+prometheus_mysqld_exporter_group: prometheus
+prometheus_mysqld_exporter_gid: 10000
+prometheus_mysqld_exporter_home: /opt/data/prometheus/mysqld_exporter
+prometheus_mysqld_exporter_service_description: MySQL Node Exporter
+prometheus_mysqld_exporter_bin: mysqld_exporter

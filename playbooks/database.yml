@@ -1,0 +1,139 @@
+---
+# Configure Matomo database
+- hosts:
+    - galera-prod[0]
+    - galera-play[0]
+    - mariadb-stag[0]
+  tasks:
+    - include_vars:
+        file: secrets.yml
+
+    - name: Database .:. Install required software
+      apt:
+        name: ["python3-pymysql"]
+        state: present
+
+    - name: Database .:. Test if prod password
+      set_fact:
+        wai_environment: wai-prod
+      when: inventory_hostname in groups['galera-prod']
+
+    - name: Database .:. Test if play password
+      set_fact:
+        wai_environment: wai-play
+      when: inventory_hostname in groups['galera-play']
+
+    - name: Database .:. Test if stag password
+      set_fact:
+        wai_environment: wai-stag
+      when: inventory_hostname in groups['mariadb-stag']
+
+    - name: Database .:. Fail if password is not found
+      fail:
+        msg: "Password for the current environment not found"
+      when: "wai_environment is not defined or wai_database_credentials[wai_environment] is not defined"
+
+    - name: Database .:. Compile dumps templates
+      include_tasks: db-templates.yml
+
+    - name: Database .:. Test if matomo database is present
+      shell: mysql -e 'SHOW TABLES;' matomo | grep log_action
+      register: matomo_db_status
+      failed_when: matomo_db_status.rc == 2
+
+    - name: Database .:. Test if portal database is present
+      shell: mysql -e 'SHOW TABLES;' wai | grep websites
+      register: wai_db_status
+      failed_when: wai_db_status.rc == 2
+
+    - name: Database .:. Import Matomo database
+      mysql_db:
+        name: matomo
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        state: import
+        target: "/root/matomo_3_13_5.sql"
+      when: matomo_db_status.rc != 0
+
+    - name: Database .:. Execute Matomo extra sql scripts
+      mysql_db:
+        name: matomo
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        state: import
+        target: "/root/{{ item | basename }}"
+      when: matomo_db_status.rc != 0
+      with_fileglob:
+        - templates/mariadb/plugins/*.sql
+
+    - name: Database .:. Create WAI database
+      mysql_db:
+        name: wai
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+      when: wai_db_status.rc != 0
+
+    - name: Database .:. Create Matomo super user
+      mysql_user:
+        name: "{{ wai_database_credentials[wai_environment]['matomo-admin-username'] }}"
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        password: "{{ wai_database_credentials[wai_environment]['matomo-admin-password'] }}"
+        priv: "matomo.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES/*.*:FILE"
+        host: "%"
+        state: present
+
+    - name: Database .:. Create Matomo readonly user
+      mysql_user:
+        name: "{{ wai_database_credentials[wai_environment]['matomo-user-username'] }}"
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        password: "{{ wai_database_credentials[wai_environment]['matomo-user-password'] }}"
+        priv: "matomo.*:SELECT,CREATE TEMPORARY TABLES"
+        host: "%"
+        state: present
+
+    - name: Database .:. Create WAI super user
+      mysql_user:
+        name: "{{ wai_database_credentials[wai_environment]['wai-admin-username'] }}"
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
+        password: "{{ wai_database_credentials[wai_environment]['wai-admin-password'] }}"
+        priv: "wai.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,CREATE TEMPORARY TABLES,LOCK TABLES"
+        host: "%"
+        state: present
+
+    - name: Database .:. Set root password
+      mysql_user:
+        login_user: "root"
+        name: root
+        password: "{{ wai_database_credentials[wai_environment]['root'] }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- hosts:
+    - galera-prod
+    - galera-prod-slave
+    - galera-play
+    - mariadb-stag
+  tasks:
+    - include_vars:
+        file: secrets.yml
+
+    - name: Database .:. Test if prod password
+      set_fact:
+        wai_environment: wai-prod
+      when: inventory_hostname in groups['galera-prod'] or inventory_hostname in groups['galera-prod-slave']
+
+    - name: Database .:. Test if play password
+      set_fact:
+        wai_environment: wai-play
+      when: inventory_hostname in groups['galera-play']
+
+    - name: Database .:. Test if stag password
+      set_fact:
+        wai_environment: wai-stag
+      when: inventory_hostname in groups['mariadb-stag']
+
+    - name: Database .:. Create root configuration file
+      vars:
+        database_root_password: "{{ wai_database_credentials[wai_environment]['root'] }}"
+      template:
+        src: "mariadb/root-my.cnf.j2"
+        dest: "/root/.my.cnf"
+        owner: "root"
+        group: "root"
+        mode: "0600"
