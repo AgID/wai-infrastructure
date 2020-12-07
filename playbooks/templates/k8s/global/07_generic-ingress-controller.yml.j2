@@ -156,7 +156,7 @@ spec:
       serviceAccountName: nginx-ingress-sa-generic
       containers:
         - name: nginx-ingress-controller
-          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.28.0
+          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.31.1
           args:
             - /nginx-ingress-controller
             - --configmap=$(POD_NAMESPACE)/nginx-configuration
@@ -311,6 +311,7 @@ metadata:
       proxy_ssl_name "kubernetes.default.svc.cluster.local";
  
   name: kubernetes-ingress
+  namespace: default
 spec:
   rules:
   - host: k8s.webanalytics.italia.it
