@@ -113,6 +113,7 @@ data:
       DUMP_OPT+=" --dump=$file"
     done <<<$(find /opt/extra-content/premium_plugins -type f -name "*.sql")
     cd /var/www/html && chmod +x console
+    ./console plugin:activate ResetDatabase
     ./console reset-database $DUMP_OPT && success "Environment cleared" || fail "An error occurred during reset operation"
 
 {% endif %}
