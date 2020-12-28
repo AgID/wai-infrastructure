@@ -268,3 +268,15 @@ data:
     if [ -f "$MATOMO_GEOIP_PATH" ]; then
       cp -f $MATOMO_GEOIP_PATH $MATOMO_GEOIP_EXTERNAL_PATH
     fi
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: matomo-delete-logs-config
+  namespace: {{ item }}
+data:
+  entrypoint.sh: |-
+    #!/bin/sh
+    chmod +x /var/www/html/console ; cd /var/www/html/
+    ./console core:archive --dates `date +%Y-%m-%d -d "-75 days"`,`date +%Y-%m-%d -d "-45 days"` -vvv -n
