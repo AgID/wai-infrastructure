@@ -32,11 +32,6 @@
           - pyhelm==2.14.5
           - grpcio
 
-    - name: K8S Helm .:. Add stable chart repo
-      community.kubernetes.helm_repository:
-        repo_name: stable
-        repo_url: "https://kubernetes-charts.storage.googleapis.com"
-
     - name: K8S Helm .:. Add Jetstack repo
       community.kubernetes.helm_repository:
         repo_name: jetstack
@@ -168,7 +163,7 @@
                   rules:
                     - alert: NginxErrorCode
                       annotations:
-                        description: "{{ $labels.ingress }} http status code =~[5].* > 1.0 %, current value is {{ $value}}"
+                        description: "{{ '{{$labels.ingress}}' }} http status code =~[5].* > 1.0 %, current value is {{ '{{$value}}' }}"
                         summary: http status code
                       expr: sum by (ingress) (rate(nginx_ingress_controller_requests{namespace="wai-prod",status=~"[5].*"}[5m])) / sum by (ingress) (rate(nginx_ingress_controller_requests{namespace="wai-prod"}[5m])) * 100 > 1.0
                       for: 1m
@@ -369,7 +364,7 @@
                 memory: 128Mi
           master:
             persistence:
-              enabled: true
+              enabled: false
               storageClass: storage-heketi
               size: 2Gi
             resources:
