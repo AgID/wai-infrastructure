@@ -38,6 +38,9 @@ spec:
               name: reset-env-config
             - mountPath: /opt/extra-content
               name: matomo-extra-content
+            - name: matomo-php-config
+              mountPath: /var/www/html/config/config.ini.php.tmp
+              subPath: config.ini.php
           restartPolicy: Never
           volumes:
             - name: reset-env-config
@@ -46,6 +49,9 @@ spec:
             - name: matomo-extra-content
               persistentVolumeClaim:
                 claimName: matomo-extra-content-pvc
+            - name: matomo-php-config
+              configMap:
+                name: matomo-php-config
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -112,6 +118,8 @@ data:
       DUMP_OPT+=" --dump=$file"
     done <<<$(find /opt/extra-content/premium_plugins -type f -name "*.sql")
     cd /var/www/html && chmod +x console
+    cp /var/www/html/config/config.ini.php.tmp /var/www/html/config/config.ini.php
+    ./console plugin:activate ResetDatabase
     ./console reset-database $DUMP_OPT && success "Environment cleared" || fail "An error occurred during reset operation"
 
 {% endif %}
