@@ -91,7 +91,7 @@ wai_ipa_redisearch_image_tag: 5.0.9-stable
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
-wai_portal_image_tag: 1.4.1-beta
+wai_portal_image_tag: 1.5.1-beta
 wai_portal_matomo_sub_path: /matomo
 wai_portal_environments:
   wai-prod: production
@@ -108,7 +108,7 @@ redis_image_version: 5.0.7
 
 # Matomo Image
 wai_matomo_image: webanalyticsitalia/wai-matomo
-wai_matomo_image_tag: 3.13.5-1
+wai_matomo_image_tag: 3.14.1
 
 # Kubectl executable
 wai_kubectl: /usr/local/bin/kubectl
