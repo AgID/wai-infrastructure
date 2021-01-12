@@ -121,5 +121,4 @@ data:
     cp /var/www/html/config/config.ini.php.tmp /var/www/html/config/config.ini.php
     ./console plugin:activate ResetDatabase
     ./console reset-database $DUMP_OPT && success "Environment cleared" || fail "An error occurred during reset operation"
-
 {% endif %}
