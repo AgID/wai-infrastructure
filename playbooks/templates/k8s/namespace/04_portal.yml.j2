@@ -436,7 +436,7 @@ spec:
               - key: app
                 operator: In
                 values:
-                - portal
+                - portal-queue-worker
             topologyKey: "kubernetes.io/hostname"
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
