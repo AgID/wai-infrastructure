@@ -47,7 +47,7 @@
         repo_name: grafana
         repo_url: https://grafana.github.io/helm-charts
 
-    - name: K8S Helm .:. Add bitname chart repo
+    - name: K8S Helm .:. Add bitnami chart repo
       community.kubernetes.helm_repository:
         repo_name: bitnami
         repo_url: https://charts.bitnami.com/bitnami
