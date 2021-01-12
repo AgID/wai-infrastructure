@@ -33,27 +33,27 @@
           - grpcio
 
     - name: K8S Helm .:. Add Jetstack repo
-      community.kubernetes.helm_repository:
+      kubernetes.core.helm_repository:
         repo_name: jetstack
         repo_url: "https://charts.jetstack.io"
 
     - name: K8S Helm .:. Add prometheus chart repo
-      community.kubernetes.helm_repository:
+      kubernetes.core.helm_repository:
         repo_name: prometheus-community 
         repo_url: https://prometheus-community.github.io/helm-charts
 
     - name: K8S Helm .:. Add grafana chart repo
-      community.kubernetes.helm_repository:
+      kubernetes.core.helm_repository:
         repo_name: grafana
         repo_url: https://grafana.github.io/helm-charts
 
     - name: K8S Helm .:. Add bitnami chart repo
-      community.kubernetes.helm_repository:
+      kubernetes.core.helm_repository:
         repo_name: bitnami
         repo_url: https://charts.bitnami.com/bitnami
 
     - name: K8S Helm .:. Install CertManager
-      community.kubernetes.helm:
+      kubernetes.core.helm:
         release_namespace: cert-manager
         create_namespace: true
         name: cert-manager
@@ -63,7 +63,7 @@
           installCRDs: true
 
     - name: K8S Helm .:. Install Prometheus
-      community.kubernetes.helm:
+      kubernetes.core.helm:
         release_namespace: monitoring
         create_namespace: true
         name: prometheus
@@ -211,7 +211,7 @@
                         severity: critical
 
     - name: K8S Helm .:. Install Grafana
-      community.kubernetes.helm:
+      kubernetes.core.helm:
         release_namespace: monitoring
         name: grafana
         chart_ref: grafana/grafana
@@ -288,7 +288,7 @@
 
     # Install Redis
     - name: K8S Helm .:. Install Redis
-      community.kubernetes.helm:
+      kubernetes.core.helm:
         release_namespace: "{{ item[0] }}"
         name: "{{ item[1] }}-{{ item[0] }}"
         chart_ref: bitnami/redis
@@ -335,7 +335,7 @@
 
     # Install IPA Redis Search
     - name: K8S Helm .:. Install IPA Redisearch
-      community.kubernetes.helm:
+      kubernetes.core.helm:
         release_namespace: "{{ item }}"
         release_name: "ipa-redisearch-{{ item }}"
         chart_version: 10.5.4
