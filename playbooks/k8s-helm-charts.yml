@@ -352,7 +352,7 @@
           existingSecretPasswordKey: ipa-redisearch-password
           fullnameOverride: ipa-redisearch
           securityContext:
-            runAsUser: 0          
+            runAsUser: 0
           metrics:
             enabled: true
             resources:
