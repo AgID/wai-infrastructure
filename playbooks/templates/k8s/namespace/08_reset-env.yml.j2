@@ -21,7 +21,7 @@ spec:
             resources:
               limits:
                 cpu: "0.50"
-                memory: "256Mi"            
+                memory: "256Mi"
           - name: matomo
             env:
             - name: MATOMO_VERSION
@@ -70,7 +70,7 @@ data:
             base_settings: {{ matomo_vars.plugins.protect_track_id[item].base_settings }}
             salt_settings: {{ matomo_vars.plugins.protect_track_id[item].salt_settings }}
             length_settings: {{ matomo_vars.plugins.protect_track_id[item].length_settings }}
-      super_user: 
+      super_user:
         login: {{ matomo_vars.super_user.login }}
         email: {{ matomo_vars.super_user.email }}
         token: {{ matomo_vars.super_user.token }}

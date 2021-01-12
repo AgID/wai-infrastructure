@@ -51,6 +51,7 @@ data:
     default_language = "it"
     multi_server_environment = 1
     archiving_custom_ranges[] = previous30
+    enable_processing_unique_visitors_range = 1
     time_before_today_archive_considered_outdated = 2700
     time_before_week_archive_considered_outdated = 2700
     time_before_month_archive_considered_outdated = 2700
@@ -189,10 +190,20 @@ data:
     waiUrl = "https://{{ wai_base_domain[item] }}"
 
     [QueuedTracking]
+    backend = redis
+    useSentinelBackend = 0
+    redisHost = ingestion-redis
+    redisPort = 6379
+    redisDatabase = 0
+    redisPassword = {{ redis_password.ingestion_redis_master[item] }}
+    queueEnabled = 1
+    numQueueWorkers = {{ wai_matomo_pod_size[item]['matomo-worker'] }}
+    numRequestsToProcess = 25
+    processDuringTrackingRequest = 0
     notify_queue_threshold_single_queue = 250000
-    {% for email in wai_alert_email_destination | default([]) -%}
+{% for email in wai_alert_email_destination | default([]) %}
     notify_queue_threshold_emails[]={{ email }}
-    {% endfor %}
+{% endfor %}
 
     [LoginFilterIp]
     allow_login_from[] = "{{ wai_infrastructure_cidr }}"
