@@ -34,18 +34,18 @@ wai_base_domain:
 wai_load_balancer:
   wai-prod:
     elastic:
-      - 10.0.30.7
+      - 10.0.30.17
     rdbms:
-      - 10.0.20.24
-      - 10.0.20.6
+      - 10.0.20.16
+      - 10.0.20.11
   wai-play:
     elastic:
-      - 10.0.30.7
+      - 10.0.30.17
     rdbms:
-      - 10.0.200.6
+      - 10.0.200.7
   wai-stag:
     elastic:
-      - 10.0.30.7
+      - 10.0.30.17
     rdbms:
       - 10.0.100.101
 
@@ -71,7 +71,7 @@ wai_ip_addresses:
 # Helm
 helm:
   cert_manager:
-    version: v0.11.0
+    version: v1.0.3
 
 # Matomo POD size configuration
 wai_matomo_pod_size:
@@ -87,11 +87,11 @@ wai_k8s_resource_quota:
 
 # IPA Redisearch image
 wai_ipa_redisearch_image: webanalyticsitalia/wai-ipa-redisearch
-wai_ipa_redisearch_image_tag: 5.0.7-stable
+wai_ipa_redisearch_image_tag: 5.0.9-stable
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
-wai_portal_image_tag: 1.0-beta
+wai_portal_image_tag: 1.5.1-beta
 wai_portal_matomo_sub_path: /matomo
 wai_portal_environments:
   wai-prod: production
@@ -100,7 +100,7 @@ wai_portal_environments:
 
 # RediSearch Image
 wai_redisearch_image: webanalyticsitalia/wai-redisearch
-wai_redisearch_image_tag: 5.0.7-stable
+wai_redisearch_image_tag: 5.0.9-stable
 wai_redisearch_slave_count: 2
 
 # Redis
@@ -121,7 +121,7 @@ wai_base_https_port: 30443
 
 # Elastic version used for Elasticsearch, Kibana and Beats.
 # These vars override default settings of role elastic.elasticsearch and are used in wai roles kibana
-es_version: 7.6.0
+es_version: 7.9.1
 es_major_version: 7.x
 es_apt_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
 es_apt_url: "deb https://artifacts.elastic.co/packages/{{ es_major_version }}/apt stable main"
@@ -136,11 +136,11 @@ gluster_apt_repo: ppa:gluster/glusterfs-5
 gluster_package_version: 5.*
 
 # MariaDB repo info
+mariadb_version: "10.5"
 mariadb_repo: "deb [arch=amd64,i386,ppc64el] http://mariadb.mirrors.ovh.net/MariaDB/repo/{{ mariadb_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main"
 mariadb_repo_key: "0xF1656F24C74CD1D8"
 mariadb_repo_keyserver: "keyserver.ubuntu.com"
 mariadb_repo_origin: mariadb.mirrors.ovh.net
-mariadb_version: "10.4"
 
 # Prometheus Node Exporter override vars
 prometheus_exporter_url: https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz

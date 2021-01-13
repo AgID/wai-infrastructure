@@ -273,7 +273,7 @@ spec:
     app: {{ matomo_name }}
 {% if matomo_create_ingress is defined and matomo_create_ingress %}
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: {{ matomo_name }}

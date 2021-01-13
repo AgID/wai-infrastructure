@@ -101,6 +101,7 @@ quello relativo all'installazione di
 
 ```bash
 $ ansible-galaxy install -r playbooks/requirements.yml
+$ ansible-galaxy collection install -r playbooks/requirements-collection.yml
 ```
 
 L'installazione del cluster [Kubernetes](https://kubernetes.io/) è effettuata

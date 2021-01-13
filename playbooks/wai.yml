@@ -133,6 +133,7 @@
 # Install galera public play ground cluster
 - hosts: galera-play
   gather_facts: no
+  vars_files: secrets.yml
   tags:
     - install
     - galera
@@ -145,6 +146,7 @@
 # Install mariadb stage server
 - hosts: mariadb-stag
   gather_facts: no
+  vars_files: secrets.yml
   tags:
     - install
     - mariadb
