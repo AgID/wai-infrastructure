@@ -441,7 +441,7 @@ spec:
               - key: app
                 operator: In
                 values:
-                - portal
+                - portal-queue-worker
             topologyKey: "kubernetes.io/hostname"
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
@@ -464,6 +464,81 @@ spec:
         - name: infrastructure-ca-conf
           configMap:
             name: infrastructure-configmap
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-scheduler
+  namespace: {{ item }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: portal-scheduler
+  template:
+    metadata:
+      annotations:
+        releaseDate: now
+      labels:
+        app: portal-scheduler
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - portal-scheduler
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
+        name: portal
+        command: ["sh", "-c", ". /entrypoint.sh"]
+        resources:
+          limits:
+            cpu: "0.75"
+            memory: "250Mi"
+        volumeMounts:
+        - name: portal-env-conf
+          mountPath: /var/www/html/.env
+          subPath: env
+        - name: portal-scheduler-configmap
+          mountPath: /entrypoint.sh
+          subPath: entrypoint.sh
+        - name: infrastructure-ca-conf
+          mountPath: /usr/local/share/ca-certificates/
+      volumes:
+        - name: portal-env-conf
+          configMap:
+            name: portal-env-configmap
+        - name: portal-scheduler-configmap
+          configMap:
+            name: portal-scheduler-configmap
+        - name: infrastructure-ca-conf
+          configMap:
+            name: infrastructure-configmap
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: portal-scheduler-configmap
+  namespace: {{ item }}
+data:
+  entrypoint.sh: |-
+    #!/bin/sh
+    cd /var/www/html
+    while true;
+    do
+      php artisan schedule:run --verbose --no-interaction &
+      sleep 60
+    done
 {% if item == 'wai-stag' %}
 ---
 apiVersion: v1
@@ -475,4 +550,3 @@ metadata:
   name: basic-auth-secret
   namespace: {{ item }}
 {% endif %}
-
