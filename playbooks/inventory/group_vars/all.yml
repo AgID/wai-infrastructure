@@ -110,6 +110,10 @@ redis_image_version: 5.0.7
 wai_matomo_image: webanalyticsitalia/wai-matomo
 wai_matomo_image_tag: 3.14.1
 
+# WAI Cache Image
+wai_cache_image: varnish
+wai_cache_image_tag: 6.5.1
+
 # Kubectl executable
 wai_kubectl: /usr/local/bin/kubectl
 

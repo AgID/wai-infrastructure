@@ -12,6 +12,8 @@ metadata:
 {% if item == 'wai-prod' %}
     nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
 {% endif %}
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Backend portal;
     nginx.ingress.kubernetes.io/server-snippet: |
       add_header Allow "GET, POST" always;
 
@@ -27,7 +29,7 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: portal-service
+          serviceName: cache-service
           servicePort: 80
         path: /
 {% endif %}
@@ -35,7 +37,7 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: portal-service
+          serviceName: cache-service
           servicePort: 80
         path: /
   tls:
