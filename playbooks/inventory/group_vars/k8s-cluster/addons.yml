@@ -1,4 +1,9 @@
-# Override Kubespray: enable metrics server addon
+dashboard_enabled: true
 metrics_server_enabled: true
-# Enable helm
 helm_enabled: true
+metallb_enabled: true
+metallb_ip_range:
+- "10.0.10.250-10.0.10.252"
+metallb_limits_cpu: "100m"
+metallb_limits_mem: "100Mi"
+

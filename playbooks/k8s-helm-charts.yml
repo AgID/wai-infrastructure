@@ -1,6 +1,9 @@
 ---
 # Deploy K8S WAI Resources
 - hosts: kube-master[0]
+  collections:
+    - kubernetes.core
+
   tasks:
     - include_vars:
         file: secrets.yml
@@ -19,60 +22,53 @@
           - python3
           - git
           - python3-pip
+          - python3-pygit2
         state: present
 
     # Install PYHelm
     - name: K8S Helm .:. Install requirements
       pip:
         name:
-          - pygit2
-          - pyhelm==2.11.5
+          - pyhelm==2.14.5
           - grpcio
 
-    # Get tiller clusterID
-    - name: K8S Helm .:. Find tiller Cluster IP
-      shell: kubectl get svc -n kube-system tiller-deploy -o=jsonpath='{.spec.clusterIP}'
-      register: clusterIP
+    - name: K8S Helm .:. Add Jetstack repo
+      kubernetes.core.helm_repository:
+        repo_name: jetstack
+        repo_url: "https://charts.jetstack.io"
 
-    # Install cert manager
-    - name: K8S Helm .:. Download Cert-Manager requirements
-      get_url:
-        url: https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml
-        dest: "{{ wai_k8s_deployment_dir }}/helm/crds.yaml"
+    - name: K8S Helm .:. Add prometheus chart repo
+      kubernetes.core.helm_repository:
+        repo_name: prometheus-community 
+        repo_url: https://prometheus-community.github.io/helm-charts
 
-    - name: K8S Helm .:. Install Cert-Manager requirements
-      shell: "{{ wai_kubectl }} apply --validate=false -f {{ wai_k8s_deployment_dir }}/helm/crds.yaml"
+    - name: K8S Helm .:. Add grafana chart repo
+      kubernetes.core.helm_repository:
+        repo_name: grafana
+        repo_url: https://grafana.github.io/helm-charts
 
-    - name: K8S Helm .:. Add Cert-Manager repo
-      shell: "helm repo add jetstack https://charts.jetstack.io"
+    - name: K8S Helm .:. Add bitnami chart repo
+      kubernetes.core.helm_repository:
+        repo_name: bitnami
+        repo_url: https://charts.bitnami.com/bitnami
 
-    - name: K8S Helm .:. Test if Cert-Manager is installed
-      shell: "helm list | grep cert-manager -c"
-      failed_when: helm_status.rc != 0 and helm_status.rc != 1
-      register: helm_status
-
-    - name: K8S Helm .:. Install Cert-Manager
-      shell: "helm install --name cert-manager --namespace cert-manager jetstack/cert-manager --version {{ helm.cert_manager.version }}"
-      when: helm_status.stdout == "0"
-
-    # Prometheus
-    - name: K8S Helm .:. Test if Prometheus is installed
-      shell: "helm list | grep prometheus -c"
-      failed_when: helm_status.rc != 0 and helm_status.rc != 1
-      register: helm_status
+    - name: K8S Helm .:. Install CertManager
+      kubernetes.core.helm:
+        release_namespace: cert-manager
+        create_namespace: true
+        name: cert-manager
+        chart_ref: jetstack/cert-manager
+        release_state: present
+        values:
+          installCRDs: true
 
     - name: K8S Helm .:. Install Prometheus
-      helm:
-        namespace: monitoring
+      kubernetes.core.helm:
+        release_namespace: monitoring
+        create_namespace: true
         name: prometheus
-        chart:
-          name: prometheus
-          source:
-            type: git
-            location: https://github.com/helm/charts.git
-            path: stable/prometheus
-        host: "{{ clusterIP.stdout }}"
-        state: present
+        chart_ref: prometheus-community/prometheus
+        release_state: present
         values:
           server:
             ingress:
@@ -130,16 +126,14 @@
                       labels:
                         severity: critical
                       annotations:
-                        description: "Redis pod {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} of namespace {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} is consuming too much memory. Percentage is {{ '{{' }} $value {{ '}}' }}"
-                        summary: "Redis pod instance {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} memory alert."
+                        description: "Redis pod {{ '{{$labels.kubernetes_pod_name}}' }} of namespace {{ '{{$labels.kubernetes_namespace}}' }} is consuming too much memory. Percentage is {{ '{{$value}}' }}"
                     - alert: RedisDown
                       expr: redis_up == 0
                       for: 5m
                       labels:
                         severity: critical
                       annotations:
-                        description: "Redis instance {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} in namespace {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} has been down for more than 5 minutes."
-                        summary: "Redis Instance {{ '{{' }} $labels.kubernetes_pod_name {{ '}}' }} in namespace {{ '{{' }} $labels.kubernetes_namespace {{ '}}' }} is down"
+                        description: "Redis instance {{ '{{$labels.kubernetes_pod_name}}' }} in namespace {{ '{{$labels.kubernetes_namespace}}' }} has been down for more than 5 minutes."
                 - name: MariaDBInstance
                   rules:
                     - alert: MariaDown
@@ -148,8 +142,7 @@
                       labels:
                         severity: critical
                       annotations:
-                        description: "MariaDB instance {{ '{{' }} $labels.instance {{ '}}' }} of job {{ '{{' }} $labels.job {{ '}}' }} has been down for more than 5 minutes."
-                        summary: "MariaDB Instance {{ '{{' }} $labels.instance {{ '}}' }} is down"
+                        description: "MariaDB instance {{ '{{$labels.instance}}' }} of job {{ '{{$labels.job}}' }} has been down for more than 5 minutes."
                     - alert: SlaveSQLNotRunnin
                       annotations:
                         description: Slave SQL not running on galera cluster slave node
@@ -168,14 +161,14 @@
                         severity: critical
                 - name: Ingress
                   rules:
-                  - alert: NginxErrorCode
-                    annotations:
-                      description: '{{ $labels.ingress }} http status code !~[4-5].* < 99.0 %, current value is {{ $value }}'
-                      summary: http status code
-                    expr: sum(nginx_ingress_controller_requests{namespace="wai-prod",status!~"[4-5].*"}) by (ingress) / sum(nginx_ingress_controller_requests{namespace="wai-prod"}) by (ingress)*100 < 99.00
-                    for: 1m
-                    labels:
-                      severity: critical
+                    - alert: NginxErrorCode
+                      annotations:
+                        description: "{{ '{{$labels.ingress}}' }} http status code =~[5].* > 1.0 %, current value is {{ '{{$value}}' }}"
+                        summary: http status code
+                      expr: sum by (ingress) (rate(nginx_ingress_controller_requests{namespace="wai-prod",status=~"[5].*"}[5m])) / sum by (ingress) (rate(nginx_ingress_controller_requests{namespace="wai-prod"}[5m])) * 100 > 1.0
+                      for: 1m
+                      labels:
+                        severity: critical
                 - name: IstanceAlert
                   rules:
                     - alert: InstanceNoK8sDown
@@ -184,62 +177,45 @@
                       labels:
                         severity: critical
                       annotations:
-                        description: "{{ '{{' }} $labels.instance {{ '}}' }} of job {{ '{{' }} $labels.job {{ '}}' }} has been down for more than 5 minutes."
-                        summary: "Instance {{ '{{' }} $labels.instance {{ '}}' }} down"
+                        description: "{{ '{{$labels.instance}}' }} of job {{ '{{$labels.job}}' }} has been down for more than 5 minutes."
                     - alert: InstanceK8sDown
                       expr: up{job="kubernetes-nodes"} == 0
                       for: 5m
                       labels:
                         severity: critical
                       annotations:
-                        description: "{{ '{{' }} $labels.instance {{ '}}' }} of job {{ '{{' }} $labels.job {{ '}}' }} has been down for more than 5 minutes."
-                        summary: "Instance {{ '{{' }} $labels.instance {{ '}}' }} down"
+                        description: "{{ '{{$labels.instance}}' }} of job {{ '{{$labels.job}}' }} has been down for more than 5 minutes."
                     - alert: InstanceCPUUsageNoK8S
                       expr: (100 - (avg(irate(node_cpu_seconds_total{mode="idle", job="wai-infrastructure"}[5m])) BY (instance) * 100)) > 75
                       for: 2m
                       labels:
                         severity: critical
                       annotations:
-                        description: "{{ '{{' }} $labels.instance {{ '}}' }}: CPU usage is above 75% (current value is:{{ '{{' }} $value {{ '}}' }})"
-                        summary: "{{ '{{' }} $labels.instance {{ '}}' }}: High CPU usage detect"
+                        description: "{{ '{{$labels.instance}}' }}: CPU usage is above 75% (current value is:{{ '{{$value}}' }})"
                     - alert: InstanceCPUUsageK8S
                       expr: (100 - (avg(irate(node_cpu_seconds_total{mode="idle", job="kubernetes-service-endpoints"}[5m])) BY (instance) * 100)) > 75
                       for: 2m
                       labels:
                         severity: critical
                       annotations:
-                        description: "{{ '{{' }} $labels.kubernetes_node {{ '}}' }}: CPU usage is above 75% (current value is: {{ '{{' }} $value {{ '}}' }})"
-                        summary: "{{ '{{' }} $labels.kubernetes_node {{ '}}' }}: High CPU usage detect"
+                        description: "{{ '{{$labels.kubernetes_node}}' }}: CPU usage is above 75% (current value is: {{ '{{$value}}' }})"
                 - name: Kubernetes
                   rules:
                     - alert: AvailableReplicas
                       annotations:
-                        description: 'Missing {{ $value }} replicas of deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }}'
+                        description: "Missing {{ '{{$value}}' }} replicas of deployment {{ '{{$labels.deployment}}' }} in namespace {{ '{{$labels.namespace}}' }}"
                         summary: Unavailable replica
                       expr: kube_deployment_status_replicas_unavailable > 0
                       for: 1m
                       labels:
                         severity: critical
-      when: helm_status.stdout == "0"
-
-    # Install Grafana
-    - name: K8S Helm .:. Test if Prometheus is installed
-      shell: "helm list | grep grafana -c"
-      failed_when: helm_status.rc != 0 and helm_status.rc != 1
-      register: helm_status
 
     - name: K8S Helm .:. Install Grafana
-      helm:
-        namespace: monitoring
+      kubernetes.core.helm:
+        release_namespace: monitoring
         name: grafana
-        chart:
-          name: grafana
-          source:
-            type: git
-            location: https://github.com/helm/charts.git
-            path: stable/grafana
-        state: present
-        host: "{{ clusterIP.stdout }}"
+        chart_ref: grafana/grafana
+        release_state: present
         values:
           ingress:
             enabled: true
@@ -309,28 +285,20 @@
                 gnetId: 7362
                 revision: 5
                 datasource: Prometheus
-      when: helm_status.stdout == "0"
 
     # Install Redis
     - name: K8S Helm .:. Install Redis
-      helm:
-        namespace: "{{ item[0] }}"
+      kubernetes.core.helm:
+        release_namespace: "{{ item[0] }}"
         name: "{{ item[1] }}-{{ item[0] }}"
-        chart:
-          name: redis
-          source:
-            type: git
-            location: https://github.com/helm/charts.git
-            path: stable/redis
-        state: present
-        host: "{{ clusterIP.stdout }}"
+        chart_ref: bitnami/redis
+        release_state: present
         values:
           image:
             repository: "{{ wai_redisearch_image }}"
             tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_redisearch_image_tag }}"
           cluster:
-            enabled: true
-            slaveCount: "{{ '1' if item[0] == 'wai-stag' else wai_redisearch_slave_count }}"
+            enabled: false
           usePassword: true
           existingSecret: redis-master-secret
           existingSecretPasswordKey: "{{ item[1] }}-password"
@@ -347,7 +315,7 @@
           master:
             extraFlags:
               - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
-              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '2000' }}mb"
+              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '256' }}mb"
               - "--maxmemory-policy noeviction"
             disableCommands: "{{ ['FLUSHDB', 'FLUSHALL'] if item[0] == 'wai-prod' else []}}"
             persistence:
@@ -361,59 +329,24 @@
               requests:
                 cpu: 250m
                 memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '1Gi' }}"
-          slave:
-            extraFlags:
-              - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
-              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '2000' }}mb"
-              - "--maxmemory-policy noeviction"
-            persistence:
-              enabled: true
-              storageClass: storage-heketi
-              size: 5Gi
-            resources:
-              limits:
-                cpu: 250m
-                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '2Gi' }}"
-              requests:
-                cpu: 250m
-                memory: "{{ '4Gi' if item[1] == 'ingestion-redis' else '1Gi' }}"
-          sentinel:
-            usePassword: false
-            enabled: true
-            masterSet: "{{ item[1] }}-master"
-            downAfterMilliseconds: 5000
-            failoverTimeout: 5000
-            resources:
-              limits:
-                cpu: 250m
-                memory: 512Mi
-              requests:
-                cpu: 250m
-                memory: 512Mi
       with_nested:
         - "{{ wai_k8s_namespaces }}"
         - ["ingestion-redis", "application-redis"]
 
     # Install IPA Redis Search
     - name: K8S Helm .:. Install IPA Redisearch
-      helm:
-        namespace: "{{ item }}"
-        name: "ipa-redisearch-{{ item }}"
-        chart:
-          name: redis
-          source:
-            type: git
-            location: https://github.com/helm/charts.git
-            path: stable/redis
-        state: present
-        host: "{{ clusterIP.stdout }}"
+      kubernetes.core.helm:
+        release_namespace: "{{ item }}"
+        release_name: "ipa-redisearch-{{ item }}"
+        chart_version: 10.5.4
+        chart_ref: bitnami/redis
+        release_state: present
         values:
           image:
             repository: "{{ wai_ipa_redisearch_image }}"
             tag: "{{ 'latest' if item[0] == 'wai-stag' else wai_ipa_redisearch_image_tag }}"
           cluster:
-            enabled: true
-            slaveCount: "{{ '1' if item[0] == 'wai-stag' else '2' }}"
+            enabled: false
           usePassword: true
           existingSecret: redis-master-secret
           existingSecretPasswordKey: ipa-redisearch-password
@@ -431,47 +364,19 @@
                 memory: 128Mi
           master:
             persistence:
-              enabled: true
+              enabled: false
               storageClass: storage-heketi
               size: 2Gi
             resources:
               limits:
                 cpu: 250m
-                memory: 2Gi
+                memory: 256Mi
               requests:
                 cpu: 250m
-                memory: 1Gi
+                memory: 256Mi
             extraFlags:
-              - "--maxmemory 2000mb"
+              - "--maxmemory 256mb"
               - "--maxmemory-policy noeviction"
-          slave:
-            persistence:
-              enabled: true
-              storageClass: storage-heketi
-              size: 2Gi
-            resources:
-              limits:
-                cpu: 250m
-                memory: 2Gi
-              requests:
-                cpu: 250m
-                memory: 1Gi
-            extraFlags:
-              - "--maxmemory 2000mb"
-              - "--maxmemory-policy noeviction"
-          sentinel:
-            usePassword: false
-            enabled: true
-            masterSet: "ipa-redisearch-master"
-            downAfterMilliseconds: 5000
-            failoverTimeout: 5000
-            resources:
-              limits:
-                cpu: 250m
-                memory: 512Mi
-              requests:
-                cpu: 250m
-                memory: 512Mi
       with_items:
         - "{{ wai_k8s_namespaces }}"
 

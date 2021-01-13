@@ -35,6 +35,7 @@ rules:
       - watch
   - apiGroups:
       - "extensions"
+      - "networking.k8s.io"
     resources:
       - ingresses
     verbs:
@@ -50,6 +51,7 @@ rules:
       - patch
   - apiGroups:
       - "extensions"
+      - "networking.k8s.io"
     resources:
       - ingresses/status
     verbs:
@@ -206,7 +208,7 @@ spec:
       serviceAccountName: nginx-ingress-sa-{{ ns }}
       containers:
         - name: nginx-ingress-controller
-          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.23.0
+          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.31.1
           args:
             - /nginx-ingress-controller
             - --configmap=$(POD_NAMESPACE)/nginx-configuration
@@ -216,8 +218,6 @@ spec:
             - --annotations-prefix=nginx.ingress.kubernetes.io
             - --ingress-class=nginx-{{ ns }}
             - --election-id=ingress-controller-leader-{{ ns }}
-            # Enforce Isolation
-            - --force-namespace-isolation=true
             # Watch for pod in the ingress namespace
             - --watch-namespace=$(POD_NAMESPACE)
             # The backend is in the same pod namespace
@@ -230,7 +230,7 @@ spec:
               add:
                 - NET_BIND_SERVICE
             # www-data -> 33
-            runAsUser: 33
+            runAsUser: 101
           env:
             - name: POD_NAME
               valueFrom:
