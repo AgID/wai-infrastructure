@@ -173,7 +173,7 @@ data:
             local opts = {
               defaultCsp = "https://{{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}",
               redis = {
-                url = "redis://{{ redis_password.application_redis_master[item] }}@{{ application-redis-master }}:6379/10",
+                url = "redis://{{ redis_password.application_redis_master[item] }}@application-redis-master:6379/{{ redis_database.application_redis_master[item].csp }}",
                 sentinels = {}
               }
             }
