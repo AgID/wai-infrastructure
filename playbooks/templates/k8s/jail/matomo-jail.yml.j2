@@ -295,6 +295,10 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx-{{ item }}
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
+{% if matomo_name == 'matomo-api' %}
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Backend matomo;
+{% endif %}    
     nginx.ingress.kubernetes.io/server-snippet: |
       add_header Allow "GET, POST" always;
 
@@ -312,6 +316,6 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: {{ matomo_name }}-service
+              serviceName: {{ 'cache-service' if matomo_name == 'matomo-api' else matomo_name + '-service' }}
               servicePort: 80
 {% endif %}
