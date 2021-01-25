@@ -159,9 +159,9 @@ data:
     REDIS_IPA_INDEX_USE_SENTINELS=false
     REDIS_IPA_INDEX_SENTINELS=tcp://ipa-redisearch-master:26379
     REDIS_IPA_INDEX_SENTINEL_SET=ipa-redisearch-master
-    REDIS_CACHE_DB=1
-    REDIS_SESSIONS_DB=2
-    REDIS_QUEUE_DB=3
+    REDIS_CACHE_DB={{ redis_database.application_redis_master[item].cache }}
+    REDIS_SESSIONS_DB={{ redis_database.application_redis_master[item].session }}
+    REDIS_QUEUE_DB={{ redis_database.application_redis_master[item].queue }}
 
 {% if wai_settings[item].environment.reset.date.day is defined %}
     RESET_PUBLIC_PLAYGROUND_DAY_VERBOSE={{ wai_settings[item].environment.reset.date.verbose }}

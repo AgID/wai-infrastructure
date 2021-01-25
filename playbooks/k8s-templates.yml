@@ -105,7 +105,8 @@
     matomo_name: "matomo-api"
     matomo_pod_size_index: "matomo-api"
     matomo_nginx_jailed: true
-    matomo_create_ingress: false
+    matomo_create_ingress: true
+    matomo_ingress_fqdn_index: "api"
   template:
     dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-api.yml"
     src: k8s/jail/matomo-jail.yml.j2
@@ -119,6 +120,7 @@
     matomo_pod_size_index: "matomo-portal"
     matomo_nginx_jailed: false
     matomo_create_ingress: false
+    matomo_ingress_fqdn_index: "portal"
   template:
     dest: "{{ wai_k8s_deployment_dir }}/{{ item }}/99_matomo-portal.yml"
     src: k8s/jail/matomo-jail.yml.j2
