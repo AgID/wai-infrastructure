@@ -152,8 +152,9 @@ data:
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
         add_header Referrer-Policy origin;
+{% if matomo_name != 'matomo-api' %}        
         add_header Content-Security-Policy "frame-ancestors https://{{ wai_base_domain[item] }}";
-
+{% endif %}
         index index.php;
 
         location = /favicon.ico {
