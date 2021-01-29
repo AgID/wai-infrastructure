@@ -20,7 +20,7 @@ spec:
         app: spid-idp
     spec:
       containers:
-      - image: italia/spid-testenv2:1.0.1
+      - image: webanalyticsitalia/wai-spid-testenv:1.0.1-stable
         imagePullPolicy: IfNotPresent
         name: spid-idp
         ports:
@@ -37,15 +37,10 @@ spec:
         volumeMounts:
         - name: spid-configmap
           mountPath: /app/conf
-        - name: spid-config-volume
-          mountPath: /data
       volumes:
         - name: spid-configmap
           configMap:
             name: spid-configmap
-        - name: spid-config-volume
-          persistentVolumeClaim:
-            claimName: spid-idp-config-pvc
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -57,14 +52,14 @@ data:
     base_url: "https://spid.{{ wai_base_domain['wai-stag'] }}"
     key_file: "conf/idp.key"
     cert_file: "conf/idp.crt"
-    debug: true
+    debug: false
     host: 0.0.0.0
     port: 80
-    https: false
-    users_file: "/data/users.json"
-    can_add_user: true
+    https: true
+    can_add_user: false
+    users_file: "/app/users/users.json"
     database_admin_interface: false
-    show_response_options: true
+    show_response_options: false
     metadata:
       local:
 {% for ns in wai_k8s_namespaces %}
@@ -111,20 +106,6 @@ data:
     </md:EntityDescriptor>
 
 {% endfor %}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: spid-idp-config-pvc
-  namespace: wai-stag
-spec:
-  accessModes:
-    - ReadWriteMany
-  volumeMode: Filesystem
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: storage-heketi
 ---
 apiVersion: v1
 kind: Service
