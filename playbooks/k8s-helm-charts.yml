@@ -396,6 +396,7 @@
         filename: "{{ wai_k8s_deployment_dir }}/helm/01_cluster-issuer-{{ item }}.yml"
       with_items:
         - "{{ wai_k8s_namespaces }}"
+        - internal
       register: result
       until: result == 0
       retries: 6
