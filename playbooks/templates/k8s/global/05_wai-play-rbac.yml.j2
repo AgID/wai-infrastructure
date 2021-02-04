@@ -34,3 +34,51 @@ subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: Group
   name: wai-play-users
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: devops-role
+  namespace: wai-play
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - '*'
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  - apps
+  resources:
+  - '*'
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - statefulsets
+  verbs:
+  - patch
+- apiGroups: ["batch"]
+  resources: ["*"]
+  verbs: ["get","list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: devops-rolebinding
+  namespace: wai-play
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: devops-role
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: devops
