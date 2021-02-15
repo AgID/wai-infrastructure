@@ -400,6 +400,12 @@ spec:
           mountPath: /etc/config
         - name: html
           mountPath: /var/www/html
+        - name: portal-storage
+          mountPath: /var/www/html/storage/persistent
+      securityContext:
+        runAsUser: 33
+        runAsGroup: 33
+        fsGroup: 33
       volumes:
         - name: portal-nginx-conf
           configMap:
@@ -410,6 +416,9 @@ spec:
         - name: infrastructure-ca-conf
           configMap:
             name: infrastructure-configmap
+        - name: portal-storage
+          persistentVolumeClaim:
+            claimName: portal-storage-pvc
         - name: html
           emptyDir: {}
 ---
@@ -459,6 +468,10 @@ spec:
           subPath: env
         - name: infrastructure-ca-conf
           mountPath: /usr/local/share/ca-certificates/
+        - name: portal-storage
+          mountPath: /var/www/html/storage/persistent
+      securityContext:
+        fsGroup: 33
       volumes:
         - name: portal-env-conf
           configMap:
@@ -466,6 +479,9 @@ spec:
         - name: infrastructure-ca-conf
           configMap:
             name: infrastructure-configmap
+        - name: portal-storage
+          persistentVolumeClaim:
+            claimName: portal-storage-pvc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -516,6 +532,12 @@ spec:
           subPath: entrypoint.sh
         - name: infrastructure-ca-conf
           mountPath: /usr/local/share/ca-certificates/
+        - name: portal-storage
+          mountPath: /var/www/html/storage/persistent
+      securityContext:
+        runAsUser: 33
+        runAsGroup: 33
+        fsGroup: 33
       volumes:
         - name: portal-env-conf
           configMap:
@@ -526,6 +548,9 @@ spec:
         - name: infrastructure-ca-conf
           configMap:
             name: infrastructure-configmap
+        - name: portal-storage
+          persistentVolumeClaim:
+            claimName: portal-storage-pvc
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -552,3 +577,17 @@ metadata:
   name: basic-auth-secret
   namespace: {{ item }}
 {% endif %}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: portal-storage-svc
+  namespace: {{ item }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: storage-heketi
