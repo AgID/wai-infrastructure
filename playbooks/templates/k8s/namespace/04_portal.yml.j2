@@ -516,7 +516,7 @@ spec:
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         name: portal
-        command: ["sh", "-c", " chown www-data:www-data /var/www/html/storage/persistent ; . /entrypoint.sh"]
+        command: ["sh", "-c", "chown www-data:www-data /var/www/html/storage/persistent ; . /entrypoint.sh"]
         resources:
           limits:
             cpu: "0.75"
