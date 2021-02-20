@@ -370,7 +370,7 @@ spec:
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
-        command: ["sh", "-c", "/usr/sbin/update-ca-certificates ; php-fpm -F -y /opt/bitnami/php/etc/php-fpm.conf"]
+        command: ["sh", "-c", "/usr/sbin/update-ca-certificates ; chown www-data:www-data /var/www/html/storage/persistent ; php-fpm -F -y /opt/bitnami/php/etc/php-fpm.conf"]
         name: portal
         resources:
           limits:
@@ -455,7 +455,7 @@ spec:
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         name: portal
-        command: ["sh", "-c", "/usr/sbin/update-ca-certificates ; php artisan queue:work --tries=3 --sleep=10"]
+        command: ["sh", "-c", "/usr/sbin/update-ca-certificates ; chown www-data:www-data /var/www/html/storage/persistent ; php artisan queue:work --tries=3 --sleep=10"]
         resources:
           limits:
             cpu: "0.75"
@@ -516,7 +516,7 @@ spec:
       containers:
       - image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
         name: portal
-        command: ["sh", "-c", ". /entrypoint.sh"]
+        command: ["sh", "-c", " chown www-data:www-data /var/www/html/storage/persistent ; . /entrypoint.sh"]
         resources:
           limits:
             cpu: "0.75"
