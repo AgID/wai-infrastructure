@@ -35,9 +35,12 @@ spec:
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
             command: ["sh", "-c", ". /entrypoint.sh"]
             resources:
+              requests:
+                cpu: "{{ wai_matomo_cronjob_resources[item].requests.cpu }}"
+                memory: "{{ wai_matomo_cronjob_resources[item].requests.memory }}Mi"
               limits:
-                cpu: "0.50"
-                memory: "256Mi"
+                cpu: "{{ wai_matomo_cronjob_resources[item].limits.cpu }}"
+                memory: "{{ wai_matomo_cronjob_resources[item].limits.memory }}Mi"
             volumeMounts:
             - mountPath: /var/www/html/
               name: html

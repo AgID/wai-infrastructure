@@ -79,6 +79,19 @@ wai_matomo_pod_size:
   wai-play: { wai-portal: 4, wai-reporting: 4, wai-api: 4, matomo-portal: 4, matomo-worker: 8, matomo-ingestion: 8, matomo-api: 4 }
   wai-stag: { wai-portal: 2, wai-reporting: 2, wai-api: 2, matomo-portal: 2, matomo-worker: 2, matomo-ingestion: 2, matomo-api: 2 }
 
+# Matomo archiving cronjob resources
+# memory sizes (in bytes) intentionally without suffixes
+wai_matomo_cronjob_resources:
+  wai-prod:
+    requests: { cpu: "4", memory: "4096" }
+    limits: { cpu: "4", memory: "4096" }
+  wai-play: 
+    requests: { cpu: "2", memory: "2048" }
+    limits : { cpu: "2", memory: "2048" }
+  wai-stag:
+    requests: { cpu: "0.5", memory: "256" }
+    limits: { cpu: "0.5", memory: "256" }
+
 # Resource Quota
 wai_k8s_resource_quota:
   wai-prod: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "60", limits.memory: "64Gi" }
