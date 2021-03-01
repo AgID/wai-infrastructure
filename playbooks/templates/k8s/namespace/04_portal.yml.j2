@@ -212,6 +212,18 @@ data:
     ANALYTICS_API_SSL_VERIFY=false
     ANALYTICS_PUBLIC_URL=https://{{ wai_base_domain[item] }}{{ wai_portal_matomo_sub_path }}
     ANALYTICS_PUBLIC_DASHBOARD_ID={{ wai_settings[item].analytics_public_dashboard_id }}
+    ANALYTICS_CRON_ARCHIVING_ENABLED={{ wai_settings[item].analytics_cron_archiving_enabled }}
+
+    SDG_API_PUBLIC_URL={{ wai_settings[item].sdg.api_public_url }}
+    SDG_API_SSL_VERIFY=true
+    SDG_API_KEY={{ wai_settings[item].sdg.api_key }}
+    SDG_STORAGE_DIRECTORY=sdg
+    SDG_STORAGE_DISK=persistent
+    SDG_URLS_FILE_FORMAT={{ wai_settings[item].sdg.file_format }}
+    SDG_COLUMN_INDEX_URL_CSV={{ wai_settings[item].sdg.column_index_url_csv }}
+    SDG_COLUMN_SEPARATOR_CSV={{ wai_settings[item].sdg.column_separator_csv }}
+    SDG_URL_ARRAY_PATH_JSON={{ wai_settings[item].sdg.url_array_path_json }}
+    SDG_URL_KEY_JSON={{ wai_settings[item].sdg.url_key_json }}
 
     ELASTICSEARCH_HOST={{ wai_load_balancer[item].elastic[0] }}
     ELASTICSEARCH_PORT=9200

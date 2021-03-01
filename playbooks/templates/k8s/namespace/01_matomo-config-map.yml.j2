@@ -57,6 +57,11 @@ data:
     time_before_month_archive_considered_outdated = 2700
     time_before_year_archive_considered_outdated = 2700
     time_before_range_archive_considered_outdated = 2700
+    anonymous_user_enable_use_segments_API = 0
+    enable_create_realtime_segments = 0
+    enable_segment_suggested_values = 0
+    adding_segment_requires_access = "admin"
+    allow_adding_segments_for_all_websites = 0
 
     [Plugins]
     Plugins[] = "CorePluginsAdmin"
@@ -271,10 +276,14 @@ metadata:
 data:
   entrypoint.sh: |-
     #!/bin/sh
+
+    set -e
+
     MATOMO_GEOIP_PATH=/var/www/html/misc/DBIP-City.mmdb
     MATOMO_GEOIP_EXTERNAL_PATH=/opt/extra-content/geoip/DBIP-City.mmdb
     rm -f $MATOMO_GEOIP_PATH
     chmod +x /var/www/html/console ; cd /var/www/html/
+    echo "memory_limit = {{ wai_matomo_cronjob[item].resources.limits.memory }}M" >> /opt/bitnami/php/etc/conf.d/wai.ini
     ./console core:delete-logs-data --dates `date +%Y-%m-%d -d "-75 days"`,`date +%Y-%m-%d -d "-45 days"` -vvv -n
     ./console core:archive
     if [ -f "$MATOMO_GEOIP_PATH" ]; then
