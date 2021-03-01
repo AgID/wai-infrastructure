@@ -4,7 +4,7 @@ metadata:
   name: matomo-core-archive-all
   namespace: {{ item }}
 spec:
-  schedule: "00 01 * * *"
+  schedule: "{{ wai_matomo_cronjob[item].schedule }}"
   jobTemplate:
     spec:
       template:
@@ -36,11 +36,11 @@ spec:
             command: ["sh", "-c", ". /entrypoint.sh"]
             resources:
               requests:
-                cpu: "{{ wai_matomo_cronjob_resources[item].requests.cpu }}"
-                memory: "{{ wai_matomo_cronjob_resources[item].requests.memory }}Mi"
+                cpu: "{{ wai_matomo_cronjob[item].resources.requests.cpu }}"
+                memory: "{{ wai_matomo_cronjob[item].resources.requests.memory }}Mi"
               limits:
-                cpu: "{{ wai_matomo_cronjob_resources[item].limits.cpu }}"
-                memory: "{{ wai_matomo_cronjob_resources[item].limits.memory }}Mi"
+                cpu: "{{ wai_matomo_cronjob[item].resources.limits.cpu }}"
+                memory: "{{ wai_matomo_cronjob[item].resources.limits.memory }}Mi"
             volumeMounts:
             - mountPath: /var/www/html/
               name: html

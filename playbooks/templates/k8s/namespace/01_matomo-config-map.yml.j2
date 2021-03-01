@@ -283,7 +283,7 @@ data:
     MATOMO_GEOIP_EXTERNAL_PATH=/opt/extra-content/geoip/DBIP-City.mmdb
     rm -f $MATOMO_GEOIP_PATH
     chmod +x /var/www/html/console ; cd /var/www/html/
-    echo "memory_limit = {{ wai_matomo_cronjob_resources[item].limits.memory }}M" >> /opt/bitnami/php/etc/conf.d/wai.ini
+    echo "memory_limit = {{ wai_matomo_cronjob[item].resources.limits.memory }}M" >> /opt/bitnami/php/etc/conf.d/wai.ini
     ./console core:delete-logs-data --dates `date +%Y-%m-%d -d "-75 days"`,`date +%Y-%m-%d -d "-45 days"` -vvv -n
     ./console core:archive
     if [ -f "$MATOMO_GEOIP_PATH" ]; then
