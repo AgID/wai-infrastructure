@@ -87,38 +87,49 @@ data:
 
   matomo-entrypoint.sh: |
     #!/bin/bash
+
     echo "Started"
+
     fail() {
-      {% if wai_settings[item].log.slack_webhook_url_extra != "" %}
+{% if wai_settings[item].log.slack_webhook_url_extra != "" %}
       curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$1\"}" {{ wai_settings[item].log.slack_webhook_url_extra }}
-      {% endif %}
+{% endif %}
       echo Failed $1
       exit 1
     }
+
     success() {
-       echo Success $1
-       exit 0
+      echo Success $1
+      exit 0
     }
+
     WORK_DIR="/tmp/reset-env"
     MATOMO_SQL_FILE="/tmp/matomo.sql"
     MATOMO_J2_SQL_FILE="/tmp/matomo.sql.j2"
+
     echo "Download matomo_$MATOMO_VERSION.sql.j2 sql script file"
     curl https://raw.githubusercontent.com/AgID/wai-infrastructure/master/playbooks/templates/mariadb/matomo_$MATOMO_VERSION.sql.j2 -s -o $MATOMO_J2_SQL_FILE > /dev/null
+
     echo "Update packages"
     apt-get update && apt-get install -y python python-pip
+
     echo "Install requirements"
     pip install j2cli pyyaml j2cli[yaml]
+
     echo "Create main matomo sql file"
     j2 -f yaml $MATOMO_J2_SQL_FILE $WORK_DIR/reset-env-vars.yaml > $MATOMO_SQL_FILE
     [ $(wc -c < $MATOMO_SQL_FILE) -eq 0 ] && fail "Unable to create $MATOMO_SQL_FILE"
     DUMP_OPT="--dump=$MATOMO_SQL_FILE"
+
     echo "Looking for plugins sql files"
     while read file
     do
       DUMP_OPT+=" --dump=$file"
     done <<<$(find /opt/extra-content/premium_plugins -type f -name "*.sql")
+
     cd /var/www/html && chmod +x console
     cp /var/www/html/config/config.ini.php.tmp /var/www/html/config/config.ini.php
+
     ./console plugin:activate ResetDatabase
     ./console reset-database $DUMP_OPT && success "Environment cleared" || fail "An error occurred during reset operation"
 {% endif %}
