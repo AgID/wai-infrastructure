@@ -41,6 +41,8 @@ spec:
         volumeMounts:
         - mountPath: /html
           name: html
+        - name: php-fpm-config
+          mountPath: /php-fpm-config
         - name: matomo-php-config
           mountPath: /tmp/config.ini.php.orig
           subPath: config.ini.php
@@ -74,6 +76,8 @@ spec:
           mountPath: /var/www/scripts
         - name: html
           mountPath: /var/www/html/
+        - name: php-fpm-config
+          mountPath: /opt/bitnami/php/etc/php-fpm.d/
       volumes:
         - name: matomo-worker-config
           configMap:
@@ -88,6 +92,8 @@ spec:
           configMap:
             name: matomo-initc-config
         - name: html
+          emptyDir: {}
+        - name: php-fpm-config
           emptyDir: {}
 ---
 kind: ConfigMap
