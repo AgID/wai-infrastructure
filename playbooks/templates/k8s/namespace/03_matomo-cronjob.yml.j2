@@ -21,6 +21,8 @@ spec:
             volumeMounts:
             - mountPath: /html
               name: html
+            - name: php-fpm-config
+              mountPath: /php-fpm-config
             - name: matomo-php-config
               mountPath: /tmp/config.ini.php.orig
               subPath: config.ini.php
@@ -44,6 +46,8 @@ spec:
             volumeMounts:
             - mountPath: /var/www/html/
               name: html
+            - name: php-fpm-config
+              mountPath: /opt/bitnami/php/etc/php-fpm.d/
             - name: matomo-cron-config
               mountPath: /entrypoint.sh
               subPath: entrypoint.sh
@@ -64,4 +68,6 @@ spec:
               configMap:
                 name: matomo-cron-config
             - name: html
+              emptyDir: {}
+            - name: php-fpm-config
               emptyDir: {}
