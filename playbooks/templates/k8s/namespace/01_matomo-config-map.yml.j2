@@ -242,7 +242,7 @@ data:
     cp -a /opt/bitnami/php/etc/php-fpm.d/* /php-fpm-config/
 
     # Update php-fpm config if needed
-    if [ "$0" == "matomo-ingestion" ]; then
+    if [ "$0" = "matomo-ingestion" ]; then
       echo "pm.max_children = 8" >> /php-fpm-config/99-matomo.conf
     fi
 
@@ -297,4 +297,3 @@ data:
     if [ -f "$MATOMO_GEOIP_PATH" ]; then
       cp -f $MATOMO_GEOIP_PATH $MATOMO_GEOIP_EXTERNAL_PATH
     fi
-
