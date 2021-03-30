@@ -14,12 +14,6 @@ metadata:
 {% endif %}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Backend portal;
-    nginx.ingress.kubernetes.io/server-snippet: |
-      add_header Allow "GET, POST" always;
-
-      if ($request_method !~ ^(GET|POST)$) {
-        return 405;
-      }
   name: portal
   namespace: {{ item }}
 spec:
