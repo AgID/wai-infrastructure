@@ -337,6 +337,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx-{{ item }}
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   tls:
   - hosts:
