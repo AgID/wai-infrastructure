@@ -37,12 +37,13 @@ spec:
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
             command: ["sh", "-c", ". /entrypoint.sh"]
             resources:
-              requests:
-                cpu: "{{ wai_matomo_cronjob[item].resources.requests.cpu }}"
-                memory: "{{ wai_matomo_cronjob[item].resources.requests.memory }}Mi"
-              limits:
-                cpu: "{{ wai_matomo_cronjob[item].resources.limits.cpu }}"
-                memory: "{{ wai_matomo_cronjob[item].resources.limits.memory }}Mi"
+            {%- if 'limits' in wai_matomo_resources[item]['matomo-cron-job'] %}
+
+              {{ wai_matomo_resources[item]['matomo-cron-job'] | to_nice_yaml(indent=2) | indent(width=14) }}
+            {%- else %}
+            
+              {{ wai_matomo_resources.default  | to_nice_yaml(indent=2) | indent(width=14) }}
+            {%- endif %}
             volumeMounts:
             - mountPath: /var/www/html/
               name: html

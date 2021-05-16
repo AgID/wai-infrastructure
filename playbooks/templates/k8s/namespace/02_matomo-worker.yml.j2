@@ -56,9 +56,13 @@ spec:
         imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         name: matomo-worker
         resources:
-          limits:
-            cpu: "0.50"
-            memory: "256Mi"
+        {%- if 'limits' in wai_matomo_resources[item]['matomo-worker'] %}
+
+          {{ wai_matomo_resources[item]['matomo-worker'] | to_nice_yaml(indent=2) | indent(width=10) }}
+        {%- else %}
+        
+          {{ wai_matomo_resources.default  | to_nice_yaml(indent=2) | indent(width=10) }}
+        {%- endif %}
         command: ["/bin/sh", "/var/www/scripts/qt-worker.sh"]
         readinessProbe:
           exec:

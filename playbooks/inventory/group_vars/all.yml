@@ -79,24 +79,63 @@ wai_matomo_pod_size:
   wai-play: { wai-portal: 4, wai-reporting: 4, wai-api: 4, matomo-portal: 4, matomo-worker: 8, matomo-ingestion: 8, matomo-api: 4 }
   wai-stag: { wai-portal: 2, wai-reporting: 2, wai-api: 2, matomo-portal: 2, matomo-worker: 2, matomo-ingestion: 2, matomo-api: 2 }
 
+# Matomo pod resources
+wai_matomo_resources:
+  default: { limits: { cpu: 750m, memory: 250Mi }, requests: { cpu: 750m, memory: 250Mi } } 
+  wai-prod:
+    matomo-ingestion: {}
+    matomo-api: {}
+    matomo: { limits: { cpu: 750m, memory: 4Gi }, requests: { cpu: 750m, memory: 4Gi } } 
+    matomo-worker: { limits: { cpu: 500m, memory: 512Mi }, requests: { cpu: 500m, memory: 512Mi } } 
+    matomo-cron-job: { limits: { cpu: 4, memory: 4Gi }, requests: { cpu: 4, memory: 4Gi } } 
+  wai-play:
+    matomo-ingestion: {}
+    matomo-api: {}
+    matomo: {}
+    matomo-worker: {}
+    matomo-cron-job: { limits: { cpu: 2, memory: 2Gi }, requests: { cpu: 4, memory: 2Gi } } 
+  wai-stag:
+    matomo-ingestion: {}
+    matomo-api: {}
+    matomo: {}
+    matomo-worker: {}
+    matomo-cron-job: { limits: { cpu: 500m, memory: 256Mi }, requests: { cpu: 500m, memory: 256Mi } } 
+
+wai_matomo_php_extra_vars:
+  wai-prod:
+    matomo-ingestion:
+      'pm.max_children': 8
+    matomo-api: {}
+    matomo:
+      memory_limit: 4096M
+    matomo-worker: {}
+    matomo-cron-job: 
+      memory_limit: 4096M
+  wai-play:
+    matomo-ingestion:
+      'pm.max_children': 8
+    matomo-api: {}
+    matomo: {}
+    matomo-worker: {}
+    matomo-cron-job:
+      memory_limit: 2048M
+  wai-stag: 
+    matomo-ingestion:
+      'pm.max_children': 4
+    matomo-api: {}
+    matomo: {}
+    matomo-worker: {}
+    matomo-cron-job:
+      memory_limit: 256M
+
 # Matomo archiving cronjob
-# memory sizes (in bytes) intentionally without suffixes
 wai_matomo_cronjob:
   wai-prod:
     schedule: "00 01 * * *"
-    resources:
-      requests: { cpu: "4", memory: "4096" }
-      limits: { cpu: "4", memory: "4096" }
   wai-play:
     schedule: "00 05 * * *"
-    resources:
-      requests: { cpu: "2", memory: "2048" }
-      limits : { cpu: "2", memory: "2048" }
   wai-stag:
     schedule: "00 07 * * *"
-    resources:
-      requests: { cpu: "0.5", memory: "256" }
-      limits: { cpu: "0.5", memory: "256" }
 
 # Resource Quota
 wai_k8s_resource_quota:

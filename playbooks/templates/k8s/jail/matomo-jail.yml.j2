@@ -59,9 +59,13 @@ spec:
         imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         name: {{ matomo_name }}
         resources:
-          limits:
-            cpu: "0.75"
-            memory: "250Mi"
+        {%- if 'limits' in wai_matomo_resources[item][matomo_name] %}
+
+          {{ wai_matomo_resources[item][matomo_name] | to_nice_yaml(indent=2) | indent(width=10) }}
+        {%- else %}
+        
+          {{ wai_matomo_resources.default  | to_nice_yaml(indent=2) | indent(width=10) }}
+        {%- endif %}
         ports:
         - containerPort: 9000
           name: fpm-port
