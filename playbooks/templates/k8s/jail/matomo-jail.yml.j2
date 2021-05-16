@@ -158,8 +158,8 @@ data:
         add_header X-Frame-Options DENY;
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
-        add_header Referrer-Policy origin;
 {% if matomo_name != 'matomo-api' %}        
+        add_header Referrer-Policy origin;
         add_header Content-Security-Policy "frame-ancestors https://{{ wai_base_domain[item] }}";
 {% endif %}
         index index.php;
@@ -209,6 +209,11 @@ data:
           fastcgi_param  HTTP_X_FORWARDED_URI '{{ wai_portal_matomo_sub_path }}';
           fastcgi_intercept_errors on;
           fastcgi_pass backend;
+{% if matomo_name == 'matomo-api' %}
+        fastcgi_hide_header Referrer-Policy;
+        add_header Referrer-Policy $actual_referrer_policy;
+{% endif %}
+
         }
 
 {% if matomo_nginx_jailed is defined and not matomo_nginx_jailed %}
@@ -279,6 +284,12 @@ data:
         piwik.js 0;
         default 1;
       }
+
+      map $upstream_http_referrer_policy $actual_referrer_policy {
+        "~." $upstream_http_referrer_policy;
+        default "origin";
+      }
+
     }
 ---
 apiVersion: v1
