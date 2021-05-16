@@ -16,6 +16,71 @@ data:
     KONG_ADMIN_ERROR_LOG: /dev/stderr
     KONG_ADMIN_LISTEN: 0.0.0.0:8001,0.0.0.0:8444 ssl
 ---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kong-init-configmap
+  namespace: {{ item }}
+data:
+  kong-init.sh: |
+    #!/bin/sh
+
+    add_plugin()
+    {
+        PLUGIN=`curl --output /dev/null --silent http://localhost:8001/plugins | jq -r '.data[] | select (.name == "$1").name'`
+        [ "$PLUGIN" == "" ] && (
+            echo "Adding plugin $1"
+            curl --output /dev/null --silent -X POST http://localhost:8001/plugins --data "name=$1&$2"
+        )
+    }
+
+    add_service()
+    {
+        SERVICE=`curl --output /dev/null --silent http://localhost:8001/services | jq -r '.data[] | select (.name == "$1").name'`
+        [ "$SERVICE" == "" ] && (
+            echo "Adding service $1"
+            curl --output /dev/null --silent -X POST http://localhost:8001/services --data "name=$1&$2"
+        )
+    }
+
+    add_route()
+    {
+        ROUTE=`curl -output /dev/null --silent http://localhost:8001/services/$1/routes | jq -r '.data[] | select (.name == "$1").name'`
+        [ "$ROUTE" == "" ] && (
+            echo "Adding route to service $1"
+            curl --output /dev/null --silent -X POST http://localhost:8001/services/$1/routes --data "name=$1&$2"
+        )
+    }
+
+    echo "Running kong"
+    echo "Waiting for postgres"
+    until $(pg_isready -h $KONG_PG_HOST -t 1 > /dev/null) ; do
+        echo "Postgres is not ready ...."
+        sleep 1
+    done
+    echo "Postgres is ready"
+
+    kong migrations list > /dev/null && (
+        echo "Running migrations update"
+        kong migrations up
+    ) || (
+        echo "Running migrations bootstrap"
+        kong migrations bootstrap
+        echo "Running very first setup"
+        kong start &
+        until $(curl --output /dev/null --silent --head --fail http://localhost:8001/services); do
+            echo "Kong is not ready"
+            sleep 2
+        done
+        add_plugin "cors" "config.origins=https://localhost"
+        add_plugin "oauth2" "config.enable_client_credentials=true&config.global_credentials=true&config.accept_http_if_already_terminated=true"
+        add_service "portal" "url=https://nginx/api"
+        add_service "matomo" "url=http://express:7080"
+        add_route "portal" "paths[]=/"
+        add_route "matomo" "paths[]=/"
+    )
+    echo "I have done my job .... enjoy kong and webanalytics italia"
+---
 apiVersion: v1
 kind: Secret
 type: Opaque
@@ -63,12 +128,12 @@ metadata:
   name: kong
   namespace: {{ item }}
 spec:
-  replicas: 2
+  replicas: {{ wai_kong_pod_size[item] }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: kong
@@ -89,8 +154,31 @@ spec:
                 values:
                 - kong
             topologyKey: "kubernetes.io/hostname"
+      initContainers:
+      - image: {{ wai_kong_image }}:{{ 'latest' if item == 'wai-stag' else wai_kong_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
+        name: setup
+        command:
+          - sh
+        args:
+          - -c
+          - /kong-init.sh
+        envFrom:
+          - configMapRef:
+              name: kong-configmap
+          - secretRef:
+              name: kong-secret
+        resources:
+          limits:
+            cpu: "0.25"
+            memory: "512Mi"
+        volumeMounts:
+        - mountPath: /kong-init.sh
+          name: kong-init-configmap
+          subPath: kong-init.sh
       containers:
       - image: {{ wai_kong_image }}:{{ 'latest' if item == 'wai-stag' else wai_kong_image_tag }}
+        imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         name: kong
         envFrom:
           - configMapRef:
@@ -110,3 +198,13 @@ spec:
           name: https
         - containerPort: 8444
           name: admin-https
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 20
+          periodSeconds: 5
+      volumes:
+        - name: kong-init-configmap
+          configMap:
+            name: kong-init-configmap
+            defaultMode: 0755
