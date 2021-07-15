@@ -137,6 +137,10 @@ wai_nginx_openresty_tag: 1.0.0-stable
 wai_cache_image: varnish
 wai_cache_image_tag: 6.5.1
 
+# WAI Kong Image
+wai_kong_image: webanalyticsitalia/wai-kong
+wai_kong_image_tag: 1.0
+
 # Kubectl executable
 wai_kubectl: /usr/local/bin/kubectl
 
