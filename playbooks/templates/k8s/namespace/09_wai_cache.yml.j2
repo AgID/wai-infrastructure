@@ -22,6 +22,12 @@ data:
         .first_byte_timeout = 150s;
     }
 
+    backend kong {
+        .host = "kong-service";
+        .port = "8001";
+        .first_byte_timeout = 150s;
+    }
+
     acl allowed_purge_net {
         "localhost";
         "10.233.0.0/16";
@@ -31,6 +37,8 @@ data:
 
       if (req.http.X-Backend == "matomo") {
         set req.backend_hint = matomo;
+      } elseif (req.http.X-Backend == "kong") {
+        set req.backend_hint = kong;
       } else {
         set req.backend_hint = portal;
       }
