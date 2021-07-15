@@ -30,7 +30,7 @@ function waicsp.evaluate(opts)
     if err then 
         ngx_log(ngx_ERR, "Unable to connect to redis " .. opts.redis.url)
         ngx_log(ngx_ERR, err)
-        ngx.header["Content-Security-Policy"] = cspValue
+        ngx.header["Content-Security-Policy"] = "frame-ancestors " .. cspValue
         return nil, err
     end
     ngx_log(ngx_NOTICE, "Lookup to redis for keys on siteId " .. siteId )
@@ -47,8 +47,8 @@ function waicsp.evaluate(opts)
     ngx_log(ngx_NOTICE, "Redis data is " .. cspValue)
     ngx_log(ngx_NOTICE, "Referer is " .. referer)
     for host in string.gmatch(cspValue, '([^%s]+)') do
-      ngx_log(ngx_NOTICE, "Testing  " .. referer .. " on " .. host )
-      if( string.match(referer, "^" .. host)) then
+      ngx_log(ngx_NOTICE, "Testing '" .. referer .. "' on '" .. host .. "'")
+      if ( referer:find(host, 1, true) == 1 ) then
         match = true
       end
     end
