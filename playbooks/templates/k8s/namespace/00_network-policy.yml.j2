@@ -57,8 +57,13 @@ metadata:
   namespace: {{ item }}
 spec:
   podSelector:
-    matchLabels:
-      app: portal-queue-worker
+    matchExpressions:
+    - key: app
+      operator: In
+      values:
+      - portal-queue-worker
+      - matomo
+      - matomo-archiving-job
   policyTypes:
   - Egress
   egress:
