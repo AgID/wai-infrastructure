@@ -163,7 +163,6 @@ data:
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
 {% if matomo_name != 'matomo-api' %}        
-        add_header Referrer-Policy origin;
         add_header Content-Security-Policy "frame-ancestors https://{{ wai_base_domain[item] }}";
 {% endif %}
         index index.php;
@@ -215,7 +214,6 @@ data:
           fastcgi_pass backend;
           fastcgi_hide_header Referrer-Policy;
           add_header Referrer-Policy $actual_referrer_policy;
-
         }
 
 {% if matomo_nginx_jailed is defined and not matomo_nginx_jailed %}
