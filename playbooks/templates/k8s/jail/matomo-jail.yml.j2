@@ -213,10 +213,8 @@ data:
           fastcgi_param  HTTP_X_FORWARDED_URI '{{ wai_portal_matomo_sub_path }}';
           fastcgi_intercept_errors on;
           fastcgi_pass backend;
-{% if matomo_name == 'matomo-api' %}
-        fastcgi_hide_header Referrer-Policy;
-        add_header Referrer-Policy $actual_referrer_policy;
-{% endif %}
+          fastcgi_hide_header Referrer-Policy;
+          add_header Referrer-Policy $actual_referrer_policy;
 
         }
 
