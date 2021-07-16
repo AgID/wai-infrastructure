@@ -59,9 +59,13 @@ spec:
         imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         name: {{ matomo_name }}
         resources:
-          limits:
-            cpu: "0.75"
-            memory: "250Mi"
+        {%- if 'limits' in wai_matomo_resources[item][matomo_name] %}
+
+          {{ wai_matomo_resources[item][matomo_name] | to_nice_yaml(indent=2) | indent(width=10) }}
+        {%- else %}
+        
+          {{ wai_matomo_resources.default  | to_nice_yaml(indent=2) | indent(width=10) }}
+        {%- endif %}
         ports:
         - containerPort: 9000
           name: fpm-port
@@ -158,7 +162,6 @@ data:
         add_header X-Frame-Options DENY;
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
-        add_header Referrer-Policy origin;
 {% if matomo_name != 'matomo-api' %}        
         add_header Content-Security-Policy "frame-ancestors https://{{ wai_base_domain[item] }}";
 {% endif %}
@@ -209,6 +212,8 @@ data:
           fastcgi_param  HTTP_X_FORWARDED_URI '{{ wai_portal_matomo_sub_path }}';
           fastcgi_intercept_errors on;
           fastcgi_pass backend;
+          fastcgi_hide_header Referrer-Policy;
+          add_header Referrer-Policy $actual_referrer_policy;
         }
 
 {% if matomo_nginx_jailed is defined and not matomo_nginx_jailed %}
@@ -279,6 +284,12 @@ data:
         piwik.js 0;
         default 1;
       }
+
+      map $upstream_http_referrer_policy $actual_referrer_policy {
+        "~." $upstream_http_referrer_policy;
+        default "origin";
+      }
+
     }
 ---
 apiVersion: v1
@@ -304,6 +315,7 @@ metadata:
     kubernetes.io/ingress.class: nginx-{{ item }}
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
 {% if matomo_name == 'matomo-api' %}
+    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Backend matomo;
 {% endif %}    
@@ -322,8 +334,37 @@ spec:
     - host: {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
       http:
         paths:
-          - path: /
+          - path: {{ '/widgets' if matomo_name == 'matomo-api' else '/' }}
             backend:
               serviceName: {{ 'cache-service' if matomo_name == 'matomo-api' else matomo_name + '-service' }}
               servicePort: 80
+---
+{% if matomo_name == 'matomo-api' %}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ matomo_name }}-kong
+  namespace: {{ item }}
+  annotations:
+    kubernetes.io/ingress.class: nginx-{{ item }}
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts:
+    - {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
+    secretName: ingress-acme-tls
+  rules:
+    - host: {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kong-service
+              servicePort: 8000
+          - path: /matomo
+            backend:
+              serviceName: kong-service
+              servicePort: 8000
+{% endif %}
 {% endif %}

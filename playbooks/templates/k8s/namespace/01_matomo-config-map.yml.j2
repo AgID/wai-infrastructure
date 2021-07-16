@@ -1,4 +1,5 @@
 # {{ ansible_managed }}
+{% set matomo_image_arr = ["matomo", "matomo-api", "matomo-ingestion"] %}
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -242,10 +243,17 @@ data:
     # Copy php-fpm config files to emptydir
     cp -a /opt/bitnami/php/etc/php-fpm.d/* /php-fpm-config/
 
+    {% for matomo_image in matomo_image_arr -%}
+    {% if wai_matomo_php_extra_vars[item][matomo_image] is defined -%}
     # Update php-fpm config if needed
-    if [ "$0" = "matomo-ingestion" ]; then
-      echo "pm.max_children = 8" >> /php-fpm-config/99-matomo.conf
+    if [ "$0" = "{{ matomo_image }}" ]; then
+    {% for prop in wai_matomo_php_extra_vars[item][matomo_image] -%}
+      echo "{{ prop }} = {{ wai_matomo_php_extra_vars[item][matomo_image][prop] }}" >> /php-fpm-config/99-matomo.conf
+    {% endfor -%}
     fi
+    {% endif %}
+
+    {% endfor %}
 
     # Create a soft link to geoip file even if it does not exist because of it is not in the image. The cron archive job will create this file.
     MATOMO_GEOIP_PATH=/html/misc/DBIP-City.mmdb
@@ -292,7 +300,7 @@ data:
     MATOMO_GEOIP_EXTERNAL_PATH=/opt/extra-content/geoip/DBIP-City.mmdb
     rm -f $MATOMO_GEOIP_PATH
     chmod +x /var/www/html/console ; cd /var/www/html/
-    echo "memory_limit = {{ wai_matomo_cronjob[item].resources.limits.memory }}M" >> /opt/bitnami/php/etc/conf.d/wai.ini
+    echo "memory_limit = {{ wai_matomo_php_extra_vars[item]['matomo-cron-job'].memory_limit }}" >> /opt/bitnami/php/etc/conf.d/wai.ini
     ./console core:delete-logs-data --dates `date +%Y-%m-%d -d "-75 days"`,`date +%Y-%m-%d -d "-45 days"` -vvv -n
     ./console core:archive
     if [ -f "$MATOMO_GEOIP_PATH" ]; then
