@@ -398,6 +398,14 @@
           postgresqlUsername: "{{ kong[item].pgsql.user }}"
           postgresqlPassword: "{{ kong[item].pgsql.password }}"
           postgresqlDatabase: kong
+          resources:
+            requests:
+              cpu: "1"
+              memory: 1G
+            limits:
+              cpu: "1"
+              memory: 1G
+
           metrics:
             serviceMonitor:
               enabled: true

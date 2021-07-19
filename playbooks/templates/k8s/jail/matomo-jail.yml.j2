@@ -83,7 +83,7 @@ spec:
           mountPath: /opt/bitnami/php/etc/php-fpm.d/
         - name: {{ matomo_name }}-extra-content
           mountPath: /opt/extra-content
-      - image: nginx:1.15.8
+      - image: {{ wai_nginx_openresty }}:{{ 'latest' if item == 'wai-stag' else wai_nginx_openresty_tag }}
         name: nginx
         resources:
           limits:
@@ -129,9 +129,9 @@ metadata:
   namespace: {{ item }}
 data:
   nginx.conf: |-
-    user nginx;
+    # user nginx;
     worker_processes 1;
-    error_log /var/log/nginx/error.log warn;
+    error_log /usr/local/openresty/nginx/logs/error.log warn;
     pid /var/run/nginx.pid;
 
     events {
@@ -150,7 +150,7 @@ data:
         server localhost:9000;
       }
 
-      include /etc/nginx/mime.types;
+      include /usr/local/openresty/nginx/conf/mime.types;
       default_type application/octet-stream;
       gzip on;
       gzip_disable "msie6";
@@ -271,7 +271,7 @@ data:
         }
 {% endif %}
 
-        access_log /var/log/nginx/access.log combined if=$loggable;
+        access_log /usr/local/openresty/nginx/logs/access.log combined if=$loggable;
       }
 
       map $uri $basename {

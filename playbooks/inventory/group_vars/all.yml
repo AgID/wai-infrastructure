@@ -34,18 +34,18 @@ wai_base_domain:
 wai_load_balancer:
   wai-prod:
     elastic:
-      - 10.0.30.17
+      - 10.0.30.101
     rdbms:
-      - 10.0.20.16
-      - 10.0.20.11
+      - 10.0.20.101
+      - 10.0.20.101
   wai-play:
     elastic:
-      - 10.0.30.17
+      - 10.0.30.101
     rdbms:
-      - 10.0.200.7
+      - 10.0.200.101
   wai-stag:
     elastic:
-      - 10.0.30.17
+      - 10.0.30.101
     rdbms:
       - 10.0.100.101
 
@@ -87,13 +87,13 @@ wai_matomo_resources:
     matomo-api: {}
     matomo: { limits: { cpu: 750m, memory: 4Gi }, requests: { cpu: 750m, memory: 4Gi } } 
     matomo-worker: { limits: { cpu: 500m, memory: 512Mi }, requests: { cpu: 500m, memory: 512Mi } } 
-    matomo-cron-job: { limits: { cpu: 4, memory: 4Gi }, requests: { cpu: 4, memory: 4Gi } } 
+    matomo-cron-job: { limits: { cpu: 4, memory: 8Gi }, requests: { cpu: 4, memory: 4Gi } } 
   wai-play:
     matomo-ingestion: {}
     matomo-api: {}
     matomo: {}
     matomo-worker: {}
-    matomo-cron-job: { limits: { cpu: 2, memory: 2Gi }, requests: { cpu: 4, memory: 2Gi } } 
+    matomo-cron-job: { limits: { cpu: 2, memory: 2Gi }, requests: { cpu: 2, memory: 2Gi } } 
   wai-stag:
     matomo-ingestion: {}
     matomo-api: {}
@@ -110,7 +110,7 @@ wai_matomo_php_extra_vars:
       memory_limit: 4096M
     matomo-worker: {}
     matomo-cron-job: 
-      memory_limit: 4096M
+      memory_limit: 7168M
   wai-play:
     matomo-ingestion:
       'pm.max_children': 8
@@ -149,7 +149,7 @@ wai_ipa_redisearch_image_tag: 5.0.12-stable
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
-wai_portal_image_tag: 1.5.1-beta
+wai_portal_image_tag: 1.6.5-beta
 wai_portal_matomo_sub_path: /matomo
 wai_portal_environments:
   wai-prod: production
@@ -166,10 +166,10 @@ redis_image_version: 5.0.7
 
 # Matomo Image
 wai_matomo_image: webanalyticsitalia/wai-matomo
-wai_matomo_image_tag: 3.14.1
+wai_matomo_image_tag: 3.14.1-6
 
 # Wai NGINX Openresty
-wai_nginx_openresty: wai-openresty
+wai_nginx_openresty: webanalyticsitalia/wai-openresty
 wai_nginx_openresty_tag: 1.0.0-stable
 
 # WAI Cache Image
@@ -228,4 +228,4 @@ heketi_port: 8443
 
 # OpenVPN
 # This is needed to set IP filtered login to Matomo
-openvpn_server_addr: 1.2.3.4
+openvpn_server_addr: 156.54.44.90/32
