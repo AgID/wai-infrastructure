@@ -139,8 +139,8 @@ wai_matomo_cronjob:
 
 # Resource Quota
 wai_k8s_resource_quota:
-  wai-prod: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "60", limits.memory: "64Gi" }
-  wai-play: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "50", limits.memory: "64Gi" }
+  wai-prod: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "60", limits.memory: "80Gi" }
+  wai-play: { requests.cpu: "50", requests.memory: "54Gi", limits.cpu: "60", limits.memory: "80Gi" }
   wai-stag: { requests.cpu: "24", requests.memory: "30Gi", limits.cpu: "34", limits.memory: "40Gi" }
 
 # IPA Redisearch image
