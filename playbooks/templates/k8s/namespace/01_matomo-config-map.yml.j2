@@ -225,8 +225,6 @@ data:
     [TrackerHostname]
     hostname = "{{ wai_hostname['ingestion'] }}.{{ wai_base_domain[item] }}"
 
-{% if item == 'wai-play' %}
-
     [SuperUserOnlyRestrictions]
     super_user_only_restrictions_enabled = 1
 
@@ -236,7 +234,6 @@ data:
     allowed_requests[] = "module=API&method=UsersManager.getTokenAuth"
     allowed_referrers[] = "module=Widgetize&action=iframe&widget=1"    
     
-{% endif %}    
 ---
 kind: ConfigMap
 apiVersion: v1
