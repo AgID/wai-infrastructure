@@ -166,7 +166,7 @@ redis_image_version: 5.0.7
 
 # Matomo Image
 wai_matomo_image: webanalyticsitalia/wai-matomo
-wai_matomo_image_tag: 3.14.1-6
+wai_matomo_image_tag: 3.14.1-7
 
 # Wai NGINX Openresty
 wai_nginx_openresty: webanalyticsitalia/wai-openresty
