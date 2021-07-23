@@ -35,8 +35,8 @@ spec:
       - name: copy
         image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
         imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
-        command: ["sh"]
-        args: ["-c", ". /entrypoint.sh {{ matomo_name }}"]
+        command: ["/entrypoint.sh"]
+        args: ["{{ matomo_name }}"]
         resources:
           limits:
             cpu: 0.1
@@ -44,8 +44,8 @@ spec:
         volumeMounts:
         - mountPath: /html
           name: html
-        - name: php-fpm-config
-          mountPath: /php-fpm-config
+        - name: php-etc
+          mountPath: /php-etc
         - name: {{ matomo_name }}-config
           mountPath: /tmp/config.ini.php.orig
           subPath: config.ini.php
@@ -79,11 +79,11 @@ spec:
         volumeMounts:
         - name: html
           mountPath: /var/www/html/
-        - name: php-fpm-config
-          mountPath: /opt/bitnami/php/etc/php-fpm.d/
+        - name: php-etc
+          mountPath: /opt/bitnami/php/etc/
         - name: {{ matomo_name }}-extra-content
           mountPath: /opt/extra-content
-      - image: nginx:1.15.8
+      - image: {{ wai_nginx_openresty }}:{{ 'latest' if item == 'wai-stag' else wai_nginx_openresty_tag }}
         name: nginx
         resources:
           limits:
@@ -111,6 +111,7 @@ spec:
         - name: {{ matomo_name }}-initc-config
           configMap:
             name: matomo-initc-config
+            defaultMode: 502
         - name: {{ matomo_name }}-nginx-conf
           configMap:
             name: {{ matomo_name }}-nginx-configmap
@@ -119,7 +120,7 @@ spec:
             claimName: matomo-extra-content-pvc
         - name: html
           emptyDir: {}
-        - name: php-fpm-config
+        - name: php-etc
           emptyDir: {}
 ---
 kind: ConfigMap
@@ -129,9 +130,9 @@ metadata:
   namespace: {{ item }}
 data:
   nginx.conf: |-
-    user nginx;
+    # user nginx;
     worker_processes 1;
-    error_log /var/log/nginx/error.log warn;
+    error_log /usr/local/openresty/nginx/logs/error.log warn;
     pid /var/run/nginx.pid;
 
     events {
@@ -150,7 +151,7 @@ data:
         server localhost:9000;
       }
 
-      include /etc/nginx/mime.types;
+      include /usr/local/openresty/nginx/conf/mime.types;
       default_type application/octet-stream;
       gzip on;
       gzip_disable "msie6";
@@ -271,7 +272,7 @@ data:
         }
 {% endif %}
 
-        access_log /var/log/nginx/access.log combined if=$loggable;
+        access_log /usr/local/openresty/nginx/logs/access.log combined if=$loggable;
       }
 
       map $uri $basename {
