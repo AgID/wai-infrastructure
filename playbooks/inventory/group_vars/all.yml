@@ -104,29 +104,59 @@ wai_matomo_resources:
 wai_matomo_php_extra_vars:
   wai-prod:
     matomo-ingestion:
-      'pm.max_children': 8
-    matomo-api: {}
+      php-fpm:
+        pm.max_children: 8
+      php-ini: {}
+    matomo-api:
+      php-fpm: {}
+      php-ini: {}
     matomo:
-      memory_limit: 4096M
-    matomo-worker: {}
+      php-fpm: {}
+      php-ini:
+        memory_limit: 4096M
+    matomo-worker:
+      php-fpm: {}
+      php-ini: {}
     matomo-cron-job: 
-      memory_limit: 7168M
+      php-fpm: {}
+      php-ini:
+        memory_limit: 7168M
   wai-play:
     matomo-ingestion:
-      'pm.max_children': 8
-    matomo-api: {}
-    matomo: {}
-    matomo-worker: {}
+      php-fpm:
+        pm.max_children: 8
+      php-ini: {}
+    matomo-api:
+      php-fpm: {}
+      php-ini: {}
+    matomo:
+      php-fpm: {}
+      php-ini: {}
+    matomo-worker:
+      php-fpm: {}
+      php-ini: {}
     matomo-cron-job:
-      memory_limit: 2048M
+      php-fpm: {}
+      php-ini:
+        memory_limit: 2048M
   wai-stag: 
     matomo-ingestion:
-      'pm.max_children': 4
-    matomo-api: {}
-    matomo: {}
-    matomo-worker: {}
+      php-fpm:
+        pm.max_children: 4
+      php-ini: {}
+    matomo-api:
+      php-fpm: {}
+      php-ini: {}
+    matomo:
+      php-fpm: {}
+      php-ini: {}
+    matomo-worker:
+      php-fpm: {}
+      php-ini: {}
     matomo-cron-job:
-      memory_limit: 256M
+      php-fpm: {}
+      php-ini:
+        memory_limit: 256M      
 
 # Matomo archiving cronjob
 wai_matomo_cronjob:

@@ -243,6 +243,7 @@ metadata:
 data:
   entrypoint.sh: |-
     #!/bin/sh
+    echo "Starting init container for $1"
 
     # Copy matomo content to emptydir
     cp -a /var/www/html/* /html/
@@ -250,17 +251,24 @@ data:
     # Copy config.ini.php.orig to matomo config folder
     cp /tmp/config.ini.php.orig /html/config/config.ini.php
 
-    # Copy php-fpm config files to emptydir
-    cp -a /opt/bitnami/php/etc/php-fpm.d/* /php-fpm-config/
+    # Copy php etc config files to emptydir
+    cp -arv /opt/bitnami/php/etc/* /php-etc/
 
     {% for matomo_image in matomo_image_arr -%}
     {% if wai_matomo_php_extra_vars[item][matomo_image] is defined -%}
-    # Update php-fpm config if needed
-    if [ "$0" = "{{ matomo_image }}" ]; then
+    # Update php-fpm or php-ini config if needed
+    if [ "$1" = "{{ matomo_image }}" ]; then
       echo "Updating {{ matomo_image }}"
-    {% for prop in wai_matomo_php_extra_vars[item][matomo_image] -%}
-      echo "{{ prop }} = {{ wai_matomo_php_extra_vars[item][matomo_image][prop] }}" >> /php-fpm-config/99-matomo.conf
+    {% if wai_matomo_php_extra_vars[item][matomo_image]['php-fpm'] is defined -%} 
+    {% for prop in wai_matomo_php_extra_vars[item][matomo_image]['php-fpm'] -%}
+      echo "{{ prop }} = {{ wai_matomo_php_extra_vars[item][matomo_image]['php-fpm'][prop] }}" >> /php-etc/php-fpm.d/99-matomo.conf
     {% endfor -%}
+    {% endif -%}
+    {% if wai_matomo_php_extra_vars[item][matomo_image]['php-ini'] is defined -%} 
+    {% for prop in wai_matomo_php_extra_vars[item][matomo_image]['php-ini'] -%}
+      echo "{{ prop }} = {{ wai_matomo_php_extra_vars[item][matomo_image]['php-ini'][prop] }}" >> /php-etc/conf.d/99-wai.ini
+    {% endfor -%}
+    {% endif -%}
     fi
     {% endif %}
 
@@ -311,7 +319,7 @@ data:
     MATOMO_GEOIP_EXTERNAL_PATH=/opt/extra-content/geoip/DBIP-City.mmdb
     rm -f $MATOMO_GEOIP_PATH
     chmod +x /var/www/html/console ; cd /var/www/html/
-    echo "memory_limit = {{ wai_matomo_php_extra_vars[item]['matomo-cron-job'].memory_limit }}" >> /opt/bitnami/php/etc/conf.d/wai.ini
+    echo "memory_limit = {{ wai_matomo_php_extra_vars[item]['matomo-cron-job']['php-ini'].memory_limit }}" >> /opt/bitnami/php/etc/conf.d/wai.ini
     ./console core:archive --skip-segments-today
     ./console core:delete-logs-data --dates `date +%Y-%m-%d -d "-75 days"`,`date +%Y-%m-%d -d "-45 days"` -vvv -n
     if [ -f "$MATOMO_GEOIP_PATH" ]; then
