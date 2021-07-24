@@ -34,7 +34,10 @@ data:
     enable_trusted_host_check = 1
     force_ssl = 1
     enable_update_users_email = 0
-    emails_enabled = 0
+    emails_enabled = 1
+    noreply_email_address = "{{ wai_settings[item].mail.from_address }}"
+    noreply_email_name = "{{ wai_settings[item].mail.from_name }}"
+    enable_tracking_failures_notification = 0
     assume_secure_protocol = 1
     enable_update_communication = 0
     enable_auto_update = 0
@@ -47,6 +50,7 @@ data:
     enable_general_settings_admin = 0
     browser_archiving_disabled_enforce = 1
     enable_browser_archiving_triggering = 0
+    archiving_range_force_on_browser_request = 0
     default_day = "previous30"
     default_period = "range"
     default_language = "it"
@@ -54,16 +58,23 @@ data:
     archiving_custom_ranges[] = previous30
     enable_processing_unique_visitors_range = 1
     ;enable_processing_unique_visitors_multiple_sites = 1
+    ;anonymous_user_enable_use_segments_API = 0
     time_before_today_archive_considered_outdated = 2700
     time_before_week_archive_considered_outdated = 2700
     time_before_month_archive_considered_outdated = 2700
     time_before_year_archive_considered_outdated = 2700
     time_before_range_archive_considered_outdated = 2700
-    ;anonymous_user_enable_use_segments_API = 0
     enable_create_realtime_segments = 0
     enable_segment_suggested_values = 0
     adding_segment_requires_access = "admin"
     allow_adding_segments_for_all_websites = 0
+    process_new_segments_from = "segment_creation_time"
+    archiving_ranking_query_row_limit = 0
+
+    [mail]
+    transport = smtp
+    port = {{ wai_settings[item].mail.port or 25 }}
+    host = {{ wai_settings[item].mail.host }}
 
     [Plugins]
     Plugins[] = "CorePluginsAdmin"
@@ -94,10 +105,8 @@ data:
     Plugins[] = "VisitFrequency"
     Plugins[] = "VisitTime"
     Plugins[] = "VisitorInterest"
-    Plugins[] = "RssWidget"
     Plugins[] = "Monolog"
     Plugins[] = "Login"
-    Plugins[] = "TwoFactorAuth"
     Plugins[] = "UsersManager"
     Plugins[] = "SitesManager"
     Plugins[] = "Installation"
@@ -128,6 +137,9 @@ data:
     Plugins[] = "CustomDimensions"
     Plugins[] = "LoginFilterIp"
     Plugins[] = "TrackerHostname"
+    Plugins[] = "SuperUserOnlyRestrictions"
+    Plugins[] = "RestrictAnonymousAccess"
+    Plugins[] = "CustomPdfReport"
 
     [PluginsInstalled]
     PluginsInstalled[] = "Diagnostics"
@@ -164,8 +176,6 @@ data:
     PluginsInstalled[] = "VisitFrequency"
     PluginsInstalled[] = "VisitTime"
     PluginsInstalled[] = "VisitorInterest"
-    PluginsInstalled[] = "RssWidget"
-    PluginsInstalled[] = "TwoFactorAuth"
     PluginsInstalled[] = "CoreUpdater"
     PluginsInstalled[] = "CoreConsole"
     PluginsInstalled[] = "ScheduledReports"
@@ -192,6 +202,9 @@ data:
     PluginsInstalled[] = "CustomDimensions"
     PluginsInstalled[] = "LoginFilterIp"
     PluginsInstalled[] = "TrackerHostname"
+    PluginsInstalled[] = "SuperUserOnlyRestrictions"
+    PluginsInstalled[] = "RestrictAnonymousAccess"
+    PluginsInstalled[] = "CustomPdfReport"
 
     [WAIMatomoTheme]
     waiUrl = "https://{{ wai_base_domain[item] }}"
@@ -232,8 +245,8 @@ data:
     allowed_requests[] = "module=Widgetize"
     allowed_requests[] = "module=API&method=API.getMatomoVersion"
     allowed_requests[] = "module=API&method=UsersManager.getTokenAuth"
-    allowed_referrers[] = "module=Widgetize&action=iframe&widget=1"    
-    
+    allowed_referrers[] = "module=Widgetize&action=iframe&widget=1"
+
 ---
 kind: ConfigMap
 apiVersion: v1
