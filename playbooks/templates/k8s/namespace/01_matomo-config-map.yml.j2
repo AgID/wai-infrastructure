@@ -1,4 +1,5 @@
 # {{ ansible_managed }}
+{% set matomo_image_arr = ["matomo", "matomo-api", "matomo-ingestion"] %}
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -33,7 +34,10 @@ data:
     enable_trusted_host_check = 1
     force_ssl = 1
     enable_update_users_email = 0
-    emails_enabled = 0
+    emails_enabled = 1
+    noreply_email_address = "{{ wai_settings[item].mail.from_address }}"
+    noreply_email_name = "{{ wai_settings[item].mail.from_name }}"
+    enable_tracking_failures_notification = 0
     assume_secure_protocol = 1
     enable_update_communication = 0
     enable_auto_update = 0
@@ -46,6 +50,7 @@ data:
     enable_general_settings_admin = 0
     browser_archiving_disabled_enforce = 1
     enable_browser_archiving_triggering = 0
+    archiving_range_force_on_browser_request = 0
     default_day = "previous30"
     default_period = "range"
     default_language = "it"
@@ -53,16 +58,23 @@ data:
     archiving_custom_ranges[] = previous30
     enable_processing_unique_visitors_range = 1
     ;enable_processing_unique_visitors_multiple_sites = 1
+    ;anonymous_user_enable_use_segments_API = 0
     time_before_today_archive_considered_outdated = 2700
     time_before_week_archive_considered_outdated = 2700
     time_before_month_archive_considered_outdated = 2700
     time_before_year_archive_considered_outdated = 2700
     time_before_range_archive_considered_outdated = 2700
-    ;anonymous_user_enable_use_segments_API = 0
     enable_create_realtime_segments = 0
     enable_segment_suggested_values = 0
     adding_segment_requires_access = "admin"
     allow_adding_segments_for_all_websites = 0
+    process_new_segments_from = "segment_creation_time"
+    archiving_ranking_query_row_limit = 0
+
+    [mail]
+    transport = smtp
+    port = {{ wai_settings[item].mail.port or 25 }}
+    host = {{ wai_settings[item].mail.host }}
 
     [Plugins]
     Plugins[] = "CorePluginsAdmin"
@@ -93,10 +105,8 @@ data:
     Plugins[] = "VisitFrequency"
     Plugins[] = "VisitTime"
     Plugins[] = "VisitorInterest"
-    Plugins[] = "RssWidget"
     Plugins[] = "Monolog"
     Plugins[] = "Login"
-    Plugins[] = "TwoFactorAuth"
     Plugins[] = "UsersManager"
     Plugins[] = "SitesManager"
     Plugins[] = "Installation"
@@ -127,6 +137,9 @@ data:
     Plugins[] = "CustomDimensions"
     Plugins[] = "LoginFilterIp"
     Plugins[] = "TrackerHostname"
+    Plugins[] = "SuperUserOnlyRestrictions"
+    Plugins[] = "RestrictAnonymousAccess"
+    Plugins[] = "CustomPdfReport"
 
     [PluginsInstalled]
     PluginsInstalled[] = "Diagnostics"
@@ -163,8 +176,6 @@ data:
     PluginsInstalled[] = "VisitFrequency"
     PluginsInstalled[] = "VisitTime"
     PluginsInstalled[] = "VisitorInterest"
-    PluginsInstalled[] = "RssWidget"
-    PluginsInstalled[] = "TwoFactorAuth"
     PluginsInstalled[] = "CoreUpdater"
     PluginsInstalled[] = "CoreConsole"
     PluginsInstalled[] = "ScheduledReports"
@@ -191,6 +202,9 @@ data:
     PluginsInstalled[] = "CustomDimensions"
     PluginsInstalled[] = "LoginFilterIp"
     PluginsInstalled[] = "TrackerHostname"
+    PluginsInstalled[] = "SuperUserOnlyRestrictions"
+    PluginsInstalled[] = "RestrictAnonymousAccess"
+    PluginsInstalled[] = "CustomPdfReport"
 
     [WAIMatomoTheme]
     waiUrl = "https://{{ wai_base_domain[item] }}"
@@ -198,7 +212,7 @@ data:
     [QueuedTracking]
     backend = redis
     useSentinelBackend = 0
-    redisHost = ingestion-redis
+    redisHost = ingestion-redis-master
     redisPort = 6379
     redisDatabase = 0
     redisPassword = {{ redis_password.ingestion_redis_master[item] }}
@@ -223,6 +237,16 @@ data:
 
     [TrackerHostname]
     hostname = "{{ wai_hostname['ingestion'] }}.{{ wai_base_domain[item] }}"
+
+    [SuperUserOnlyRestrictions]
+    super_user_only_restrictions_enabled = 1
+
+    [RestrictAnonymousAccess]
+    allowed_requests[] = "module=Widgetize"
+    allowed_requests[] = "module=API&method=API.getMatomoVersion"
+    allowed_requests[] = "module=API&method=UsersManager.getTokenAuth"
+    allowed_referrers[] = "module=Widgetize&action=iframe&widget=1"
+
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -232,6 +256,7 @@ metadata:
 data:
   entrypoint.sh: |-
     #!/bin/sh
+    echo "Starting init container for $1"
 
     # Copy matomo content to emptydir
     cp -a /var/www/html/* /html/
@@ -239,13 +264,28 @@ data:
     # Copy config.ini.php.orig to matomo config folder
     cp /tmp/config.ini.php.orig /html/config/config.ini.php
 
-    # Copy php-fpm config files to emptydir
-    cp -a /opt/bitnami/php/etc/php-fpm.d/* /php-fpm-config/
+    # Copy php etc config files to emptydir
+    cp -arv /opt/bitnami/php/etc/* /php-etc/
 
-    # Update php-fpm config if needed
-    if [ "$0" = "matomo-ingestion" ]; then
-      echo "pm.max_children = 8" >> /php-fpm-config/99-matomo.conf
+    {% for matomo_image in matomo_image_arr -%}
+    {% if wai_matomo_php_extra_vars[item][matomo_image] is defined -%}
+    # Update php-fpm or php-ini config if needed
+    if [ "$1" = "{{ matomo_image }}" ]; then
+      echo "Updating {{ matomo_image }}"
+    {% if wai_matomo_php_extra_vars[item][matomo_image]['php-fpm'] is defined -%} 
+    {% for prop in wai_matomo_php_extra_vars[item][matomo_image]['php-fpm'] -%}
+      echo "{{ prop }} = {{ wai_matomo_php_extra_vars[item][matomo_image]['php-fpm'][prop] }}" >> /php-etc/php-fpm.d/99-matomo.conf
+    {% endfor -%}
+    {% endif -%}
+    {% if wai_matomo_php_extra_vars[item][matomo_image]['php-ini'] is defined -%} 
+    {% for prop in wai_matomo_php_extra_vars[item][matomo_image]['php-ini'] -%}
+      echo "{{ prop }} = {{ wai_matomo_php_extra_vars[item][matomo_image]['php-ini'][prop] }}" >> /php-etc/conf.d/99-wai.ini
+    {% endfor -%}
+    {% endif -%}
     fi
+    {% endif %}
+
+    {% endfor %}
 
     # Create a soft link to geoip file even if it does not exist because of it is not in the image. The cron archive job will create this file.
     MATOMO_GEOIP_PATH=/html/misc/DBIP-City.mmdb
@@ -292,9 +332,9 @@ data:
     MATOMO_GEOIP_EXTERNAL_PATH=/opt/extra-content/geoip/DBIP-City.mmdb
     rm -f $MATOMO_GEOIP_PATH
     chmod +x /var/www/html/console ; cd /var/www/html/
-    echo "memory_limit = {{ wai_matomo_cronjob[item].resources.limits.memory }}M" >> /opt/bitnami/php/etc/conf.d/wai.ini
+    echo "memory_limit = {{ wai_matomo_php_extra_vars[item]['matomo-cron-job']['php-ini'].memory_limit }}" >> /opt/bitnami/php/etc/conf.d/wai.ini
+    ./console core:archive --skip-segments-today
     ./console core:delete-logs-data --dates `date +%Y-%m-%d -d "-75 days"`,`date +%Y-%m-%d -d "-45 days"` -vvv -n
-    ./console core:archive
     if [ -f "$MATOMO_GEOIP_PATH" ]; then
       cp -f $MATOMO_GEOIP_PATH $MATOMO_GEOIP_EXTERNAL_PATH
     fi

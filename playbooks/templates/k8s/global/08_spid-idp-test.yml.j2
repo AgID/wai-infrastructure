@@ -67,10 +67,10 @@ data:
 {% endfor %}
 
   idp.key: |-
-{{ test_env_idp.key | indent( width=4) }}
+    {{ test_env_idp.key | indent( width=4) }}
 
   idp.crt: |-
-{{ test_env_idp.crt | indent( width=4) }}
+    {{ test_env_idp.crt | indent( width=4) }}
 
 {% for ns in wai_k8s_namespaces %}
   sp_{{ ns }}_meta.xml: |-

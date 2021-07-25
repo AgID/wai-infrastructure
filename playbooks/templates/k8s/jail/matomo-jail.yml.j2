@@ -35,8 +35,8 @@ spec:
       - name: copy
         image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
         imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
-        command: ["sh"]
-        args: ["-c", ". /entrypoint.sh {{ matomo_name }}"]
+        command: ["/entrypoint.sh"]
+        args: ["{{ matomo_name }}"]
         resources:
           limits:
             cpu: 0.1
@@ -44,8 +44,8 @@ spec:
         volumeMounts:
         - mountPath: /html
           name: html
-        - name: php-fpm-config
-          mountPath: /php-fpm-config
+        - name: php-etc
+          mountPath: /php-etc
         - name: {{ matomo_name }}-config
           mountPath: /tmp/config.ini.php.orig
           subPath: config.ini.php
@@ -59,9 +59,13 @@ spec:
         imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
         name: {{ matomo_name }}
         resources:
-          limits:
-            cpu: "0.75"
-            memory: "250Mi"
+        {%- if 'limits' in wai_matomo_resources[item][matomo_name] %}
+
+          {{ wai_matomo_resources[item][matomo_name] | to_nice_yaml(indent=2) | indent(width=10) }}
+        {%- else %}
+        
+          {{ wai_matomo_resources.default  | to_nice_yaml(indent=2) | indent(width=10) }}
+        {%- endif %}
         ports:
         - containerPort: 9000
           name: fpm-port
@@ -75,11 +79,11 @@ spec:
         volumeMounts:
         - name: html
           mountPath: /var/www/html/
-        - name: php-fpm-config
-          mountPath: /opt/bitnami/php/etc/php-fpm.d/
+        - name: php-etc
+          mountPath: /opt/bitnami/php/etc/
         - name: {{ matomo_name }}-extra-content
           mountPath: /opt/extra-content
-      - image: nginx:1.15.8
+      - image: {{ wai_nginx_openresty }}:{{ 'latest' if item == 'wai-stag' else wai_nginx_openresty_tag }}
         name: nginx
         resources:
           limits:
@@ -107,6 +111,7 @@ spec:
         - name: {{ matomo_name }}-initc-config
           configMap:
             name: matomo-initc-config
+            defaultMode: 502
         - name: {{ matomo_name }}-nginx-conf
           configMap:
             name: {{ matomo_name }}-nginx-configmap
@@ -115,7 +120,7 @@ spec:
             claimName: matomo-extra-content-pvc
         - name: html
           emptyDir: {}
-        - name: php-fpm-config
+        - name: php-etc
           emptyDir: {}
 ---
 kind: ConfigMap
@@ -125,9 +130,9 @@ metadata:
   namespace: {{ item }}
 data:
   nginx.conf: |-
-    user nginx;
+    # user nginx;
     worker_processes 1;
-    error_log /var/log/nginx/error.log warn;
+    error_log /usr/local/openresty/nginx/logs/error.log warn;
     pid /var/run/nginx.pid;
 
     events {
@@ -146,7 +151,7 @@ data:
         server localhost:9000;
       }
 
-      include /etc/nginx/mime.types;
+      include /usr/local/openresty/nginx/conf/mime.types;
       default_type application/octet-stream;
       gzip on;
       gzip_disable "msie6";
@@ -158,7 +163,6 @@ data:
         add_header X-Frame-Options DENY;
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
-        add_header Referrer-Policy origin;
 {% if matomo_name != 'matomo-api' %}        
         add_header Content-Security-Policy "frame-ancestors https://{{ wai_base_domain[item] }}";
 {% endif %}
@@ -209,6 +213,8 @@ data:
           fastcgi_param  HTTP_X_FORWARDED_URI '{{ wai_portal_matomo_sub_path }}';
           fastcgi_intercept_errors on;
           fastcgi_pass backend;
+          fastcgi_hide_header Referrer-Policy;
+          add_header Referrer-Policy $actual_referrer_policy;
         }
 
 {% if matomo_nginx_jailed is defined and not matomo_nginx_jailed %}
@@ -266,7 +272,7 @@ data:
         }
 {% endif %}
 
-        access_log /var/log/nginx/access.log combined if=$loggable;
+        access_log /usr/local/openresty/nginx/logs/access.log combined if=$loggable;
       }
 
       map $uri $basename {
@@ -279,6 +285,12 @@ data:
         piwik.js 0;
         default 1;
       }
+
+      map $upstream_http_referrer_policy $actual_referrer_policy {
+        "~." $upstream_http_referrer_policy;
+        default "origin";
+      }
+
     }
 ---
 apiVersion: v1
@@ -304,6 +316,7 @@ metadata:
     kubernetes.io/ingress.class: nginx-{{ item }}
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
 {% if matomo_name == 'matomo-api' %}
+    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Backend matomo;
 {% endif %}    
@@ -322,8 +335,37 @@ spec:
     - host: {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
       http:
         paths:
-          - path: /
+          - path: {{ '/widgets' if matomo_name == 'matomo-api' else '/' }}
             backend:
               serviceName: {{ 'cache-service' if matomo_name == 'matomo-api' else matomo_name + '-service' }}
               servicePort: 80
+---
+{% if matomo_name == 'matomo-api' %}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ matomo_name }}-kong
+  namespace: {{ item }}
+  annotations:
+    kubernetes.io/ingress.class: nginx-{{ item }}
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer-{{ item }}
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts:
+    - {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
+    secretName: ingress-acme-tls
+  rules:
+    - host: {{ wai_hostname[matomo_ingress_fqdn_index] }}.{{ wai_base_domain[item] }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kong-service
+              servicePort: 8000
+          - path: /matomo
+            backend:
+              serviceName: kong-service
+              servicePort: 8000
+{% endif %}
 {% endif %}

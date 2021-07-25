@@ -380,6 +380,38 @@
       with_items:
         - "{{ wai_k8s_namespaces }}"
 
+    # Install postgres
+    - name: K8S Helm .:. Install Kong Postgres
+      kubernetes.core.helm:
+        release_namespace: "{{ item }}"
+        create_namespace: true
+        name: kong-postgres
+        chart_ref: bitnami/postgresql
+        release_state: present
+        values:
+          image:
+            tag: 11
+          fullnameOverride: kong-pgsql
+          persistence:
+            storageClass: storage-heketi
+          postgresqlPostgresPassword: "{{ kong[item].pgsql.postgres_password }}"
+          postgresqlUsername: "{{ kong[item].pgsql.user }}"
+          postgresqlPassword: "{{ kong[item].pgsql.password }}"
+          postgresqlDatabase: kong
+          resources:
+            requests:
+              cpu: "1"
+              memory: 1G
+            limits:
+              cpu: "1"
+              memory: 1G
+
+          metrics:
+            serviceMonitor:
+              enabled: true
+      with_items:
+        - "{{ wai_k8s_namespaces }}"
+
     # At the end.
     - name: K8S Helm .:. Prepare cluster issuer
       template:
