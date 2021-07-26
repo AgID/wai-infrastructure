@@ -391,6 +391,8 @@ spec:
           subPath: env
         - name: infrastructure-ca-conf
           mountPath: /usr/local/share/ca-certificates/
+        - name: portal-storage
+          mountPath: /var/www/html/storage/persistent
       - image: nginx:1.15.8
         name: nginx
         resources:
