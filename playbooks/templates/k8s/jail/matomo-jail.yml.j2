@@ -63,7 +63,7 @@ spec:
 
           {{ wai_matomo_resources[item][matomo_name] | to_nice_yaml(indent=2) | indent(width=10) }}
         {%- else %}
-        
+
           {{ wai_matomo_resources.default  | to_nice_yaml(indent=2) | indent(width=10) }}
         {%- endif %}
         ports:
@@ -319,7 +319,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Backend matomo;
-{% endif %}    
+{% endif %}
     nginx.ingress.kubernetes.io/server-snippet: |
       add_header Allow "GET, POST" always;
 

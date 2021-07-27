@@ -42,7 +42,7 @@ data:
       } else {
         set req.backend_hint = portal;
       }
-      
+
       if (req.method == "BAN") {
         if (!client.ip ~ allowed_purge_net) {
           return (synth(405, "Not allowed"));

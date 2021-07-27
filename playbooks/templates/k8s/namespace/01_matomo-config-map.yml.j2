@@ -283,9 +283,10 @@ data:
     {% endfor -%}
     {% endif -%}
     fi
-    {% endif %}
+    {%- endif %}
 
-    {% endfor %}
+
+    {% endfor -%}
 
     # Create a soft link to geoip file even if it does not exist because of it is not in the image. The cron archive job will create this file.
     MATOMO_GEOIP_PATH=/html/misc/DBIP-City.mmdb
