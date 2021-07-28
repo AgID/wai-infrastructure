@@ -179,7 +179,7 @@ wai_ipa_redisearch_image_tag: 5.0.12-stable
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
-wai_portal_image_tag: 1.6.5-beta
+wai_portal_image_tag: 1.6.6-beta
 wai_portal_matomo_sub_path: /matomo
 wai_portal_environments:
   wai-prod: production
