@@ -10,8 +10,8 @@ jobs:
         - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
         - chmod +x docker-compose
         - sudo mv docker-compose /usr/local/bin
-        - sudo ln -s /home/travis/.nvm/versions/node/$/node -v)/bin/newman /usr/local/bin/newman
         - npm install -g newman
+        - sudo ln -s /home/travis/.nvm/versions/node/$(node -v)/bin/newman /usr/local/bin/newman
       script:
         - cd images/wai-openresty/tests
         - ./test.sh
