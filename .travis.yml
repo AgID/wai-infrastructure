@@ -14,6 +14,7 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
+  - sudo apt-get install -y npm
 
 install:
   - curl -sLo terraform.zip https://releases.hashicorp.com/terraform/0.12.20/terraform_0.12.20_linux_amd64.zip
@@ -27,6 +28,7 @@ install:
   - ansible-galaxy install -r playbooks/requirements.yml
   - ansible-galaxy collection install -r playbooks/requirements-collection.yml
   - git clone --branch v2.12.0 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
+  - npm install newman
 
 script:
   - cd images/wai-openresty/tests
