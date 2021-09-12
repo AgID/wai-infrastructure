@@ -1,6 +1,49 @@
 jobs:
   include:
-    - stage: openresty
-      script: ~/build/AgID/wai-infrastructure/travis/openresty.yml
-    - stage: default
-      scritpt: ~/build/AgID/wai-infrastructure/travis/default.yml
+    - language: node_js
+      node_js:
+        - 12
+      env:
+        - DOCKER_COMPOSE_VERSION=1.29.2
+      install:
+        - sudo rm /usr/local/bin/docker-compose
+        - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+        - chmod +x docker-compose
+        - sudo mv docker-compose /usr/local/bin
+        - npm install -g newman
+      script:
+        - cd images/wai-openresty/tests
+        - ./test.sh
+
+    - language: python
+      python:
+        - "3.8"
+      addons:
+        mariadb: "10.4"
+      before_install:
+        - sudo mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
+      install:
+        - curl -sLo terraform.zip https://releases.hashicorp.com/terraform/0.12.20/terraform_0.12.20_linux_amd64.zip
+        - unzip terraform.zip
+        - sudo mv terraform /usr/local/bin
+        - rm terraform.zip
+        - curl -sLo kubeval.tar.gz https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+        - tar xf kubeval.tar.gz
+        - sudo mv kubeval /usr/local/bin
+        - pip install -r requirements.txt
+        - ansible-galaxy install -r playbooks/requirements.yml
+        - ansible-galaxy collection install -r playbooks/requirements-collection.yml
+        - git clone --branch v2.12.0 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
+      script:
+        - ssh-keygen -t rsa -b 4096 -N '' -f ssh_wai_key
+        - pwd
+        - cd infrastructure
+        - terraform init -backend=false -no-color
+        - terraform validate -no-color
+        - cd ..
+        - ansible-playbook playbooks/wai.yml -i playbooks/inventory/30-localhost --syntax-check
+        - ansible-playbook playbooks/wai.yml -i playbooks/inventory/30-localhost -t templates
+        - kubeval playbooks/compiled-templates/k8s/*.yml
+        - kubeval playbooks/compiled-templates/k8s/**/*.yml
+        - cat playbooks/compiled-templates/db/*.sql | sudo mysql test -v
+        - cat playbooks/compiled-templates/db/**/*.sql | sudo mysql test -v
