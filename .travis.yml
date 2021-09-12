@@ -10,16 +10,16 @@ addons:
 
 before_install:
   - sudo mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
+  - curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - 
+  - sudo apt-get install -y npm 
+  - node -v
+  - npm -v
 
 install:
   - sudo rm /usr/local/bin/docker-compose
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash - 
-  - sudo apt-get install -y npm 
-  - node -v
-  - npm -v
   - npm install -g newman
   - curl -sLo terraform.zip https://releases.hashicorp.com/terraform/0.12.20/terraform_0.12.20_linux_amd64.zip
   - unzip terraform.zip
