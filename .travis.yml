@@ -2,11 +2,18 @@ language: python
 python:
   - "3.8"
 
+env:
+  - DOCKER_COMPOSE_VERSION=1.29.2
+
 addons:
   mariadb: "10.4"
 
 before_install:
   - sudo mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 
 install:
   - curl -sLo terraform.zip https://releases.hashicorp.com/terraform/0.12.20/terraform_0.12.20_linux_amd64.zip
@@ -22,6 +29,9 @@ install:
   - git clone --branch v2.12.0 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
 
 script:
+  - cd images/wai-openresty/tests
+  - ./test.sh
+  - cd ../../..
   - ssh-keygen -t rsa -b 4096 -N '' -f ssh_wai_key
   - cd infrastructure
   - terraform init -backend=false -no-color
