@@ -1,6 +1,6 @@
 jobs:
   include:
     - stage: openresty
-      script: ./trevis/openresty.yml
+      script: ./AgID/wai-infrastructure/travis/openresty.yml
     - stage: default
-      scritpt: ./trevis/default.yml
+      scritpt: ./AgID/wai-infrastructure/travis/default.yml
