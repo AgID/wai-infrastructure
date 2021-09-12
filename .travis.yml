@@ -29,7 +29,8 @@ install:
   - ansible-galaxy collection install -r playbooks/requirements-collection.yml
   - git clone --branch v2.12.0 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
   - npm install -g newman
-
+  - find /
+  
 script:
   - cd images/wai-openresty/tests
   - ./test.sh
