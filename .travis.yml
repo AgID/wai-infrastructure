@@ -15,7 +15,6 @@ jobs:
       script:
         - cd images/wai-openresty/tests
         - ./test.sh
-        - newman run --env-var url=https://api.webanalytics.italia.it/widgets/index.php --env-var "default_csp=https://api.webanalytics.italia.it https://webanalytics.italia.it" WAI-Openresty.postman_collection.json
 
     - language: python
       python:
