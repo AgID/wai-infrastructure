@@ -14,8 +14,9 @@
 						"exec": [
 							"pm.test(\"Content-Security-Policy is present\", function () {",
 							"    pm.response.to.have.header(\"Content-Security-Policy\");",
-							"    pm.expect(pm.response.headers.get(\"Content-Security-Policy\")).to.eq(\"frame-ancestors https://default.csp\");",
-							"});"
+							"    pm.expect(pm.response.headers.get(\"Content-Security-Policy\")).to.eq(\"frame-ancestors \" + pm.variables.get(\"default_csp\"));",
+							"});",
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -144,7 +145,7 @@
 							"",
 							"pm.test(\"Content-Security-Policy is present\", function () {",
 							"    pm.response.to.have.header(\"Content-Security-Policy\");",
-							"    pm.expect(pm.response.headers.get(\"Content-Security-Policy\")).to.eq(\"frame-ancestors https://default.csp https://www.site-one.it https://site-two.it https://site-three.it\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Security-Policy\")).to.eq(\"frame-ancestors \" + pm.variables.get(\"default_csp\") + \" https://www.site-one.it https://site-two.it https://site-three.it\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -200,7 +201,7 @@
 							"",
 							"pm.test(\"Content-Security-Policy is present\", function () {",
 							"    pm.response.to.have.header(\"Content-Security-Policy\");",
-							"    pm.expect(pm.response.headers.get(\"Content-Security-Policy\")).to.eq(\"frame-ancestors https://default.csp https://www.site-one.it https://site-two.it https://site-three.it\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Security-Policy\")).to.eq(\"frame-ancestors \" + pm.variables.get(\"default_csp\") + \" https://www.site-one.it https://site-two.it https://site-three.it\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -256,7 +257,7 @@
 							"",
 							"pm.test(\"Content-Security-Policy is present\", function () {",
 							"    pm.response.to.have.header(\"Content-Security-Policy\");",
-							"    pm.expect(pm.response.headers.get(\"Content-Security-Policy\")).to.eq(\"frame-ancestors https://default.csp https://www.site-one.it https://site-two.it https://site-three.it\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Security-Policy\")).to.eq(\"frame-ancestors \" + pm.variables.get(\"default_csp\") + \" https://www.site-one.it https://site-two.it https://site-three.it\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -324,6 +325,10 @@
 		{
 			"key": "url",
 			"value": "http://localhost:8888"
+		},
+		{
+			"key": "default_csp",
+			"value": "https://default.csp"
 		}
 	]
 }
