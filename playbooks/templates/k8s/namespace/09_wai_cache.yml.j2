@@ -22,6 +22,12 @@ data:
         .first_byte_timeout = 150s;
     }
 
+    backend matomo_api {
+        .host = "matomo-api-service";
+        .port = "80";
+        .first_byte_timeout = 150s;
+    }
+
     backend kong {
         .host = "kong-service";
         .port = "8001";
@@ -37,6 +43,8 @@ data:
 
       if (req.http.X-Backend == "matomo") {
         set req.backend_hint = matomo;
+      } elseif (req.http.X-Backend == "matomo-api") {
+        set req.backend_hint = matomo_api;
       } elseif (req.http.X-Backend == "kong") {
         set req.backend_hint = kong;
       } else {
