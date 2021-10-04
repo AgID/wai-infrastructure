@@ -17,11 +17,15 @@ spec:
           - name: portal
             image: {{ wai_portal_image }}:{{ 'latest' if item == 'wai-stag' else wai_portal_image_tag }}
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
-            command: ["sh", "-c", "chmod +x /var/www/html/artisan ;  /var/www/html/artisan app:reset-environment"]
+            command: ["sh", "-c", "chmod +x /var/www/html/artisan ; /var/www/html/artisan app:reset-environment"]
             resources:
               limits:
                 cpu: "0.50"
                 memory: "256Mi"
+            volumeMounts:
+            - name: portal-env-conf
+              mountPath: /var/www/html/.env
+              subPath: env
           - name: matomo
             env:
             - name: MATOMO_VERSION
@@ -43,6 +47,9 @@ spec:
               subPath: config.ini.php
           restartPolicy: Never
           volumes:
+            - name: portal-env-conf
+              configMap:
+                name: portal-env-configmap
             - name: reset-env-config
               configMap:
                 name: reset-env-config
