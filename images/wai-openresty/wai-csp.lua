@@ -13,6 +13,21 @@ local function exit_401()
   ngx.exit(ngx.HTTP_OK)
 end
 
+local function has_value (arg, val)
+  if arg == nil or val == ngx.null then
+    return false
+end
+if type(arg) == "table" then
+  for index, value in ipairs(arg) do
+      if value == val then
+          return true
+      end
+  end
+  return false
+end
+return type(arg) == "string" and arg == val
+end
+
 local waicsp = {
   _VERSION = '0.0.1',
 }
@@ -22,7 +37,7 @@ waicsp.__index = waicsp
 function waicsp.evaluate(opts) 
   local args, err = ngx.req.get_uri_args()
   local cspValue = opts.defaultCsp
-  if (err ~= "truncated" and args["module"] == "Widgetize" and args["action"] == "iframe" and args["widget"] == "1" and args["idSite"] ~= nil ) then
+  if (err ~= "truncated" and has_value(args["module"], "Widgetize") and has_value(args["action"], "iframe") and has_value(args["widget"], "1") and args["idSite"] ~= nil and type(args["idSite"]) == "string") then
     local siteId = args["idSite"]
     ngx_log(ngx_NOTICE, "Parameters are ok. CSP procedure activated")
     local rc = require("resty.redis.connector").new()

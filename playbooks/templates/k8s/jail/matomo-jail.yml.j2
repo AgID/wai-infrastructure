@@ -269,10 +269,13 @@ data:
           add_header Cache-Control "public";
         }
 
+{% if matomo_name != 'matomo-api' %}
         location ~* / {
           deny all;
           return 404;
         }
+{% endif %}
+
 {% endif %}
 
         access_log /usr/local/openresty/nginx/logs/access.log combined if=$loggable;
