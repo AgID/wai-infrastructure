@@ -162,10 +162,13 @@ wai_matomo_php_extra_vars:
 wai_matomo_cronjob:
   wai-prod:
     schedule: "00 01 * * *"
+    schedule_segments: "00 14 * * 0"
   wai-play:
     schedule: "00 05 * * *"
+    schedule_segments: "00 14 * * 0"
   wai-stag:
     schedule: "00 07 * * *"
+    schedule_segments: "00 14 * * 0"
 
 # Resource Quota
 wai_k8s_resource_quota:
