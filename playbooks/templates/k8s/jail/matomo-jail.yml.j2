@@ -341,9 +341,9 @@ metadata:
       proxy_set_header X-Backend matomo-api;
 {% endif %}
     nginx.ingress.kubernetes.io/server-snippet: |
-      add_header Allow "GET, POST" always;
+      add_header Allow "GET, POST,OPTIONS" always;
 
-      if ($request_method !~ ^(GET|POST)$) {
+      if ($request_method !~ ^(GET|POST|OPTIONS)$) {
         return 405;
       }
 spec:
