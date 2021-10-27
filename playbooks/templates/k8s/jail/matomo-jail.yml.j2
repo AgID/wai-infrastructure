@@ -218,6 +218,20 @@ data:
           fastcgi_pass backend;
           fastcgi_hide_header Referrer-Policy;
           add_header Referrer-Policy $actual_referrer_policy;
+
+{% if matomo_name == 'matomo-api' %}
+
+          fastcgi_hide_header Access-Control-Allow-Origin;
+          add_header 'Access-Control-Allow-Origin' '*' always;
+
+          fastcgi_hide_header Access-Control-Allow-Methods;
+          add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+
+          fastcgi_hide_header Access-Control-Allow-Headers;
+          add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-CSRF-TOKEN' always;
+
+{% endif %}
+
         }
 
 {% if matomo_nginx_jailed is defined and not matomo_nginx_jailed %}
@@ -327,9 +341,9 @@ metadata:
       proxy_set_header X-Backend matomo-api;
 {% endif %}
     nginx.ingress.kubernetes.io/server-snippet: |
-      add_header Allow "GET, POST" always;
+      add_header Allow "GET, POST,OPTIONS" always;
 
-      if ($request_method !~ ^(GET|POST)$) {
+      if ($request_method !~ ^(GET|POST|OPTIONS)$) {
         return 405;
       }
 spec:

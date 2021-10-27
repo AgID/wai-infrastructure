@@ -38,6 +38,11 @@ function waicsp.evaluate(opts)
   local args, err = ngx.req.get_uri_args()
   local cspValue = opts.defaultCsp
   if (err ~= "truncated" and has_value(args["module"], "Widgetize") and has_value(args["action"], "iframe") and has_value(args["widget"], "1") and args["idSite"] ~= nil and type(args["idSite"]) == "string") then
+    local referer = ngx.req.get_headers()["referer"]
+    if(referer == ngx.null or referer == nil) then
+      exit_401()
+    end
+    ngx_log(ngx_NOTICE, "Referer is " .. referer)
     local siteId = args["idSite"]
     ngx_log(ngx_NOTICE, "Parameters are ok. CSP procedure activated")
     local rc = require("resty.redis.connector").new()
@@ -54,13 +59,8 @@ function waicsp.evaluate(opts)
       cspValue = cspValue .. " " .. siteUrl
     end
     redis:close()
-    local referer = ngx.req.get_headers()["referer"]
     local match = false
-    if(referer == ngx.null or referer == nil) then
-      exit_401()
-    end
     ngx_log(ngx_NOTICE, "Redis data is " .. cspValue)
-    ngx_log(ngx_NOTICE, "Referer is " .. referer)
     for host in string.gmatch(cspValue, '([^%s]+)') do
       ngx_log(ngx_NOTICE, "Testing '" .. referer .. "' on '" .. host .. "'")
       if ( referer:find(host, 1, true) == 1 ) then
