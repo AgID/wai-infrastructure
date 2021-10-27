@@ -128,6 +128,7 @@ data:
     BROADCAST_DRIVER=log
     CACHE_DRIVER=redis
     CACHE_CONNECTION=cache
+    CSP_CONNECTION=csp
     SESSION_DRIVER=redis
     SESSION_LIFETIME=120
     SESSION_CONNECTION=sessions
@@ -156,6 +157,7 @@ data:
     REDIS_CACHE_DB={{ redis_database.application_redis_master[item].cache }}
     REDIS_SESSIONS_DB={{ redis_database.application_redis_master[item].session }}
     REDIS_QUEUE_DB={{ redis_database.application_redis_master[item].queue }}
+    REDIS_CSP_DB={{ redis_database.application_redis_master[item].csp }}
 
 {% if wai_settings[item].environment.reset.date.day is defined %}
     RESET_PUBLIC_PLAYGROUND_DAY_VERBOSE={{ wai_settings[item].environment.reset.date.verbose }}
