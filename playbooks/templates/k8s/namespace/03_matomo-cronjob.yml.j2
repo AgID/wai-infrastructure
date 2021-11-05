@@ -17,9 +17,6 @@ spec:
             image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
             command: ["sh", "-c", ". /entrypoint.sh"]
-            env:
-            - name: ARCHIVE_OPTS
-              value: "--skip-all-segments"
             resources:
               limits:
                 cpu: 0.1
@@ -42,6 +39,9 @@ spec:
             image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
             command: ["sh", "-c", ". /entrypoint.sh"]
+            env:
+            - name: ARCHIVE_OPTS
+              value: "--skip-all-segments"
             resources:
             {%- if 'limits' in wai_matomo_resources[item]['matomo-cron-job'] %}
 
@@ -99,9 +99,6 @@ spec:
             image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
             command: ["sh", "-c", ". /entrypoint.sh"]
-            env:
-            - name: ARCHIVE_OPTS
-              value: "--skip-segments-today"
             resources:
               limits:
                 cpu: 0.1
@@ -124,6 +121,9 @@ spec:
             image: {{ wai_matomo_image }}:{{ 'latest' if item == 'wai-stag' else wai_matomo_image_tag }}
             imagePullPolicy: {{ 'Always' if item == 'wai-stag' else 'IfNotPresent' }}
             command: ["sh", "-c", ". /entrypoint.sh"]
+            env:
+            - name: ARCHIVE_OPTS
+              value: "--skip-segments-today"
             resources:
             {%- if 'limits' in wai_matomo_resources[item]['matomo-cron-job'] %}
 
