@@ -87,7 +87,7 @@ wai_matomo_resources:
     matomo-api: {}
     matomo: { limits: { cpu: 750m, memory: 4Gi }, requests: { cpu: 750m, memory: 4Gi } } 
     matomo-worker: { limits: { cpu: 500m, memory: 512Mi }, requests: { cpu: 500m, memory: 512Mi } } 
-    matomo-cron-job: { limits: { cpu: 4, memory: 8Gi }, requests: { cpu: 4, memory: 4Gi } } 
+    matomo-cron-job: { limits: { cpu: 4, memory: 10Gi }, requests: { cpu: 4, memory: 4Gi } } 
   wai-play:
     matomo-ingestion: {}
     matomo-api: {}
@@ -120,7 +120,7 @@ wai_matomo_php_extra_vars:
     matomo-cron-job: 
       php-fpm: {}
       php-ini:
-        memory_limit: 7168M
+        memory_limit: 10240M
   wai-play:
     matomo-ingestion:
       php-fpm:
