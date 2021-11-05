@@ -60,7 +60,7 @@ spec:
               subPath: entrypoint.sh
             - name: matomo-extra-content
               mountPath: /opt/extra-content
-          restartPolicy: OnFailure
+          restartPolicy: Never
           volumes:
             - name: matomo-php-config
               configMap:
@@ -142,7 +142,7 @@ spec:
               subPath: entrypoint.sh
             - name: matomo-extra-content
               mountPath: /opt/extra-content
-          restartPolicy: OnFailure
+          restartPolicy: Never
           volumes:
             - name: matomo-php-config
               configMap:
