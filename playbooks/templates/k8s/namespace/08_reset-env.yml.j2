@@ -98,7 +98,7 @@ data:
     echo "Started"
 
     fail() {
-{% if wai_settings[item].log.slack_webhook_url_extra != "" %}
+{% if wai_settings[item].log.slack_webhook_url_extra %}
       curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$1\"}" {{ wai_settings[item].log.slack_webhook_url_extra }}
 {% endif %}
       echo Failed $1

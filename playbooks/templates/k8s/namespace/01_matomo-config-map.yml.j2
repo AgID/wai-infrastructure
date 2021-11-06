@@ -330,12 +330,23 @@ data:
 
     set -e
 
+    fail() {
+{% if wai_settings[item].log.slack_webhook_url_extra %}
+      curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$1\"}" {{ wai_settings[item].log.slack_webhook_url_extra }}
+{% endif %}
+{% if wai_settings[item].log.slack_webhook_url %}
+      curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$1\"}" {{ wai_settings[item].log.slack_webhook_url }}
+{% endif %}
+      echo Failed $1
+      exit 1
+    }
+
     MATOMO_GEOIP_PATH=/var/www/html/misc/DBIP-City.mmdb
     MATOMO_GEOIP_EXTERNAL_PATH=/opt/extra-content/geoip/DBIP-City.mmdb
     rm -f $MATOMO_GEOIP_PATH
     chmod +x /var/www/html/console ; cd /var/www/html/
     echo "memory_limit = {{ wai_matomo_php_extra_vars[item]['matomo-cron-job']['php-ini'].memory_limit }}" >> /opt/bitnami/php/etc/conf.d/wai.ini
-    ./console core:archive $ARCHIVE_OPTS
+    ./console core:archive $ARCHIVE_OPTS || fail "Archiving job failed!"
     ./console core:delete-logs-data --dates `date +%Y-%m-%d -d "-75 days"`,`date +%Y-%m-%d -d "-45 days"` -vvv -n
     if [ -f "$MATOMO_GEOIP_PATH" ]; then
       cp -f $MATOMO_GEOIP_PATH $MATOMO_GEOIP_EXTERNAL_PATH
