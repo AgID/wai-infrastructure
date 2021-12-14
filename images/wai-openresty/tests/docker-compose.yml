@@ -3,7 +3,10 @@ services:
     redis:
         image: webanalyticsitalia/wai-redisearch
     openresty:
-        image: webanalyticsitalia/wai-openresty:latest
+        build:
+            context: ../
+            args:
+                OPENRESTY_VERSION: 1.19.3.1-2-alpine-fat
         links:
             - redis
         ports:
