@@ -42,7 +42,9 @@ function waicsp.evaluate(opts)
     if (referer == ngx.null or referer == nil) then
       exit_401()
     end
-    ngx_log(ngx_NOTICE, "Referer is " .. referer)
+    local resty_url = require 'resty.url'
+    local referer_host = resty_url.parse(referer).host
+    ngx_log(ngx_NOTICE, "Referer host is " .. referer_host)
     local siteId = args["idSite"]
     ngx_log(ngx_NOTICE, "Parameters are ok. CSP procedure activated")
     local rc = require("resty.redis.connector").new()
@@ -62,8 +64,8 @@ function waicsp.evaluate(opts)
     local match = false
     ngx_log(ngx_NOTICE, "Redis data is " .. cspValue)
     for host in string.gmatch(cspValue, '([^%s]+)') do
-      ngx_log(ngx_NOTICE, "Testing '" .. referer .. "' on '" .. host .. "'")
-      if (referer:find(host, 1, true) == 1) then
+      ngx_log(ngx_NOTICE, "Testing '" .. referer_host .. "' on '" .. host .. "'")
+      if (referer_host:find(host, 1, true) == 1) then
         match = true
       end
     end
