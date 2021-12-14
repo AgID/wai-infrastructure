@@ -16,16 +16,16 @@ end
 local function has_value (arg, val)
   if arg == nil or val == ngx.null then
     return false
-end
-if type(arg) == "table" then
-  for index, value in ipairs(arg) do
-      if value == val then
-          return true
-      end
   end
-  return false
-end
-return type(arg) == "string" and arg == val
+  if type(arg) == "table" then
+    for index, value in ipairs(arg) do
+        if value == val then
+            return true
+        end
+    end
+    return false
+  end
+  return type(arg) == "string" and arg == val
 end
 
 local waicsp = {
@@ -39,7 +39,7 @@ function waicsp.evaluate(opts)
   local cspValue = opts.defaultCsp
   if (err ~= "truncated" and has_value(args["module"], "Widgetize") and has_value(args["action"], "iframe") and has_value(args["widget"], "1") and args["idSite"] ~= nil and type(args["idSite"]) == "string") then
     local referer = ngx.req.get_headers()["referer"]
-    if(referer == ngx.null or referer == nil) then
+    if (referer == ngx.null or referer == nil) then
       exit_401()
     end
     ngx_log(ngx_NOTICE, "Referer is " .. referer)
@@ -53,9 +53,9 @@ function waicsp.evaluate(opts)
         ngx.header["Content-Security-Policy"] = "frame-ancestors " .. cspValue
         return nil, err
     end
-    ngx_log(ngx_NOTICE, "Lookup to redis for keys on siteId " .. siteId )
+    ngx_log(ngx_NOTICE, "Lookup to redis for keys on siteId " .. siteId)
     local siteUrl = redis:get(siteId)
-    if(not _is_empty(siteUrl)) then
+    if (not _is_empty(siteUrl)) then
       cspValue = cspValue .. " " .. siteUrl
     end
     redis:close()
@@ -63,11 +63,11 @@ function waicsp.evaluate(opts)
     ngx_log(ngx_NOTICE, "Redis data is " .. cspValue)
     for host in string.gmatch(cspValue, '([^%s]+)') do
       ngx_log(ngx_NOTICE, "Testing '" .. referer .. "' on '" .. host .. "'")
-      if ( referer:find(host, 1, true) == 1 ) then
+      if (referer:find(host, 1, true) == 1) then
         match = true
       end
     end
-    if(match == false) then
+    if (match == false) then
       exit_401()
     end  
   end
