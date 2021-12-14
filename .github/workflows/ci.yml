@@ -1,9 +1,5 @@
 name: WAI infrastructure CI
-on:
-  push:
-    branches: [ $default-branch ]
-  pull_request:
-    branches: [ $default-branch ]
+on: [push, pull_request]
 jobs:
   Test-WAI-Images:
     runs-on: ubuntu-latest
