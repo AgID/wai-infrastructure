@@ -1,6 +1,6 @@
 # Web Analytics Italia - Infrastructure
 
-[![Build Status](https://travis-ci.com/AgID/wai-infrastructure.svg?branch=develop)](https://travis-ci.com/AgID/wai-infrastructure)
+[![WAI infrastructure CI](https://github.com/AgID/wai-infrastructure/actions/workflows/ci.yml/badge.svg)](https://github.com/AgID/wai-infrastructure/actions/workflows/ci.yml)
 
 Il repository contiene gli script di installazione e configurazione di tutte le
 componenti infrastrutturali e del software di base della piattaforma
