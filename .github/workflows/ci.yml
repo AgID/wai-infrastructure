@@ -1,0 +1,85 @@
+name: WAI infrastructure CI
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+jobs:
+  Test-WAI-Images:
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: 16
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install newman
+        run: npm install -g newman
+      - name: Run images tests
+        run: |
+          cd images/wai-openresty/tests
+          ./test.sh
+
+  Test-WAI-Infrastructure:
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: 3.8
+    services:
+      mariadb:
+        image: mariadb:latest
+        ports:
+          - 3306
+        env:
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: password
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install terraform
+        run: |
+          curl -sLo terraform.zip https://releases.hashicorp.com/terraform/0.12.20/terraform_0.12.20_linux_amd64.zip
+          unzip terraform.zip
+          sudo mv terraform /usr/local/bin
+          rm terraform.zip
+      - name: Install kubeval
+        run: |
+          curl -sLo kubeval.tar.gz https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+          tar xf kubeval.tar.gz
+          sudo mv kubeval /usr/local/bin
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          ansible-galaxy install -r playbooks/requirements.yml
+          ansible-galaxy collection install -r playbooks/requirements-collection.yml
+          git clone --branch v2.12.0 https://github.com/kubernetes-sigs/kubespray.git playbooks/kubespray
+      - name: Create test SSH key
+        run: ssh-keygen -t rsa -b 4096 -N '' -f ssh_wai_key
+      - name: Test terraform scripts
+        run: |
+          cd infrastructure
+          terraform init -backend=false -no-color
+          terraform validate -no-color
+      - name: Test ansible playbooks
+        run: |
+          ansible-playbook playbooks/wai.yml -i playbooks/inventory/30-localhost --syntax-check
+          ansible-playbook playbooks/wai.yml -i playbooks/inventory/30-localhost -t templates
+      - name: Test K8S resources
+        run: |
+          kubeval playbooks/compiled-templates/k8s/*.yml
+          kubeval playbooks/compiled-templates/k8s/**/*.yml
+      - name: Test DB scripts
+        env:
+          PORT: ${{ job.services.mariadb.ports[3306] }}
+        run: |
+          cat playbooks/compiled-templates/db/*.sql | sudo mysql -u"user" -p"password" -h"127.0.0.1" -P"$PORT" test -v
+          cat playbooks/compiled-templates/db/**/*.sql | sudo mysql -u"user" -p"password" -h"127.0.0.1" -P"$PORT" test -v
