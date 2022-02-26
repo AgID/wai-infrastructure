@@ -217,6 +217,14 @@ wai_kong_pod_size:
   wai-play: 2
   wai-stag: 1
 
+# WAI API Image
+wai_api_image: webanalyticsitalia/wai-api
+wai_api_image_tag: 0.0.1-beta
+wai_api_pod_size:
+  wai-prod: 4
+  wai-play: 2
+  wai-stag: 1
+
 # Kubectl executable
 wai_kubectl: /usr/local/bin/kubectl
 
