@@ -74,10 +74,10 @@ data:
         done
         add_plugin "cors" "config.origins=https://localhost"
         add_plugin "oauth2" "config.enable_client_credentials=true&config.global_credentials=true&config.accept_http_if_already_terminated=true"
-        add_service "portal" "url=https://nginx/api"
-        add_service "matomo" "url=http://express:7080"
+        add_service "portal" "url=http://portal-service/api"
+        add_service "matomo" "url=http://api-service:7080"
         add_route "portal" "paths[]=/"
-        add_route "matomo" "paths[]=/"
+        add_route "matomo" "paths[]=/matomo"
     )
     echo "I have done my job .... enjoy kong and webanalytics italia"
 ---
