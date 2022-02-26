@@ -85,6 +85,7 @@ data:
     APP_SALT={{ wai_settings[item].app_salt }}
     APP_DEBUG=false
     APP_URL=https://{{ wai_base_domain[item] }}
+    APP_API_VERSION={{ wai_portal_api_version }}
 
     APP_CLOSED_BETA_ENABLED={{ wai_settings[item].closed_beta.enabled }}
     CLOSED_BETA_WHITELIST_WEBHOOK_CLIENT_SECRET={{ wai_settings[item].closed_beta.secret }}
@@ -207,8 +208,15 @@ data:
     ANALYTICS_API_BASE_URL=http://matomo-service
     ANALYTICS_API_SSL_VERIFY=false
     ANALYTICS_PUBLIC_URL=https://{{ wai_base_domain[item] }}{{ wai_portal_matomo_sub_path }}
+    ANALYTICS_API_PUBLIC_DOMAIN=https://{{ wai_hostname['api'] }}.{{ wai_base_domain[item] }}
+    ANALYTICS_API_PUBLIC_PATH={{ wai_portal_matomo_sub_path }}
+    ANALYTICS_WIDGETS_BASE_URL={{ wai_matomo_widgets_sub_path }}
     ANALYTICS_PUBLIC_DASHBOARD_ID={{ wai_settings[item].analytics_public_dashboard_id }}
     ANALYTICS_CRON_ARCHIVING_ENABLED={{ wai_settings[item].analytics_cron_archiving_enabled }}
+
+    KONG_ADMIN_API_URL=<to be set>
+    KONG_API_URL=<to be set>
+    KONG_API_PORTAL_BASE_PATH=/
 
     SDG_API_PUBLIC_URL={{ wai_settings[item].sdg.api_public_url }}
     SDG_API_SSL_VERIFY=true
