@@ -6,7 +6,7 @@ metadata:
     kubernetes.io/ingress.class: nginx-{{ item }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Backend matomo;
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/rewrite-target: /matomo/$2
   name: api-matomo
   namespace: {{ item }}
 spec:
