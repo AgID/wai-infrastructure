@@ -210,8 +210,10 @@ data:
     ANALYTICS_PUBLIC_DASHBOARD_ID={{ wai_settings[item].analytics_public_dashboard_id }}
     ANALYTICS_CRON_ARCHIVING_ENABLED={{ wai_settings[item].analytics_cron_archiving_enabled }}
 
-    KONG_ADMIN_API_URL=http://kong-service:8001
-    KONG_API_URL=http://kong-service:8000
+    APP_API_VERSION=v1
+    KONG_ADMIN_API_URL=http://kong-admin-service:8001
+    KONG_API_URL=https://{{ wai_hostname['api'] }}.{{ wai_base_domain[item] }}
+    KONG_API_PORTAL_BASE_PATH=/
 
     SDG_API_PUBLIC_URL={{ wai_settings[item].sdg.api_public_url }}
     SDG_API_SSL_VERIFY=true
