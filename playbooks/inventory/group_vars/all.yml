@@ -182,7 +182,7 @@ wai_ipa_redisearch_image_tag: 5.0.12-stable
 
 # Portal image
 wai_portal_image: webanalyticsitalia/wai-portal
-wai_portal_image_tag: 1.6.8-beta
+wai_portal_image_tag: 2.4.0-beta-api
 wai_portal_matomo_sub_path: /matomo
 wai_portal_environments:
   wai-prod: production
@@ -213,6 +213,14 @@ wai_cache_image_tag: 6.5.1
 wai_kong_image: webanalyticsitalia/wai-kong
 wai_kong_image_tag: 2.4.1
 wai_kong_pod_size:
+  wai-prod: 4
+  wai-play: 2
+  wai-stag: 1
+
+# WAI API Image
+wai_api_image: webanalyticsitalia/wai-api
+wai_api_image_tag: 0.0.1-beta
+wai_api_pod_size:
   wai-prod: 4
   wai-play: 2
   wai-stag: 1
