@@ -140,6 +140,7 @@ data:
     Plugins[] = "SuperUserOnlyRestrictions"
     Plugins[] = "RestrictAnonymousAccess"
     Plugins[] = "CustomPdfReport"
+    Plugins[] = "WaiCustom"
 
     [PluginsInstalled]
     PluginsInstalled[] = "Diagnostics"
@@ -205,6 +206,7 @@ data:
     PluginsInstalled[] = "SuperUserOnlyRestrictions"
     PluginsInstalled[] = "RestrictAnonymousAccess"
     PluginsInstalled[] = "CustomPdfReport"
+    PluginsInstalled[] = "WaiCustom"
 
     [WAIMatomoTheme]
     waiUrl = "https://{{ wai_base_domain[item] }}"
@@ -245,7 +247,7 @@ data:
     allowed_requests[] = "module=Widgetize"
     allowed_requests[] = "module=API&method=API.getMatomoVersion"
     allowed_requests[] = "module=API&method=UsersManager.getTokenAuth"
-    allowed_requests[] = "module=API&method=VisitsSummary.getVisits&period=range&date=previous30"
+    allowed_requests[] = "module=API&method=VisitsSummary.getVisits&period=month&date=-1month"
     allowed_referrers[] = "module=Widgetize&action=iframe&widget=1"
 
 ---
