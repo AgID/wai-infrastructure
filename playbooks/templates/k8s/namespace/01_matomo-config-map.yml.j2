@@ -302,6 +302,8 @@ data:
     find -P /opt/extra-content/premium_plugins/* -prune -type d -printf "%f\n" | while IFS= read -r directory; do
         # Extract plugin code
         unzip -u "/opt/extra-content/premium_plugins/$directory/*.zip" -d /html/plugins
+        # Apply patches
+        find -P /opt/extra-content/premium_plugins/"$directory"/patches/*.patch -exec sh -c "patch -p1 -d /html/plugins/$directory < {}" \;
         if ! grep -q "$directory" $MATOMO_INI; then
             # Add plugin into "installed" list
             sed -i -E -e "/^PluginsInstalled\[\] = .*$/!b;:a;n;//ba;i\PluginsInstalled\[\] = \"$directory\"" $MATOMO_INI
