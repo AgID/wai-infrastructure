@@ -41,7 +41,7 @@ spec:
             command: ["sh", "-c", ". /entrypoint.sh"]
             env:
             - name: ARCHIVE_OPTS
-              value: "--skip-all-segments"
+              value: "--skip-all-segments --concurrent-requests-per-website=8"
             resources:
             {%- if 'limits' in wai_matomo_resources[item]['matomo-cron-job'] %}
 
@@ -123,7 +123,7 @@ spec:
             command: ["sh", "-c", ". /entrypoint.sh"]
             env:
             - name: ARCHIVE_OPTS
-              value: "--skip-segments-today"
+              value: "--skip-segments-today --concurrent-requests-per-website=8"
             resources:
             {%- if 'limits' in wai_matomo_resources[item]['matomo-cron-job'] %}
 
