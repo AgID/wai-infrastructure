@@ -2,7 +2,7 @@ python-openstackclient==5.5.0
 python-terraform==0.10.1
 ansible==2.9.6
 passlib==1.7.4
-termcolor==1.1.0
+termcolor==2.0.1
 pyOpenSSL==19.1.0
 bcrypt==3.2.0
 jinja2<3.1
