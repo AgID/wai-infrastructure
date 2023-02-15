@@ -315,7 +315,7 @@
           master:
             extraFlags:
               - "--loadmodule /opt/bitnami/redis/bin/redisearch.so"
-              - "--maxmemory {{ '4000' if item[1] == 'ingestion-redis' else '256' }}mb"
+              - "--maxmemory {{ '7500' if item[1] == 'ingestion-redis' else '256' }}mb"
               - "--maxmemory-policy noeviction"
             disableCommands: "{{ ['FLUSHDB', 'FLUSHALL'] if item[0] == 'wai-prod' else []}}"
             persistence:

@@ -87,6 +87,7 @@ data:
     APP_URL=https://{{ wai_base_domain[item] }}
 
     APP_CLOSED_BETA_ENABLED={{ wai_settings[item].closed_beta.enabled }}
+    APP_SUSPENDED={{ wai_settings[item].app_suspended }}
     CLOSED_BETA_WHITELIST_WEBHOOK_CLIENT_SECRET={{ wai_settings[item].closed_beta.secret }}
     CLOSED_BETA_WHITELIST_REPOSITORY_FULL_NAME={{ wai_settings[item].closed_beta.repository.name }}
     CLOSED_BETA_WHITELIST_REPOSITORY_BRANCH={{ wai_settings[item].closed_beta.repository.branch }}
